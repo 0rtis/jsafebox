@@ -19,13 +19,13 @@ JSafe encrypt your file using AES encryption. It can be used as command line too
 JSafe is using a very basic protocol so the safe file can be easily descrypted by another program, as long as you have the encryption password.
 Each datagram is preceded by its length stored as a 64 bits (8 bytes) integer (`long` in Java):
 
-    length 0|data 0|length 1|data 1|length 3|...|data N
+    length 0|datagram 0|length 1|datagram 1|length 3|...|datagram N
     
-The first datagram `data 0` is the *header* and is **the only datagram not encrypted**. The *header* contains text entries specified by the user and various additional entries incuding a protocol explanation, the type of encoding and the IV of the encryption. The *header*'s data is stored in JSON format can seen by opening the safe file with a basic text editor.
+The first datagram `datagram 0` is the *header* and is **the only datagram not encrypted**. The *header* contains text entries specified by the user and various additional entries incuding a protocol explanation, the type of encoding and the IV of the encryption. The *header*'s data is stored in JSON format can seen by opening the safe file with a basic text editor.
 
-This second datagram `data 1` is the *properties*. *properties* contains data specified by the user.
+This second datagram `datagram 1` is the *properties*. *properties* contains data specified by the user.
 
-The following datagrams (from 2 to N) are the encrypted files. They worked by pair: `data i ` contains the metadata of the file as JSON text and `data i+1` contains the bytes if the file.
+The following datagrams (from 2 to N) are the encrypted files. They worked by pair: `datagram i ` contains the metadata of the file as JSON text and `datagram i+1` contains the bytes if the file.
 
 ### TODO
 - [x] Command line
