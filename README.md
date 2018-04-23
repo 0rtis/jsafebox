@@ -27,6 +27,13 @@ This second datagram `datagram 1` is the *properties*. *properties* contains dat
 
 The following datagrams (from 2 to N) are the encrypted files. They worked by pair: `datagram i ` contains the metadata of the file as JSON text and `datagram i+1` contains the bytes if the file.
 
+
+### Why JSafe ?
+With the avent of cryptocurrencies and online banking, it has become necessary to backup sensitive files.
+Those file need to be easily accesible, securely stored and encrypted. But lightweight, standalone, cross platform vault software are surprisingly hard to come by. Password protected archive works fine but they let room for file leakage as there is no convenient way of exploring the vault unless extracting the whole content.
+
+
+
 ### TODO
 - [x] Command line
 - [x] Wildcard path
@@ -34,12 +41,6 @@ The following datagrams (from 2 to N) are the encrypted files. They worked by pa
 - [ ] Text viewer
 - [ ] Picture viewer
 
-### Why JSafe ?
-
-- It is hard to find a standalone and cross platform vault software
-- Password protected archive works fine but they let room for file leakage as there is no convenient way of exploring the vault
-  unless extracting the whole content
-- Need for both file explorer GUI and command line capabilities
 
 
 **This project is still under developement. Make sure to have a backup of your file somewhere else if you plan to use it**
