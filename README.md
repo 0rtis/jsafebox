@@ -1,4 +1,4 @@
-# JSafe - A standalone, cross-plateform virutal safe
+# JSafe - A standalone, cross-plateform virtual safe
 
 JSafe encrypt your file using AES encryption. It can be used as command line tool or with a _file explorer_ like interface.
 
@@ -16,7 +16,16 @@ JSafe encrypt your file using AES encryption. It can be used as command line too
 
 
 ### Encryption protocol
+Jsafe is using a very basic protocol so the safe file can be easily descrypted by another program, as long as you have the encryption password.
+Each datagram is preceded by its length stored as a 64 bits (8 bytes) integer (`long` in Java):
 
+    length 0|data 0|length 1|data 1|length 3|...|data N
+    
+The first datagram `data 0` is the *header* and is **the only data not encrypted**. The *header* contains text entries specified by the user and various additional entries incuding a protocol explanation, the type of encoding and the IV of the encryption. The *header*'s data is stored in JSON format can seen by opening the safe file with a basic text editor.
+
+This second datagram `data 1` is the *properties*. *properties* contains data specified by the user.
+
+The following datagrams (from 2 to N) are the encrypted files. They worked by pair: `data i ` contains the metadata of the file as JSON text and `data i+1` contains the bytes if the file.
 
 ### TODO
 - [x] Command line
@@ -25,7 +34,7 @@ JSafe encrypt your file using AES encryption. It can be used as command line too
 - [ ] Text viewer
 - [ ] Picture viewer
 
-#### Why JSafe ?
+### Why JSafe ?
 
 - It is hard to find a standalone and cross platform vault software
 - Password protected archive works fine but they let room for file leakage as there is no convenient way of exploring the vault
