@@ -42,7 +42,6 @@ The following datagrams (from 2 to N) are the encrypted files. They worked by pa
 - Need for both file explorer GUI and command line capabilities
 
 
-
 **This project is still under developement. Make sure to have a backup of your file somewhere else if you plan to use it**
 
 *JSafe is using the mighty [picocli](https://github.com/remkop/picocli)*
