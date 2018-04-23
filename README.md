@@ -16,7 +16,7 @@ JSafe encrypt your file using AES encryption. It can be used as command line too
 
 
 ### Encryption protocol
-Jsafe is using a very basic protocol so the safe file can be easily descrypted by another program, as long as you have the encryption password.
+JSafe is using a very basic protocol so the safe file can be easily descrypted by another program, as long as you have the encryption password.
 Each datagram is preceded by its length stored as a 64 bits (8 bytes) integer (`long` in Java):
 
     length 0|data 0|length 1|data 1|length 3|...|data N
