@@ -21,7 +21,7 @@ Each datagram is preceded by its length stored as a 64 bits (8 bytes) integer (`
 
     length 0|data 0|length 1|data 1|length 3|...|data N
     
-The first datagram `data 0` is the *header* and is **the only data not encrypted**. The *header* contains text entries specified by the user and various additional entries incuding a protocol explanation, the type of encoding and the IV of the encryption. The *header*'s data is stored in JSON format can seen by opening the safe file with a basic text editor.
+The first datagram `data 0` is the *header* and is **the only datagram not encrypted**. The *header* contains text entries specified by the user and various additional entries incuding a protocol explanation, the type of encoding and the IV of the encryption. The *header*'s data is stored in JSON format can seen by opening the safe file with a basic text editor.
 
 This second datagram `data 1` is the *properties*. *properties* contains data specified by the user.
 
