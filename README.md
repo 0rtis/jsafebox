@@ -1,6 +1,25 @@
+
+
+```
+     _.---.._    
+ .-"'        `;"--,
+ L""--..__    | .'J
+ |:`' - ..`""-.'  |             _  _____        __     
+ |.        `":J   S	       | |/ ____|      / _|    		
+ J:   ,-.    .|  J 	       | | (___   __ _| |_ ___ 		
+ S    JS)|   ;S  | 	   _   | |\___ \ / _` |  _/ _ \		
+ J.   `-'  .J   S '	  | |__| |____) | (_| | ||  __/		
+  S:        :|  J/ 	   \____/|_____/ \__,_|_| \___|		
+  |'._      :| /   		
+   `c-.__'- .;S/ 
+   
+```
+
 # JSafe - A standalone, cross-plateform virtual safe
 
 JSafe encrypt your file using AES encryption. It can be used as command line tool or with a _file explorer_ like interface.
+
+**Decrypted data is never wrote on disk** (except during file extraction requested by user).
 
 *picture of file explorer*
 *picture of command line and example*
@@ -12,7 +31,7 @@ JSafe encrypt your file using AES encryption. It can be used as command line too
 
 
 
-**Decrypted data is never wrote on disk** (except during file extraction requested by user).
+
 
 
 ### Encryption protocol
@@ -23,13 +42,13 @@ Each datagram is preceded by its length stored as a 64 bits (8 bytes) integer (`
     
 The first datagram `datagram 0` is the *header* and is **the only datagram not encrypted**. The *header* contains text entries specified by the user and various additional entries incuding a protocol explanation, the type of encoding and the IV of the encryption. The *header*'s data is stored in JSON format can seen by opening the safe file with a basic text editor.
 
-This second datagram `datagram 1` is the *properties*. *properties* contains data specified by the user.
+This second datagram `datagram 1` is the *properties*. It contains encrypted text entries specified by the user.
 
-The following datagrams (from 2 to N) are the encrypted files. They worked by pair: `datagram i ` contains the metadata of the file as JSON text and `datagram i+1` contains the bytes if the file.
+The following datagrams (from 2 to N) are the encrypted files. They worked by pair: `datagram i ` contains the metadata of the file as JSON text and `datagram i+1` contains the bytes of the file.
 
 
 ### Why JSafe ?
-With the avent of cryptocurrencies and online banking, it has become necessary to backup sensitive files.
+With the avent of online banking, cryptocurrencies and other digital transformation, it has become mandatory to backup sensitive files.
 Those file need to be easily accesible, securely stored and encrypted. But lightweight, standalone, cross platform vault software are surprisingly hard to come by. Password protected archive works fine but they let room for file leakage as there is no convenient way of exploring the vault unless extracting the whole content.
 
 
@@ -43,6 +62,6 @@ Those file need to be easily accesible, securely stored and encrypted. But light
 
 
 
-**This project is still under developement. Make sure to have a backup of your file somewhere else if you plan to use it**
+**This project is still under developement. Make sure to have a backup of your files somewhere else if you plan to use it**
 
 *JSafe is using the mighty [picocli](https://github.com/remkop/picocli)*
