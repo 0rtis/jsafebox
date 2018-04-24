@@ -49,7 +49,7 @@ The following datagrams (from 2 to N) are the encrypted files. They worked by pa
 
 
 ### Why JSafe ?
-With the avent of online banking, cryptocurrencies and other digital transformation, it has become mandatory to backup sensitive files.
+With the rise of online banking, cryptocurrencies and other digital transformation, it has become mandatory to backup sensitive files.
 Those file need to be easily accesible, securely stored and encrypted. But lightweight, standalone, cross platform vault software are surprisingly hard to come by. Password protected archive works fine but they let room for file leakage as there is no convenient way of exploring the vault unless extracting the whole content.
 
 
