@@ -43,7 +43,7 @@ Each datagram is preceded by its length stored as a 64 bits (8 bytes) integer (`
     
 The first datagram `datagram 0` is the *header* and is **the only datagram not encrypted**. The *header* contains text entries specified by the user and various additional entries incuding a protocol explanation, the type of encoding and the IV of the encryption. The *header*'s data is stored in JSON format can seen by opening the safe file with a basic text editor.
 
-This second datagram `datagram 1` is the *properties*. It contains encrypted text entries specified by the user.
+The second datagram `datagram 1` is the *properties*. It contains encrypted text entries specified by the user.
 
 The following datagrams (from 2 to N) are the encrypted files. They worked by pair: `datagram i ` contains the metadata of the file an encrypted JSON text and `datagram i+1` contains the bytes of the encrypted file.
 
@@ -62,7 +62,9 @@ Those file need to be easily accesible, securely stored and encrypted. But light
 - [ ] Picture viewer
 
 
-
+### Download
 **This project is still under developement. Make sure to have a backup of your files somewhere else if you plan to use it !**
+
+You can download the lastest version of JSafe [here]()
 
 *JSafe is using the mighty [picocli](https://github.com/remkop/picocli)*
