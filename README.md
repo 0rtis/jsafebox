@@ -41,11 +41,11 @@ Each datagram is preceded by its length stored as a 64 bits (8 bytes) integer (`
 
     length 0|datagram 0|length 1|datagram 1|length 3|...|datagram N
     
-The first datagram `datagram 0` is the *header* and is **the only datagram not encrypted**. The *header* contains text entries specified by the user and various additional entries incuding a protocol explanation, the type of encoding and the IV of the encryption. The *header*'s data is stored in JSON format can seen by opening the safe file with a basic text editor.
+The first datagram `datagram 0` is the *header* and is **the only datagram not encrypted**. The *header* contains text entries specified by the user and various additional entries incuding a protocol explanation, the type of encoding and the IV of the encryption. The *header*'s data is stored in JSON format and can be seen by opening the safe file with a basic text editor.
 
 The second datagram `datagram 1` is the *properties*. It contains encrypted text entries specified by the user.
 
-The following datagrams (from 2 to N) are the encrypted files. They worked by pair: `datagram i ` contains the metadata of the file an encrypted JSON text and `datagram i+1` contains the bytes of the encrypted file.
+The following datagrams (from 2 to N) are the encrypted files. They work by pair: `datagram i ` contains the metadata of the file as an encrypted JSON text and `datagram i+1` contains the bytes of the encrypted file.
 
 
 ### Why JSafe ?
@@ -67,4 +67,4 @@ Those file need to be easily accesible, securely stored and encrypted. But light
 
 You can download the lastest version of JSafe [here]()
 
-*JSafe is using the mighty [picocli](https://github.com/remkop/picocli)*
+*JSafe is using the mighty tiny [picocli](https://github.com/remkop/picocli)*
