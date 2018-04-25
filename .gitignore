@@ -1,0 +1,6 @@
+bin
+*.safe
+target
+.classpath
+.project
+.settings
