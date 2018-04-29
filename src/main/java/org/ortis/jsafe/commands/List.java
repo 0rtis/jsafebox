@@ -1,19 +1,15 @@
 /*******************************************************************************
  * Copyright 2018 Ortis (cao.ortis.org@gmail.com)
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License.  You may obtain a copy
- * of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  * 
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under the License.
  ******************************************************************************/
-package org.ortis.jsafe.command;
+
+package org.ortis.jsafe.commands;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -36,17 +32,16 @@ import picocli.CommandLine.Parameters;
 
 /**
  * List the content of a {@link Safe}
- * @author Ortis
- *<br>
- *2018 Apr 26 8:16:31 PM 
- *<br>
+ * 
+ * @author Ortis <br>
+ *         2018 Apr 26 8:16:31 PM <br>
  */
 @Command(description = "List content", name = "ls", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, showDefaultValues = true)
 public class List implements Callable<Void>
 {
 	private final static DecimalFormat BYTE_FORMAT = new DecimalFormat("###,###");
 
-	@Option(names = { "-pw", "--password" }, required = true, description = "Password")
+	@Option(names = { "-pw", "-pwd", "--password" }, required = true, description = "Password")
 	private String password;
 
 	@Option(names = { "-b", "--buffer" }, description = "Read buffer size")

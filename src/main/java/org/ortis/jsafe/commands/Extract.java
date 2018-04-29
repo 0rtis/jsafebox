@@ -9,7 +9,7 @@
  * License for the specific language governing permissions and limitations under the License.
  ******************************************************************************/
 
-package org.ortis.jsafe.command;
+package org.ortis.jsafe.commands;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,7 +43,7 @@ import picocli.CommandLine.Parameters;
 public class Extract implements Callable<Void>
 {
 
-	@Option(names = { "-pw", "--password" }, description = "Password")
+	@Option(names = { "-pw", "-pwd", "--password" }, description = "Password")
 	private String password;
 
 	@Option(names = { "-b", "--buffer" }, description = "Read buffer size")

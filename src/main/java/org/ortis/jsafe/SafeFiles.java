@@ -204,7 +204,7 @@ public abstract class SafeFiles
 	}
 
 	/**
-	 * Remove forbidden <code>char</code> from the path and replace them with {@link Environment#getForbidenSubstitute()}
+	 * Remove forbidden <code>char</code> from the path and replace them with {@link Environment#getSubstitute()}
 	 * 
 	 * @param path:
 	 *            the path to sanitize
@@ -215,7 +215,7 @@ public abstract class SafeFiles
 
 		final StringBuilder sb = new StringBuilder(path);
 
-		final Character replacement = Environment.getForbidenSubstitute();
+		final Character replacement = Environment.getSubstitute();
 
 		c: for (int i = 0; i < sb.length(); i++)
 		{

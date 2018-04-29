@@ -1,19 +1,15 @@
 /*******************************************************************************
  * Copyright 2018 Ortis (cao.ortis.org@gmail.com)
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License.  You may obtain a copy
- * of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  * 
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under the License.
  ******************************************************************************/
-package org.ortis.jsafe.command;
+
+package org.ortis.jsafe.commands;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,12 +28,12 @@ import org.ortis.jsafe.Utils;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
+
 /**
  * Create a new {@link Safe}
- * @author Ortis
- *<br>
- *2018 Apr 26 8:16:17 PM 
- *<br>
+ * 
+ * @author Ortis <br>
+ *         2018 Apr 26 8:16:17 PM <br>
  */
 @Command(description = "Init a new safe", name = "init", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, showDefaultValues = true)
 public class Init implements Callable<Void>
@@ -49,10 +45,10 @@ public class Init implements Callable<Void>
 	@Option(names = { "-H", "--header" }, arity = "2", description = "Clear text header key and value")
 	private String [] headers;
 
-	@Option(names = { "-p", "--property" }, arity = "2", description = "Encrypted text header key and value")
+	@Option(names = { "-p", "-pp", "--property" }, arity = "2", description = "Encrypted text header key and value")
 	private String [] properties;
 
-	@Option(names = { "-pw", "--password" }, required = true, description = "Password")
+	@Option(names = { "-pw", "-pwd", "--password" }, required = true, description = "Password")
 	private String password;
 
 	@Option(names = { "-b", "--buffer" }, description = "Read buffer size")
@@ -113,12 +109,11 @@ public class Init implements Callable<Void>
 
 			Safe.create(file, key, header, properties, this.bufferSize).close();
 
-			
 		} catch (final Exception e)
 		{
 			log.severe(Utils.formatException(e));
 		}
-		
+
 		return null;
 	}
 }

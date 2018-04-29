@@ -98,8 +98,8 @@ public class SafeFilesTest
 		assertEquals(safeFile.getName(), SafeFiles.getName(safeFile.getPath()));
 		assertTrue(safeFile.isFolder());
 		assertEquals(0, ((Folder) safeFile).listFiles().size());
-
-		// creating root/1/13 from within root/1 and with a block path argument
+		
+			// creating root/1/13 from within root/1 and with a block path argument
 		SafeFiles.mkdir("13" + Folder.DELIMITER + "block", true, folder, root);
 		safeFile = folder.get("13");
 		assertNotNull(safeFile);
@@ -178,6 +178,17 @@ public class SafeFilesTest
 		assertEquals(2, matches.size());
 		contains(root.getName() + Folder.DELIMITER + "1" + Folder.DELIMITER + "12", matches);
 		contains(root.getName() + Folder.DELIMITER + "1b" + Folder.DELIMITER + "12", matches);
+		
+		
+		//sanitize
+		final StringBuilder sb = new StringBuilder();
+		for(final char c: Environment.getForbidenChars())
+			sb.append(c);
+		
+		final String sanitized = SafeFiles.sanitize(sb.toString());
+		for(final Character c : sanitized.toCharArray())
+			assertTrue(c.equals(Environment.getSubstitute()) || c.equals(Folder.DELIMITER));
+		
 
 	}
 

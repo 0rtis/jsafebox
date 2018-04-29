@@ -43,6 +43,9 @@ public abstract class Environment
 		chars.add('<');
 		chars.add('>');
 		chars.add('|');
+		chars.add('\0');
+		
+		chars.remove((Character)Folder.DELIMITER);
 
 		FORBIDEN_CHARS = Collections.unmodifiableList(chars);
 
@@ -86,9 +89,9 @@ public abstract class Environment
 		return FORBIDEN_CHARS;
 	}
 
-	public static Character getForbidenSubstitute()
+	public static Character getSubstitute()
 	{
-		return null;
+		return '_';
 	}
 
 }

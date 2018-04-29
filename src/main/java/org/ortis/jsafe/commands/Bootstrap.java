@@ -9,7 +9,7 @@
  * License for the specific language governing permissions and limitations under the License.
  ******************************************************************************/
 
-package org.ortis.jsafe.command;
+package org.ortis.jsafe.commands;
 
 import java.util.concurrent.Callable;
 

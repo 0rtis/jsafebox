@@ -9,18 +9,12 @@
  * License for the specific language governing permissions and limitations under the License.
  ******************************************************************************/
 
-package org.ortis.jsafe.command;
+package org.ortis.jsafe.commands;
 
-import java.io.ByteArrayOutputStream;
-import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 import org.ortis.jsafe.Environment;
-import org.ortis.jsafe.Safe;
-import org.ortis.jsafe.SafeFile;
-import org.ortis.jsafe.SafeFiles;
 import org.ortis.jsafe.Utils;
 
 import picocli.CommandLine.Command;
@@ -33,11 +27,11 @@ import picocli.CommandLine.Parameters;
  * @author Ortis <br>
  *         2018 Apr 26 8:16:54 PM <br>
  */
-@Command(description = "Outpt text file content", name = "cat", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, showDefaultValues = true)
-public class Cat implements Callable<Void>
+@Command(description = "Delete file", name = "rm", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, showDefaultValues = true)
+public class Delete implements Callable<Void>
 {
 
-	@Option(names = { "-pw", "--password" }, description = "Password")
+	@Option(names = { "-pw", "-pwd", "--password" }, description = "Password")
 	private String password;
 
 	@Option(names = { "-b", "--buffer" }, description = "Read buffer size")
@@ -46,41 +40,15 @@ public class Cat implements Callable<Void>
 	@Parameters(index = "0", arity = "0...1", description = "File path of safe file")
 	private String safeFile;
 
-	@Parameters(index = "1", arity = "1...*", description = "Paths of safe's files to cat")
-	private String [] paths;
-
 	@Override
 	public Void call() throws Exception
 	{
 
 		final Logger log = Environment.getLogger();
 
-		try (final Safe safe = Utils.open(this.safeFile, this.password.toCharArray(), this.bufferSize, log))
+		try
 		{
-
-			final Set<SafeFile> matches = new LinkedHashSet<>();
-
-			for (int i = 0; i < this.paths.length - 1; i++)
-				SafeFiles.match(this.paths[i], safe.getRootFolder(), safe.getRootFolder(), matches);
-
-			for (final SafeFile safeFile : matches)
-			{
-
-				if (!safeFile.isBlock())
-				{
-					log.warning(safeFile + " is not a block");
-
-				} else
-				{
-					final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-					safe.extract(safeFile.getPath(), baos);
-					final StringBuilder sb = new StringBuilder("\n");
-					sb.append(new String(baos.toByteArray()));
-					log.info(safeFile + " -> " + sb.toString());
-				}
-
-			}
+			throw new Exception("Not implemented yet");
 
 		} catch (final Exception e)
 		{

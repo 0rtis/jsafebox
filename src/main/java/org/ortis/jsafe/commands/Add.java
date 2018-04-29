@@ -9,7 +9,7 @@
  * License for the specific language governing permissions and limitations under the License.
  ******************************************************************************/
 
-package org.ortis.jsafe.command;
+package org.ortis.jsafe.commands;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,10 +42,10 @@ import picocli.CommandLine.Parameters;
 public class Add implements Callable<Void>
 {
 
-	@Option(names = { "-pw", "--password" }, required = true, description = "Password")
+	@Option(names = { "-pw", "-pwd", "--password" }, required = true, description = "Password")
 	private String password;
 
-	@Option(names = { "-p", "--property" }, arity = "2", description = "Encrypted property's key and value")
+	@Option(names = { "-p","-pp", "--property" }, arity = "2", description = "Encrypted property's key and value")
 	private String [] properties;
 
 	@Option(names = { "-m", "--mkdir" }, description = "Create destination folder if necessary")
