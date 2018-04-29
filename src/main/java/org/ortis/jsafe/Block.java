@@ -12,6 +12,7 @@
 package org.ortis.jsafe;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Block implements SafeFile
@@ -43,7 +44,18 @@ public class Block implements SafeFile
 		this.dataOffset = dataOffset;
 		this.dataLength = dataLength;
 
-		this.properties = Collections.unmodifiableMap(properties);
+		final Map<String, String> props = new LinkedHashMap<>();
+		props.putAll(properties);
+
+		final String name = SafeFiles.getName(path);
+
+		if (name == null)
+			throw new IllegalArgumentException("Path '" + path + "' is not valid");
+
+		props.put(PATH_LABEL, path);
+		props.put(NAME_LABEL, name);
+
+		this.properties = Collections.unmodifiableMap(props);
 
 	}
 
@@ -116,6 +128,12 @@ public class Block implements SafeFile
 	public long getDataLength()
 	{
 		return dataLength;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return this.comparablePath.hashCode();
 	}
 
 	@Override

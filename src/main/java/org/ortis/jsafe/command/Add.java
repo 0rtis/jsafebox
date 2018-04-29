@@ -32,6 +32,12 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
+/**
+ * Add file to the {@link Safe}
+ * 
+ * @author Ortis <br>
+ *         2018 Apr 26 8:17:40 PM <br>
+ */
 @Command(description = "Add file", name = "add", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, showDefaultValues = true)
 public class Add implements Callable<Void>
 {
@@ -48,7 +54,7 @@ public class Add implements Callable<Void>
 	@Option(names = { "-b", "--buffer" }, description = "Read buffer size")
 	private int bufferSize = 1024;
 
-	@Parameters(index = "0", description = "File path of safe file")
+	@Parameters(index = "0", description = "System path of safe file")
 	private String safeFile;
 
 	@Parameters(index = "1", arity = "2...*", description = "Paths of system's source files followed by the safe's destination folder")
@@ -63,9 +69,8 @@ public class Add implements Callable<Void>
 
 		final Logger log = Environment.getLogger();
 
-		try
+		try (final Safe safe = Utils.open(this.safeFile, this.password.toCharArray(), this.bufferSize, log))
 		{
-			final Safe safe = Utils.open(this.safeFile, this.password.toCharArray(), this.bufferSize, log);
 
 			final String destination = this.paths[this.paths.length - 1];
 

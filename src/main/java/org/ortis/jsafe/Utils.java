@@ -1,18 +1,14 @@
 /*******************************************************************************
  * Copyright 2018 Ortis (cao.ortis.org@gmail.com)
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License.  You may obtain a copy
- * of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  * 
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under the License.
  ******************************************************************************/
+
 package org.ortis.jsafe;
 
 import java.io.File;
@@ -33,12 +29,17 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * Utility class
+ * 
+ * @author Ortis <br>
+ *         2018 Apr 26 8:06:47 PM <br>
+ */
 public class Utils
 {
 
-	public final static String WILDCARD = "*";
-	public final static String WILDCARD_REGEX = ".*";
-	public final static String REGEX_SEPARATOR = "[/|" + Pattern.quote(java.io.File.separator) + "]";
+
+	public final static String SEPARATOR_REGEX = "[/|" + Pattern.quote(java.io.File.separator) + "]";
 
 	public static byte [] passwordToBytes(final char [] chars)
 	{
@@ -50,6 +51,19 @@ public class Utils
 		return bytes;
 	}
 
+	/**
+	 * Open a {@link Safe}
+	 * 
+	 * @param safeFilePath:
+	 *            system path to the safe file
+	 * @param password:
+	 *            the encryption password
+	 * @param bufferSize:size
+	 *            of the <code>byte</code> buffer to be used in IO operation
+	 * @param log
+	 * @return
+	 * @throws Exception
+	 */
 	public static Safe open(final String safeFilePath, final char [] password, final int bufferSize, final Logger log) throws Exception
 	{
 		final File file = new File(safeFilePath);
@@ -85,13 +99,21 @@ public class Utils
 		return new Safe(file, cipher, keySpec, iv, 1024);
 	}
 
-	public static List<java.io.File> parseSystemPath(final String path, final List<java.io.File> files)
+	/**
+	 * Parse the system path whith a support for {@link Utils#WILDCARD}
+	 * 
+	 * @param path:
+	 *            system path to parse
+	 * @param destination
+	 * @return
+	 */
+	public static List<java.io.File> parseSystemPath(final String path, final List<java.io.File> destination)
 	{
 
-		final String [] tokens = path.split(REGEX_SEPARATOR);
-		searchSystemPath(null, tokens, 0, files);
+		final String [] tokens = path.split(SEPARATOR_REGEX);
+		searchSystemPath(null, tokens, 0, destination);
 
-		return files;
+		return destination;
 
 	}
 
@@ -102,7 +124,7 @@ public class Utils
 		for (int i = index; i < tokens.length; i++)
 		{
 			final String token = tokens[i];
-			if (token.contains(WILDCARD))
+			if (token.contains(Folder.WILDCARD))
 			{
 				if (i == 0)
 				{// search all root drives
@@ -112,7 +134,7 @@ public class Utils
 				} else
 				{
 
-					final Pattern regex = Pattern.compile(token.toUpperCase(Environment.getLocale()).replace(WILDCARD, WILDCARD_REGEX));
+					final Pattern regex = Pattern.compile(token.toUpperCase(Environment.getLocale()).replace(Folder.WILDCARD, Folder.WILDCARD_REGEX));
 
 					final String [] matches = folder.list(new FilenameFilter()
 					{
@@ -165,6 +187,12 @@ public class Utils
 
 	}
 
+	/**
+	 * Return the MIME type of a file
+	 * 
+	 * @param file
+	 * @return
+	 */
 	public static String getType(final java.io.File file)
 	{
 
@@ -186,6 +214,12 @@ public class Utils
 			return "application/octet-stream";
 	}
 
+	/**
+	 * Format the exception message
+	 * 
+	 * @param t
+	 * @return
+	 */
 	public static String formatException(final Throwable t)
 	{
 		if (t == null)

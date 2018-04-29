@@ -32,7 +32,13 @@ import org.ortis.jsafe.Utils;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
-
+/**
+ * Create a new {@link Safe}
+ * @author Ortis
+ *<br>
+ *2018 Apr 26 8:16:17 PM 
+ *<br>
+ */
 @Command(description = "Init a new safe", name = "init", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, showDefaultValues = true)
 public class Init implements Callable<Void>
 {
@@ -92,7 +98,7 @@ public class Init implements Callable<Void>
 					properties.put(key, value);
 				}
 
-			header.put(Safe.USER_MANUAL_LABEL, Safe.USER_MANUAL);
+			header.put(Safe.PROTOCOL_SPEC_LABEL, Safe.PROTOCOL_SPEC);
 			header.put(Safe.ENCRYPTION_LABEL, "AES/CBC/PKCS5Padding");
 			header.put(Safe.KEY_ALGO_LABEL, "AES");
 
@@ -105,7 +111,7 @@ public class Init implements Callable<Void>
 
 			final byte [] key = Arrays.copyOf(md.digest(md.digest(Utils.passwordToBytes(this.password.toCharArray()))), 128 >> 3);
 
-			Safe.create(file, key, header, properties, this.bufferSize);
+			Safe.create(file, key, header, properties, this.bufferSize).close();
 
 			
 		} catch (final Exception e)

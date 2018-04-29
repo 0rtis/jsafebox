@@ -15,33 +15,37 @@
  ******************************************************************************/
 package org.ortis.jsafe;
 
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-/**
- * A CLI outout only {@link Handler}
- * @author Ortis
- *<br>
- *2018 Apr 26 7:51:38 PM 
- *<br>
- */
-public class ConsoleHandler extends Handler
+public class TestUtils
 {
 
-	@Override
-	public synchronized void publish(final LogRecord record)
+	private static final char [] CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123446789".toCharArray();
+
+	private static Logger log;
+
+	public static synchronized Logger getLog()
 	{
-		System.out.println(record.getMessage());
+		if (log == null)
+		{
+			log = Logger.getLogger("Test");
+
+			log.setLevel(Level.ALL);
+		}
+		
+		return log;
+
 	}
 
-	@Override
-	public void close() throws SecurityException
+	public static String randomString(final Random random, final int length)
 	{
-	}
+		final StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < length; i++)
+			sb.append(CHARS[random.nextInt(CHARS.length)]);
 
-	@Override
-	public void flush()
-	{
-	}
+		return sb.toString();
 
+	}
 }
