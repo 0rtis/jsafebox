@@ -43,7 +43,7 @@ public abstract class Environment
 		chars.add('<');
 		chars.add('>');
 		chars.add('|');
-		chars.add('\0');
+	chars.add('\u0000');
 		
 		chars.remove((Character)Folder.DELIMITER);
 

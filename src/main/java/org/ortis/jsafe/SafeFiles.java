@@ -40,9 +40,6 @@ public abstract class SafeFiles
 
 		final String [] tokens = path.split(Folder.REGEX_DELIMITER);
 
-		if (tokens.length == 0)
-			return null;
-
 		final String [] comparableTokens = path.toUpperCase(Environment.getLocale()).split(Folder.REGEX_DELIMITER);
 
 		if (comparableTokens[0].trim().equals(Folder.ROOT_NAME))
@@ -87,23 +84,18 @@ public abstract class SafeFiles
 
 			final String [] tokens = path.split(Folder.REGEX_DELIMITER);
 
-			if (tokens.length == 0)
-				return destination;
-
 			final String [] comparableTokens = path.toUpperCase(Environment.getLocale()).split(Folder.REGEX_DELIMITER);
 
 			if (comparableTokens[0].trim().equals(Folder.ROOT_NAME))
 				searchSafePath(root, comparableTokens, 1, destination);
 			else if (tokens[0].trim().equals("."))
 			{
-				if (tokens.length == 1)
-					destination.add(current);
-				else
-					// relative to current folder
-					searchSafePath(current, comparableTokens, 1, destination);
+				// relative to current folder
+				searchSafePath(current, comparableTokens, 1, destination);
 
 			} else if (tokens[0].trim().equals(".."))
 			{
+				// relative to parent folder
 				searchSafePath(current.getParent(), comparableTokens, 1, destination);
 			} else
 				// relative to current folder
@@ -154,7 +146,6 @@ public abstract class SafeFiles
 
 	}
 
-	
 	/**
 	 * Create all {@link Folder} required for the path
 	 * 
@@ -203,43 +194,6 @@ public abstract class SafeFiles
 
 	}
 
-	/**
-	 * Remove forbidden <code>char</code> from the path and replace them with {@link Environment#getSubstitute()}
-	 * 
-	 * @param path:
-	 *            the path to sanitize
-	 * @return
-	 */
-	public static String sanitize(final String path)
-	{
-
-		final StringBuilder sb = new StringBuilder(path);
-
-		final Character replacement = Environment.getSubstitute();
-
-		c: for (int i = 0; i < sb.length(); i++)
-		{
-			if (sb.charAt(i) == Folder.DELIMITER)
-				continue;
-
-			if (sb.charAt(i) == java.io.File.separatorChar)
-			{
-				sb.setCharAt(i, Folder.DELIMITER);
-				continue;
-			}
-
-			for (final char c : Environment.getForbidenChars())
-				if (sb.charAt(i) == c)
-				{
-					if (replacement == null)
-						sb.deleteCharAt(i--);
-					else
-						sb.setCharAt(i, replacement);
-					continue c;
-				}
-		}
-		return sb.toString();
-
-	}
+	
 
 }

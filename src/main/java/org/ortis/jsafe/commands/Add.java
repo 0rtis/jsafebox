@@ -112,7 +112,7 @@ public class Add implements Callable<Void>
 			{
 				final Map<String, String> props = new TreeMap<>(properties);
 
-				props.put(Block.PATH_LABEL, SafeFiles.sanitize(folder.getPath() + Folder.DELIMITER + source.getName()));
+				props.put(Block.PATH_LABEL, Utils.sanitize(folder.getPath() + Folder.DELIMITER + source.getName(), Folder.DELIMITER, Environment.getSubstitute()));
 
 				props.put(Block.NAME_LABEL, source.getName());
 				props.put("content-type", Utils.getMIMEType(source));

@@ -148,6 +148,10 @@ public class SafeFilesTest
 			safeFile = SafeFiles.get("1", root, root);
 			assertNotNull(safeFile);
 			assertEquals("1", safeFile.getName());
+
+			safeFile = SafeFiles.get(Character.toString(Folder.DELIMITER), root, root);
+			assertNotNull(safeFile);
+			assertEquals(root, safeFile);
 		}
 
 		// SafeFiles.match
@@ -195,13 +199,16 @@ public class SafeFilesTest
 			matches = SafeFiles.match("", root, root, new ArrayList<>());
 			assertEquals(0, matches.size());
 
+			matches = SafeFiles.match(".", folder, root, new ArrayList<>());
+			assertEquals(1, matches.size());
+			assertEquals(folder, matches.get(0));
+
 			matches = SafeFiles.match("." + Folder.DELIMITER + folder.getName(), root, root, new ArrayList<>());
 			assertEquals(1, matches.size());
 			assertEquals(folder, matches.get(0));
 
-			matches = SafeFiles.match(".", folder, root, new ArrayList<>());
-			assertEquals(1, matches.size());
-			assertEquals(folder, matches.get(0));
+			matches = SafeFiles.match("." + Folder.DELIMITER + Folder.WILDCARD, folder, root, new ArrayList<>());
+			assertEquals(3, matches.size());
 
 			matches = SafeFiles.match("..", folder, root, new ArrayList<>());
 			assertEquals(1, matches.size());
@@ -215,14 +222,26 @@ public class SafeFilesTest
 			contains(root.getName() + Folder.DELIMITER + "3", matches);
 		}
 
+		{// test all code path
+
+			SafeFiles.mkdir("." + Folder.DELIMITER + "final folder", false, root, root);
+			safeFile = root.get("final folder");
+			assertNotNull(safeFile);
+		}
+
 		// sanitize
 		final StringBuilder sb = new StringBuilder();
 		for (final char c : Environment.getForbidenChars())
-			sb.append(c);
+			sb.append(Character.toString(c) + Folder.DELIMITER);
 
-		final String sanitized = SafeFiles.sanitize(sb.toString());
+		String sanitized = Utils.sanitize(sb.toString(), Folder.DELIMITER, null);
 		for (final Character c : sanitized.toCharArray())
-			assertTrue(c.equals(Environment.getSubstitute()) || c.equals(Folder.DELIMITER));
+			assertTrue(c.equals(Folder.DELIMITER));
+
+		sanitized = Utils.sanitize(sb.toString(), Folder.DELIMITER, '#');
+
+		for (final Character c : sanitized.toCharArray())
+			assertTrue(c.equals('#') || c.equals(Folder.DELIMITER));
 
 	}
 

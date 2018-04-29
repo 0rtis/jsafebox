@@ -38,7 +38,6 @@ import javax.crypto.spec.SecretKeySpec;
 public class Utils
 {
 
-
 	public final static String SEPARATOR_REGEX = "[/|" + Pattern.quote(java.io.File.separator) + "]";
 
 	public static byte [] passwordToBytes(final char [] chars)
@@ -259,6 +258,64 @@ public class Utils
 			builder.append("Caused by " + cause);
 
 		return builder.toString();
+	}
+
+	/**
+	 * Remove forbidden <code>char</code> from the path and replace them with <code>substitute</code>
+	 * 
+	 * @param path:
+	 *            the path to sanitize
+	 * @param delimiter:
+	 *            delimiter of the path
+	 * @param substitute:
+	 *            replacement char
+	 * @return
+	 */
+	public static String sanitize(final String path, final Character delimiter, final Character substitute)
+	{
+		final String [] tokens = path.split(Pattern.quote(Character.toString(delimiter)));
+
+		final StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < tokens.length; i++)
+		{
+			if (i < tokens.length - 1)
+				sb.append(sanitizeToken(tokens[i], substitute) + delimiter);
+			else
+				sb.append(sanitizeToken(tokens[i], substitute));
+
+		}
+
+		return sb.toString();
+	}
+
+	public static String sanitizeToken(final String token, final Character substitute)
+	{
+
+		final StringBuilder sb = new StringBuilder(token);
+
+		final Character replacement = substitute;
+
+		c: for (int i = 0; i < sb.length(); i++)
+		{
+
+			if (sb.charAt(i) == java.io.File.separatorChar)
+			{
+				sb.setCharAt(i, Folder.DELIMITER);
+				continue;
+			}
+
+			for (final char c : Environment.getForbidenChars())
+				if (sb.charAt(i) == c)
+				{
+					if (replacement == null)
+						sb.deleteCharAt(i--);
+					else
+						sb.setCharAt(i, replacement);
+					continue c;
+				}
+		}
+		return sb.toString();
+
 	}
 
 }

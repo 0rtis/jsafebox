@@ -114,7 +114,7 @@ public class Extract implements Callable<Void>
 						for (final SafeFile safeFile : safeFiles.getValue())
 						{
 
-							final File systemFile = new File(destinationFolder, safeFile.getName() + "_" + SafeFiles.sanitize(safeFile.getPath()).replace(Folder.DELIMITER, '-'));
+							final File systemFile = new File(destinationFolder, safeFile.getName() + "_" + Utils.sanitize(safeFile.getPath(), Folder.DELIMITER, '-'));
 							log.info("Extracting " + safeFile + " to " + systemFile);
 							final FileOutputStream fos = new FileOutputStream(systemFile);
 							safe.extract(safeFile.getPath(), fos);
