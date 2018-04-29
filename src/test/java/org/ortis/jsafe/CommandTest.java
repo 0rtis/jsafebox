@@ -72,14 +72,14 @@ public class CommandTest
 	}
 
 	@Test
-	public void initAddTest() throws Exception
+	public void test() throws Exception
 	{
 
 		final File safeFile = new File(folder, TestUtils.randomString(random, 10) + ".safe");
 		if (safeFile.exists())
 			throw new Exception("Safe file " + safeFile.getAbsolutePath() + " already exists");
 
-		String [] args = new String[] { "init", "--password", "mypassword", safeFile.getAbsolutePath() };
+		String [] args = new String[] { "init", "--password", "mypassword", safeFile.getAbsolutePath(), "--header", "headerKey", "headerValue", "--property", "propertyKey", "propertyValue" };
 		CommandLine.call(new Bootstrap(), System.err, args);
 
 		assertTrue(safeFile.exists());
@@ -107,14 +107,15 @@ public class CommandTest
 		if (!systemFile.exists())
 			throw new Exception("System file " + systemFile.getAbsolutePath() + " not found");
 
-		args = new String[] { "add", "--password", "mypassword", safeFile.getAbsolutePath(), systemFile.getAbsolutePath(), Folder.ROOT_NAME + Folder.DELIMITER };
+		final String safeFolderPath = Folder.ROOT_NAME + Folder.DELIMITER + "folder";
+		args = new String[] { "add", "--password", "mypassword", safeFile.getAbsolutePath(), "-m", "-pp", "propertyKey", "propertyValue", systemFile.getAbsolutePath(), safeFolderPath };
+		Bootstrap.main(args);
+
+		args = new String[] { "ls", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath };
 		CommandLine.call(new Bootstrap(), System.err, args);
 
-		args = new String[] { "ls", "--password", "mypassword", safeFile.getAbsolutePath(), Folder.ROOT_NAME + Folder.DELIMITER };
-		CommandLine.call(new Bootstrap(), System.err, args);
-
-		args = new String[] { "cat", "--password", "mypassword", safeFile.getAbsolutePath(), Folder.ROOT_NAME + Folder.DELIMITER + systemFile.getName() };
-		CommandLine.call(new Bootstrap(), System.err, args);
+		args = new String[] { "cat", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName() };
+		Bootstrap.main(args);
 
 		final File extractTargetSystemFolder = new File(folder, TestUtils.randomString(random, 10) + ".extracted");
 
@@ -133,9 +134,9 @@ public class CommandTest
 		if (extractTargetSystemFile.exists())
 			throw new Exception("Extract target file " + safeFile.getAbsolutePath() + " already exists");
 
-		args = new String[] { "extract", "--password", "mypassword", safeFile.getAbsolutePath(), Folder.ROOT_NAME + Folder.DELIMITER + systemFile.getName(),
+		args = new String[] { "extract", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName(),
 				extractTargetSystemFolder.getAbsolutePath() };
-		CommandLine.call(new Bootstrap(), System.err, args);
+		Bootstrap.main(args);
 
 		assertTrue(extractTargetSystemFile.exists());
 

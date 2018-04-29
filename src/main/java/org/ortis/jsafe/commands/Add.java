@@ -89,7 +89,7 @@ public class Add implements Callable<Void>
 				{
 					final String key = this.properties[i];
 					final String value = this.properties[i + 1];
-					log.info("Adding property entry '" + key + "' -> " + value);
+					log.info("Adding property entry '" + key + "' -> '" + value+"'");
 					properties.put(key, value);
 				}
 

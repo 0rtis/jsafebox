@@ -86,7 +86,7 @@ public class Folder implements SafeFile
 
 		final String [] tokens = block.getComparablePath().split(REGEX_DELIMITER);
 
-		if (tokens.length <= this.comparableTokens.length)
+		if (tokens.length - 1 != this.comparableTokens.length)
 			throw new Exception("Block path '" + block.getPath() + " does not match folder path '" + this.path + "'");
 
 		for (int i = 0; i < this.comparableTokens.length; i++)

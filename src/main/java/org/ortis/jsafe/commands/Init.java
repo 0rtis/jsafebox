@@ -39,9 +39,6 @@ import picocli.CommandLine.Parameters;
 public class Init implements Callable<Void>
 {
 
-	@Option(names = { "-f", "--force" }, description = "Force delete if the file already exist")
-	private boolean force;
-
 	@Option(names = { "-H", "--header" }, arity = "2", description = "Clear text header key and value")
 	private String [] headers;
 
@@ -66,13 +63,8 @@ public class Init implements Callable<Void>
 		{
 			final File file = new File(this.filePath);
 
-			file: if (file.exists())
-			{
-				if (this.force)
-					if (file.delete())
-						break file;
+			if (file.exists())
 				throw new IOException("File " + file + " already exist");
-			}
 
 			final Map<String, String> header = new HashMap<>();
 			if (this.headers != null)

@@ -16,7 +16,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Random;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -63,18 +62,14 @@ public class UtilsTest
 	@Test
 	public void passwordTest() throws Exception
 	{
-		final byte [] bytes = new byte[404];
-		new Random().nextBytes(bytes);
-		final String password = new String(bytes);
+
+		final String password = "password";
 		final byte [] extractedBytes = Utils.passwordToBytes(password.toCharArray());
 		final String extractedPassword = new String(extractedBytes);
-		
+
 		assertEquals(password, extractedPassword);
-		
-		
 
 	}
-
 
 	@Test
 	public void parseSystemPathTest() throws Exception
@@ -82,31 +77,28 @@ public class UtilsTest
 		Utils.parseSystemPath(".", new ArrayList<>());
 		Utils.parseSystemPath("./*", new ArrayList<>());
 	}
-	
-	
+
 	@Test
 	public void mimeTypeTest() throws Exception
 	{
-		assertEquals("image/jpg",Utils.getMIMEType(new File("img.jpg")));
-		assertEquals("image/png",Utils.getMIMEType(new File("img.png")));
-		assertEquals("text/plain",Utils.getMIMEType(new File("doc.txt")));
-		assertEquals("application/pdf",Utils.getMIMEType(new File("doc.pdf")));
-		assertEquals("video/x-msvideo",Utils.getMIMEType(new File("movie.avi")));
-		assertEquals("video/mpeg",Utils.getMIMEType(new File("movie.mpeg")));
-		assertEquals("video/mp4",Utils.getMIMEType(new File("movie.mp4")));
-		assertEquals("application/octet-stream",Utils.getMIMEType(new File("img.safe")));
-		
-		
+		assertEquals("image/jpg", Utils.getMIMEType(new File("img.jpg")));
+		assertEquals("image/png", Utils.getMIMEType(new File("img.png")));
+		assertEquals("text/plain", Utils.getMIMEType(new File("doc.txt")));
+		assertEquals("application/pdf", Utils.getMIMEType(new File("doc.pdf")));
+		assertEquals("video/x-msvideo", Utils.getMIMEType(new File("movie.avi")));
+		assertEquals("video/mpeg", Utils.getMIMEType(new File("movie.mpeg")));
+		assertEquals("video/mp4", Utils.getMIMEType(new File("movie.mp4")));
+		assertEquals("application/octet-stream", Utils.getMIMEType(new File("img.safe")));
+
 	}
-	
+
 	@Test
 	public void formatExceptionTest() throws Exception
 	{
 		final Exception exception = new Exception("Error message");
 		final String msg = Utils.formatException(exception);
 		assertTrue(msg.contains(exception.getMessage()));
-		
+
 	}
-	
 
 }

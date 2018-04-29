@@ -107,7 +107,7 @@ public abstract class SafeFiles
 				searchSafePath(current.getParent(), comparableTokens, 1, destination);
 			} else
 				// relative to current folder
-				searchSafePath(current.getParent(), comparableTokens, 0, destination);
+				searchSafePath(current, comparableTokens, 0, destination);
 
 		}
 

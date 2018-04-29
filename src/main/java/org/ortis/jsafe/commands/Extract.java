@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
+import org.ortis.jsafe.Block;
 import org.ortis.jsafe.Environment;
 import org.ortis.jsafe.Folder;
 import org.ortis.jsafe.Safe;
@@ -34,7 +35,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /**
- * GUI starter
+ * Extract a {@link Block} to local drive
  * 
  * @author Ortis <br>
  *         2018 Apr 26 8:16:54 PM <br>

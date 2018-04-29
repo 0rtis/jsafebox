@@ -22,7 +22,7 @@ import picocli.CommandLine.Command;
  * @author Ortis <br>
  *         2018 Apr 26 8:14:45 PM <br>
  */
-@Command(description = "Bootstrap", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, subcommands = { Init.class, List.class, Add.class, Delete.class, Cat.class, Extract.class })
+@Command(description = "Bootstrap", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, subcommands = { Init.class, List.class, Add.class,  Cat.class, Extract.class })
 public class Bootstrap implements Callable<Void>
 {
 	public static final String VERSION = "0.1 alpha";

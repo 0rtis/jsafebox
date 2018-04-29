@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
+import org.ortis.jsafe.Block;
 import org.ortis.jsafe.Environment;
 import org.ortis.jsafe.Safe;
 import org.ortis.jsafe.SafeFile;
@@ -28,7 +29,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /**
- * GUI starter
+ * Output {@link Block} content as text
  * 
  * @author Ortis <br>
  *         2018 Apr 26 8:16:54 PM <br>

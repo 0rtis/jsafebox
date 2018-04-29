@@ -1,22 +1,19 @@
 /*******************************************************************************
  * Copyright 2018 Ortis (cao.ortis.org@gmail.com)
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License.  You may obtain a copy
- * of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  * 
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under the License.
  ******************************************************************************/
+
 package org.ortis.jsafe;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -98,8 +95,8 @@ public class SafeFilesTest
 		assertEquals(safeFile.getName(), SafeFiles.getName(safeFile.getPath()));
 		assertTrue(safeFile.isFolder());
 		assertEquals(0, ((Folder) safeFile).listFiles().size());
-		
-			// creating root/1/13 from within root/1 and with a block path argument
+
+		// creating root/1/13 from within root/1 and with a block path argument
 		SafeFiles.mkdir("13" + Folder.DELIMITER + "block", true, folder, root);
 		safeFile = folder.get("13");
 		assertNotNull(safeFile);
@@ -108,7 +105,6 @@ public class SafeFilesTest
 		assertTrue(safeFile.isFolder());
 		assertEquals(0, ((Folder) safeFile).listFiles().size());
 
-	
 		// creating additional directory for testing
 		folder = root.mkdir("1b");
 		folder.mkdir("11");
@@ -126,6 +122,7 @@ public class SafeFilesTest
 		folder.mkdir("33");
 
 		// SafeFiles.get
+
 		safeFile = SafeFiles.get("1", root, root);
 		assertNotNull(safeFile);
 		assertEquals("1", safeFile.getName());
@@ -137,6 +134,21 @@ public class SafeFilesTest
 		safeFile = SafeFiles.get("1" + Folder.DELIMITER + "11", root, root);
 		assertNotNull(safeFile);
 		assertEquals("11", safeFile.getName());
+
+		{// test all code paths
+			safeFile = SafeFiles.get("", root, root);
+			assertNull(safeFile);
+
+			safeFile = SafeFiles.get(".", folder, root);
+			assertEquals(folder, safeFile);
+
+			safeFile = SafeFiles.get("..", folder, root);
+			assertEquals(root, safeFile);
+
+			safeFile = SafeFiles.get("1", root, root);
+			assertNotNull(safeFile);
+			assertEquals("1", safeFile.getName());
+		}
 
 		// SafeFiles.match
 
@@ -178,17 +190,39 @@ public class SafeFilesTest
 		assertEquals(2, matches.size());
 		contains(root.getName() + Folder.DELIMITER + "1" + Folder.DELIMITER + "12", matches);
 		contains(root.getName() + Folder.DELIMITER + "1b" + Folder.DELIMITER + "12", matches);
-		
-		
-		//sanitize
+
+		{// test all code paths
+			matches = SafeFiles.match("", root, root, new ArrayList<>());
+			assertEquals(0, matches.size());
+
+			matches = SafeFiles.match("." + Folder.DELIMITER + folder.getName(), root, root, new ArrayList<>());
+			assertEquals(1, matches.size());
+			assertEquals(folder, matches.get(0));
+
+			matches = SafeFiles.match(".", folder, root, new ArrayList<>());
+			assertEquals(1, matches.size());
+			assertEquals(folder, matches.get(0));
+
+			matches = SafeFiles.match("..", folder, root, new ArrayList<>());
+			assertEquals(1, matches.size());
+			assertEquals(root, matches.get(0));
+
+			matches = SafeFiles.match(Folder.WILDCARD, root, root, new ArrayList<>());
+			assertEquals(4, matches.size());
+			contains(root.getName() + Folder.DELIMITER + "1", matches);
+			contains(root.getName() + Folder.DELIMITER + "1b", matches);
+			contains(root.getName() + Folder.DELIMITER + "2", matches);
+			contains(root.getName() + Folder.DELIMITER + "3", matches);
+		}
+
+		// sanitize
 		final StringBuilder sb = new StringBuilder();
-		for(final char c: Environment.getForbidenChars())
+		for (final char c : Environment.getForbidenChars())
 			sb.append(c);
-		
+
 		final String sanitized = SafeFiles.sanitize(sb.toString());
-		for(final Character c : sanitized.toCharArray())
+		for (final Character c : sanitized.toCharArray())
 			assertTrue(c.equals(Environment.getSubstitute()) || c.equals(Folder.DELIMITER));
-		
 
 	}
 
