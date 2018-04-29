@@ -19,13 +19,13 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
 /**
- * A CLI outout only {@link Handler}
+ * A CLI, output only {@link Handler}
  * @author Ortis
  *<br>
  *2018 Apr 26 7:51:38 PM 
  *<br>
  */
-public class ConsoleHandler extends Handler
+public class CLIHandler extends Handler
 {
 
 	@Override

@@ -79,56 +79,58 @@ public class Extract implements Callable<Void>
 				return null;
 			}
 
-			final Safe safe = Utils.open(this.safeFile, this.password.toCharArray(), this.bufferSize, log);
-
-			final Set<SafeFile> matches = new LinkedHashSet<>();
-
-			for (int i = 0; i < this.paths.length - 1; i++)
-				SafeFiles.match(this.paths[i], safe.getRootFolder(), safe.getRootFolder(), matches);
-
-			final Map<String, List<SafeFile>> names = new LinkedHashMap<>();
-			for (final SafeFile safeFile : matches)
+			try (final Safe safe = Utils.open(this.safeFile, this.password.toCharArray(), this.bufferSize, log))
 			{
-				if (!safeFile.isBlock())
+
+				final Set<SafeFile> matches = new LinkedHashSet<>();
+
+				for (int i = 0; i < this.paths.length - 1; i++)
+					SafeFiles.match(this.paths[i], safe.getRootFolder(), safe.getRootFolder(), matches);
+
+				final Map<String, List<SafeFile>> names = new LinkedHashMap<>();
+				for (final SafeFile safeFile : matches)
 				{
-					log.warning("Skipping extracation of " + safeFile + " (not a block)");
-					continue;
+					if (!safeFile.isBlock())
+					{
+						log.warning("Skipping extracation of " + safeFile + " (not a block)");
+						continue;
+					}
+					List<SafeFile> safeFiles = names.get(safeFile.getComparableName());
+					if (safeFiles == null)
+					{
+						safeFiles = new ArrayList<>();
+						names.put(safeFile.getComparableName(), safeFiles);
+					}
+
+					safeFiles.add(safeFile);
+
 				}
-				List<SafeFile> safeFiles = names.get(safeFile.getComparableName());
-				if (safeFiles == null)
-				{
-					safeFiles = new ArrayList<>();
-					names.put(safeFile.getComparableName(), safeFiles);
-				}
 
-				safeFiles.add(safeFile);
-
-			}
-
-			for (final Map.Entry<String, List<SafeFile>> safeFiles : names.entrySet())
-				if (safeFiles.getValue().size() > 1)
-				{
-
-					for (final SafeFile safeFile : safeFiles.getValue())
+				for (final Map.Entry<String, List<SafeFile>> safeFiles : names.entrySet())
+					if (safeFiles.getValue().size() > 1)
 					{
 
-						final File systemFile = new File(destinationFolder, safeFile.getName() + "_" + SafeFiles.sanitize(safeFile.getPath()).replace(Folder.DELIMITER, '-'));
-						log.fine("Extracting " + safeFile + " to " + systemFile);
+						for (final SafeFile safeFile : safeFiles.getValue())
+						{
+
+							final File systemFile = new File(destinationFolder, safeFile.getName() + "_" + SafeFiles.sanitize(safeFile.getPath()).replace(Folder.DELIMITER, '-'));
+							log.info("Extracting " + safeFile + " to " + systemFile);
+							final FileOutputStream fos = new FileOutputStream(systemFile);
+							safe.extract(safeFile.getPath(), fos);
+							fos.close();
+						}
+
+					} else
+					{
+
+						final SafeFile safeFile = safeFiles.getValue().get(0);
+						final File systemFile = new File(destinationFolder, safeFile.getName());
+						log.info("Extracting " + safeFile + " to " + systemFile);
 						final FileOutputStream fos = new FileOutputStream(systemFile);
 						safe.extract(safeFile.getPath(), fos);
 						fos.close();
 					}
-
-				} else
-				{
-
-					final SafeFile safeFile = safeFiles.getValue().get(0);
-					final File systemFile = new File(destinationFolder, safeFile.getName());
-					log.fine("Extracting " + safeFile + " to " + systemFile);
-					final FileOutputStream fos = new FileOutputStream(systemFile);
-					safe.extract(safeFile.getPath(), fos);
-					fos.close();
-				}
+			}
 
 		} catch (final Exception e)
 		{

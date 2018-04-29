@@ -1,18 +1,14 @@
 /*******************************************************************************
  * Copyright 2018 Ortis (cao.ortis.org@gmail.com)
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License.  You may obtain a copy
- * of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  * 
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under the License.
  ******************************************************************************/
+
 package org.ortis.jsafe;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -49,21 +45,8 @@ public class SafeTest
 	public static void setUpBeforeClass() throws Exception
 	{
 		log = TestUtils.getLog();
-		random = new Random(404);
-
-		for (int i = 0; i < 100; i++)
-		{
-
-			folder = new File(TestUtils.randomString(random, 10) + ".safe");
-			if (!folder.exists())
-				break;
-
-		}
-
-		if (folder.exists())
-			throw new Exception("Could not find non existing folder");
-
-		folder.mkdir();
+		random = TestUtils.getRandom();
+		folder = TestUtils.mkdir();
 	}
 
 	/**
@@ -72,15 +55,7 @@ public class SafeTest
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception
 	{
-
-		for (final File file : folder.listFiles())
-		{
-			log.fine("Deleting file " + file);
-			file.delete();
-		}
-		log.info("Deleting folder " + folder);
-		folder.delete();
-
+		TestUtils.delete(folder);
 	}
 
 	/**
@@ -185,14 +160,14 @@ public class SafeTest
 		random.nextBytes(iv);
 		header.put(Safe.ENCRYPTION_IV_LABEL, Safe.GSON.toJson(iv));
 
-		 Safe safe = Safe.create(safeFile, key, header, null, 1024);
+		Safe safe = Safe.create(safeFile, key, header, null, 1024);
 		try
 		{
 			final String name = TestUtils.randomString(random, 20);
 			final String path = Folder.ROOT_NAME + Folder.DELIMITER + name;
 			final Map<String, String> metadatas = new HashMap<>();
 			metadatas.put(Block.PATH_LABEL, path);
-			metadatas.put(Block.NAME_LABEL,name);
+			metadatas.put(Block.NAME_LABEL, name);
 			metadatas.put(TestUtils.randomString(random, 5), TestUtils.randomString(random, 20));
 			final ByteArrayOutputStream original = new ByteArrayOutputStream();
 			final InputStream is = SafeTest.class.getResourceAsStream("/img/Gentleman.sh-600x600.png");
@@ -205,7 +180,7 @@ public class SafeTest
 
 			// extract
 
-			//before save
+			// before save
 			final Block block = safe.getTempBlock(path);
 			Assert.assertNotNull(block);
 
@@ -217,14 +192,13 @@ public class SafeTest
 
 			assertEquals(block.getProperties(), metadatas);
 
-			//assertEquals(block.getDataLength(), original.size());
+			// assertEquals(block.getDataLength(), original.size());
 
 			final ByteArrayOutputStream extracted = new ByteArrayOutputStream();
 			safe.extract(path, extracted);
 			assertArrayEquals(original.toByteArray(), extracted.toByteArray());
-			
-			
-			//after saved
+
+			// after saved
 			safe = safe.save();
 			final Block savedBlock = safe.getBlock(path);
 			Assert.assertNotNull(savedBlock);
@@ -237,13 +211,11 @@ public class SafeTest
 
 			assertEquals(savedBlock.getProperties(), metadatas);
 
-			//assertEquals(savedBlock.getDataLength(), original.size());
+			// assertEquals(savedBlock.getDataLength(), original.size());
 
 			extracted.reset();
 			safe.extract(path, extracted);
 			assertArrayEquals(original.toByteArray(), extracted.toByteArray());
-			
-			
 
 		} finally
 		{

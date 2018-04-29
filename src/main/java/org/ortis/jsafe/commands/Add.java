@@ -45,7 +45,7 @@ public class Add implements Callable<Void>
 	@Option(names = { "-pw", "-pwd", "--password" }, required = true, description = "Password")
 	private String password;
 
-	@Option(names = { "-p","-pp", "--property" }, arity = "2", description = "Encrypted property's key and value")
+	@Option(names = { "-p", "-pp", "--property" }, arity = "2", description = "Encrypted property's key and value")
 	private String [] properties;
 
 	@Option(names = { "-m", "--mkdir" }, description = "Create destination folder if necessary")
@@ -59,9 +59,6 @@ public class Add implements Callable<Void>
 
 	@Parameters(index = "1", arity = "2...*", description = "Paths of system's source files followed by the safe's destination folder")
 	private String [] paths;
-
-	// @Parameters(index = "2",arity="0", description = "Destination folder path")
-	// private String destination;
 
 	@Override
 	public Void call() throws Exception
@@ -118,13 +115,16 @@ public class Add implements Callable<Void>
 				props.put(Block.PATH_LABEL, SafeFiles.sanitize(folder.getPath() + Folder.DELIMITER + source.getName()));
 
 				props.put(Block.NAME_LABEL, source.getName());
-				props.put("content-type", Utils.getType(source));
+				props.put("content-type", Utils.getMIMEType(source));
 				log.info("Encrypting " + source + " to " + props.get(Block.PATH_LABEL));
-				safe.add(props, new FileInputStream(source));
+				
+				final FileInputStream fis = new FileInputStream(source);
+				safe.add(props, fis);
+				fis.close();
 			}
 
 			log.info("Writting safe file...");
-			safe.save();
+			safe.save().close();;
 			log.info("Done");
 
 		} catch (final Exception e)

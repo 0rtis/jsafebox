@@ -58,10 +58,8 @@ public class List implements Callable<Void>
 	{
 		final Logger log = Environment.getLogger();
 
-		try
+		try (final Safe safe = Utils.open(this.safeFile, this.password.toCharArray(), this.bufferSize, log))
 		{
-
-			final Safe safe = Utils.open(this.safeFile, this.password.toCharArray(), this.bufferSize, log);
 
 			final java.util.Set<SafeFile> safeFiles = new LinkedHashSet<>();
 

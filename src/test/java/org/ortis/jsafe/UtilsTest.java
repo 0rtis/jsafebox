@@ -14,6 +14,7 @@ package org.ortis.jsafe;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -79,8 +80,24 @@ public class UtilsTest
 	public void parseSystemPathTest() throws Exception
 	{
 		Utils.parseSystemPath(".", new ArrayList<>());
+		Utils.parseSystemPath("./*", new ArrayList<>());
 	}
 	
+	
+	@Test
+	public void mimeTypeTest() throws Exception
+	{
+		assertEquals("image/jpg",Utils.getMIMEType(new File("img.jpg")));
+		assertEquals("image/png",Utils.getMIMEType(new File("img.png")));
+		assertEquals("text/plain",Utils.getMIMEType(new File("doc.txt")));
+		assertEquals("application/pdf",Utils.getMIMEType(new File("doc.pdf")));
+		assertEquals("video/x-msvideo",Utils.getMIMEType(new File("movie.avi")));
+		assertEquals("video/mpeg",Utils.getMIMEType(new File("movie.mpeg")));
+		assertEquals("video/mp4",Utils.getMIMEType(new File("movie.mp4")));
+		assertEquals("application/octet-stream",Utils.getMIMEType(new File("img.safe")));
+		
+		
+	}
 	
 	@Test
 	public void formatExceptionTest() throws Exception

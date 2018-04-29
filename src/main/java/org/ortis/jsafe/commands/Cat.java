@@ -33,7 +33,7 @@ import picocli.CommandLine.Parameters;
  * @author Ortis <br>
  *         2018 Apr 26 8:16:54 PM <br>
  */
-@Command(description = "Outpt text file content", name = "cat", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, showDefaultValues = true)
+@Command(description = "Output file content as text", name = "cat", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, showDefaultValues = true)
 public class Cat implements Callable<Void>
 {
 
@@ -60,8 +60,14 @@ public class Cat implements Callable<Void>
 
 			final Set<SafeFile> matches = new LinkedHashSet<>();
 
-			for (int i = 0; i < this.paths.length - 1; i++)
+			for (int i = 0; i < this.paths.length; i++)
 				SafeFiles.match(this.paths[i], safe.getRootFolder(), safe.getRootFolder(), matches);
+
+			if (matches.isEmpty())
+			{
+				log.info("No file found");
+				return null;
+			}
 
 			for (final SafeFile safeFile : matches)
 			{

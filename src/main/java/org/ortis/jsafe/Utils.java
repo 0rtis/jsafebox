@@ -193,7 +193,7 @@ public class Utils
 	 * @param file
 	 * @return
 	 */
-	public static String getType(final java.io.File file)
+	public static String getMIMEType(final java.io.File file)
 	{
 
 		final String name = file.getName().toUpperCase();
@@ -210,6 +210,8 @@ public class Utils
 			return "video/x-msvideo";
 		else if (name.endsWith(".MPEG"))
 			return "video/mpeg";
+		else if (name.endsWith(".MP4"))
+			return "video/mp4";
 		else
 			return "application/octet-stream";
 	}

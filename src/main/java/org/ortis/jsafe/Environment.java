@@ -52,7 +52,7 @@ public abstract class Environment
 		final Logger log = Logger.getLogger("JSafe");
 		log.setUseParentHandlers(false);
 
-		log.addHandler(new ConsoleHandler());
+		log.addHandler(new CLIHandler());
 		log.setLevel(Level.INFO);
 
 		setLogger(log);

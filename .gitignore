@@ -1,5 +1,5 @@
 bin
-*.jsafe
+*.safe
 target
 .classpath
 .project
