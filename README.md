@@ -62,7 +62,7 @@ The following datagrams (from 2 to N) are the encrypted files. They work by pair
 - [ ] Interactive shell
 
 ### Download
-**This project is still under development and file loss might occur. Make sure to have a backup of your files somewhere else !**
+**This project is still under development and file loss might occur. Make sure to have a backup of your files !**
 
 You can download the lastest version of JSafe [here]()
 
