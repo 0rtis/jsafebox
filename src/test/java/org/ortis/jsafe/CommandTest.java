@@ -50,6 +50,7 @@ public class CommandTest
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception
 	{
+
 		TestUtils.delete(folder);
 	}
 
@@ -79,13 +80,9 @@ public class CommandTest
 		if (safeFile.exists())
 			throw new Exception("Safe file " + safeFile.getAbsolutePath() + " already exists");
 
-		log.info("BEFORE INIT");
-		
 		String [] args = new String[] { "init", "--password", "mypassword", safeFile.getAbsolutePath(), "--header", "headerKey", "headerValue", "--property", "propertyKey", "propertyValue" };
 		CommandLine.call(new Bootstrap(), System.err, args);
 
-		log.info("INIT DONE");
-		
 		assertTrue(safeFile.exists());
 
 		final InputStream is = SafeTest.class.getResourceAsStream("/img/Gentleman.sh-600x600.png");
@@ -114,14 +111,13 @@ public class CommandTest
 		final String safeFolderPath = Folder.ROOT_NAME + Folder.DELIMITER + "folder";
 		args = new String[] { "add", "--password", "mypassword", safeFile.getAbsolutePath(), "-m", "-pp", "propertyKey", "propertyValue", systemFile.getAbsolutePath(), safeFolderPath };
 		Bootstrap.main(args);
-		log.info("ADD DONE");
-		
+
 		args = new String[] { "ls", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath };
 		CommandLine.call(new Bootstrap(), System.err, args);
-		log.info("LS DONE");
+
 		args = new String[] { "cat", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName() };
 		Bootstrap.main(args);
-		log.info("CAT DONE");
+
 		final File extractTargetSystemFolder = new File(folder, TestUtils.randomString(random, 10) + ".extracted");
 
 		if (!extractTargetSystemFolder.exists())
@@ -142,7 +138,7 @@ public class CommandTest
 		args = new String[] { "extract", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName(),
 				extractTargetSystemFolder.getAbsolutePath() };
 		Bootstrap.main(args);
-		log.info("EXTRACT DONE");
+
 		assertTrue(extractTargetSystemFile.exists());
 
 		assertArrayEquals(Files.readAllBytes(systemFile.toPath()), Files.readAllBytes(extractTargetSystemFile.toPath()));

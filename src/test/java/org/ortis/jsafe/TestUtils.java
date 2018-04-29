@@ -28,6 +28,7 @@ public class TestUtils
 	static
 	{
 		log = Logger.getAnonymousLogger();
+		log.setUseParentHandlers(false);
 		log.setLevel(Level.ALL);
 		java.util.logging.ConsoleHandler handler = new java.util.logging.ConsoleHandler();
 		handler.setLevel(Level.ALL);
