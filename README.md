@@ -1,5 +1,6 @@
 
 [![Build Status](https://travis-ci.org/0rtis/jsafe.svg?branch=master)](https://travis-ci.org/0rtis/jsafe)
+[![codecov](https://codecov.io/gh/0rtis/jsafe/branch/master/graph/badge.svg)](https://codecov.io/gh/0rtis/jsafe)
 
 
 ```
