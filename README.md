@@ -22,7 +22,7 @@
 
 JSafe encrypt your file using [AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) encryption. It can be used as command line tool or with a _file explorer_ like interface.
 
-**Decrypted data is never wrote on disk** (except during file extraction requested by user).
+**Decrypted data is never wrote on the drive** (except during file extraction requested by user).
 
 *picture of file explorer*
 

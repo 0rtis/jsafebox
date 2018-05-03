@@ -11,13 +11,10 @@
 
 package org.ortis.jsafe.commands;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
-import org.ortis.jsafe.Block;
 import org.ortis.jsafe.Environment;
 import org.ortis.jsafe.Folder;
 import org.ortis.jsafe.Safe;
@@ -30,94 +27,76 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /**
- * List the content of a {@link Safe}
+ * Add file to the {@link Safe}
  * 
  * @author Ortis <br>
- *         2018 Apr 26 8:16:31 PM <br>
+ *         2018 Apr 26 8:17:40 PM <br>
  */
-@Command(description = "List content", name = "ls", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, showDefaultValues = true)
-public class List implements Callable<Void>
+@Command(description = "Delete file", name = "rm", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, showDefaultValues = true)
+public class Delete implements Callable<Void>
 {
-	private final static DecimalFormat BYTE_FORMAT = new DecimalFormat("###,###");
 
 	@Option(names = { "-pw", "-pwd", "--password" }, required = true, description = "Password")
 	private String password;
 
+	@Option(names = { "-f", "--force" }, description = "Force delete")
+	private boolean force;
+
 	@Option(names = { "-b", "--buffer" }, description = "Read buffer size")
 	private int bufferSize = 1024;
 
-	@Parameters(index = "0", description = "File path of safe file")
+	@Parameters(index = "0", description = "System path of safe file")
 	private String safeFile;
 
-	@Parameters(index = "1", arity = "1...*", description = "Path to list")
+	@Parameters(index = "1", arity = "1...*", description = "Safe's paths to delete")
 	private String[] paths;
 
 	@Override
 	public Void call() throws Exception
 	{
+
 		final Logger log = Environment.getLogger();
 
 		try (final Safe safe = Utils.open(this.safeFile, this.password.toCharArray(), this.bufferSize, log))
 		{
 
 			final java.util.Set<SafeFile> safeFiles = new LinkedHashSet<>();
-			final java.util.List<SafeFile> buffer = new ArrayList<>();
 
 			for (final String path : this.paths)
 			{
 				log.fine("Lookup " + path + "...");
-				buffer.clear();
-				SafeFiles.match(path, safe.getRootFolder(), safe.getRootFolder(), buffer);
-				safeFiles.addAll(buffer);
+				SafeFiles.match(path, safe.getRootFolder(), safe.getRootFolder(), safeFiles);
 			}
 
-			int bCount = 0;
-			long size = 0;
-			int fCount = 0;
-
-			final StringBuilder sb = new StringBuilder("\n");
-
-			for (final SafeFile sf : safeFiles)
+			if (safeFiles.isEmpty())
 			{
-				if (sf.isBlock())
-				{
-					final Block block = (Block) sf;
+				log.info("No file found");
+				return null;
+			}
 
-					sb.append(sf.getPath() + "\t" + BYTE_FORMAT.format(block.getDataLength()) + " bytes\n");
-					size += block.getDataLength();
-					bCount++;
-				} else
-				{
-					final Folder folder = (Folder) sf;
+			for (final SafeFile safeFile : safeFiles)
+			{
 
-					for (final SafeFile ssf : folder.listFiles())
-						if (ssf.isBlock())
-						{
-							final Block block = (Block) ssf;
-							sb.append(ssf.getPath() + "\t" + BYTE_FORMAT.format(block.getDataLength()) + " bytes\n");
-							bCount++;
-							size += block.getDataLength();
-						} else
-						{
-							sb.append(ssf.getPath() + "\t" + ((Folder) ssf).listFiles().size() + " child(s)\n");
-							fCount++;
-						}
+				if (safeFile.isBlock())
+					delete(safe, safeFile, log);
+				else if (safeFile.isFolder())
+				{
+					final Folder folder = (Folder) safeFile;
+
+					if (!folder.listFiles().isEmpty())
+					{
+						if (this.force)
+							delete(safe, safeFile, log);
+						else
+							log.severe("Cannot delete non empty folder '" + folder + "'");
+					}
+
 				}
 			}
 
-			sb.append("\n");
-
-			if (bCount > 0)
-				sb.append(bCount + " file(s) - Total " + BYTE_FORMAT.format(size) + " bytes");
-
-			if (fCount > 0)
-			{
-				if (bCount > 0)
-					sb.append("\n");
-				sb.append(fCount + " folder(s)");
-			}
-
-			log.info(sb.toString());
+			log.info("Writting safe file...");
+			safe.save().close();
+			log.info("Done");
 
 		} catch (final Exception e)
 		{
@@ -125,5 +104,21 @@ public class List implements Callable<Void>
 		}
 
 		return null;
+	}
+
+	private void delete(final Safe safe, final SafeFile safeFile, final Logger log)
+	{
+		if (safeFile.isBlock())
+		{
+			log.info("Deleting block " + safeFile);
+			safe.delete(safeFile.getPath());
+		} else
+		{
+
+			final Folder folder = (Folder) safeFile;
+			for (final SafeFile sf : folder.listFiles())
+				delete(safe, sf, log);
+		}
+
 	}
 }

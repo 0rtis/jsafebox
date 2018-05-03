@@ -12,17 +12,23 @@
 package org.ortis.jsafe;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
@@ -35,16 +41,14 @@ import javax.crypto.spec.SecretKeySpec;
  * @author Ortis <br>
  *         2018 Apr 26 8:06:47 PM <br>
  */
-public class Utils
-{
+public class Utils {
 
 	public final static String SEPARATOR_REGEX = "[/|" + Pattern.quote(java.io.File.separator) + "]";
 
-	public static byte [] passwordToBytes(final char [] chars)
-	{
+	public static byte[] passwordToBytes(final char[] chars) {
 		final CharBuffer charBuffer = CharBuffer.wrap(chars);
 		final ByteBuffer byteBuffer = Charset.forName(Safe.UTF8).encode(charBuffer);
-		final byte [] bytes = Arrays.copyOfRange(byteBuffer.array(), byteBuffer.position(), byteBuffer.limit());
+		final byte[] bytes = Arrays.copyOfRange(byteBuffer.array(), byteBuffer.position(), byteBuffer.limit());
 		Arrays.fill(charBuffer.array(), '\u0000'); // clear sensitive data
 		Arrays.fill(byteBuffer.array(), (byte) 0); // clear sensitive data
 		return bytes;
@@ -63,8 +67,8 @@ public class Utils
 	 * @return
 	 * @throws Exception
 	 */
-	public static Safe open(final String safeFilePath, final char [] password, final int bufferSize, final Logger log) throws Exception
-	{
+	public static Safe open(final String safeFilePath, final char[] password, final int bufferSize, final Logger log)
+			throws Exception {
 		final File file = new File(safeFilePath);
 
 		if (!file.exists())
@@ -85,7 +89,7 @@ public class Utils
 		log.fine("Key algorithm " + header.get(Safe.KEY_ALGO_LABEL));
 
 		final MessageDigest md = MessageDigest.getInstance("SHA-256");
-		final byte [] key = Arrays.copyOf(md.digest(md.digest(Utils.passwordToBytes(password))), 128 >> 3);
+		final byte[] key = Arrays.copyOf(md.digest(md.digest(Utils.passwordToBytes(password))), 128 >> 3);
 		final SecretKeySpec keySpec = new SecretKeySpec(key, header.get(Safe.KEY_ALGO_LABEL));
 
 		final IvParameterSpec iv;
@@ -98,91 +102,85 @@ public class Utils
 		return new Safe(file, cipher, keySpec, iv, 1024);
 	}
 
-	/**
-	 * Parse the system path whith a support for {@link Utils#WILDCARD}
-	 * 
-	 * @param path:
-	 *            system path to parse
-	 * @param destination
-	 * @return
-	 */
-	public static List<java.io.File> parseSystemPath(final String path, final List<java.io.File> destination)
-	{
+	private final static String SYSTEM_PATH_DELIMITER_REGEX = Pattern.quote(File.separator) + "|" + Pattern.quote("/")
+			+ "|" + Pattern.quote("\\");
 
-		final String [] tokens = path.split(SEPARATOR_REGEX);
-		searchSystemPath(null, tokens, 0, destination);
+	public static List<java.io.File> parseSystemPath(final String query, final List<java.io.File> destination)
+			throws IOException {
+		final String[] tokens = query.split(SYSTEM_PATH_DELIMITER_REGEX);
 
-		return destination;
+		Path baseDirectory = null;
 
-	}
+		if (tokens[0].equals(".") || tokens[0].equals("..")) {
+			baseDirectory = new File(tokens[0]).toPath();
+		} else {
 
-	private static int searchSystemPath(java.io.File folder, final String [] tokens, final int index, final List<java.io.File> destination)
-	{
-
-		// for (final String token : tokens)
-		for (int i = index; i < tokens.length; i++)
-		{
-			final String token = tokens[i];
-			if (token.contains(Folder.WILDCARD))
-			{
-				if (i == 0)
-				{// search all root drives
-					for (final java.io.File root : java.io.File.listRoots())
-						i = searchSystemPath(root, tokens, i + 1, destination);
-
-				} else
-				{
-
-					final Pattern regex = Pattern.compile(token.toUpperCase(Environment.getLocale()).replace(Folder.WILDCARD, Folder.WILDCARD_REGEX));
-
-					final String [] matches = folder.list(new FilenameFilter()
-					{
-
-						@Override
-						public boolean accept(final java.io.File dir, String name)
-						{
-							name = name.toUpperCase(Environment.getLocale());
-							final Matcher matcher = regex.matcher(name);
-
-							return matcher.matches();
-						}
-					});
-
-					// System.out.println(Arrays.toString(matches));
-					for (final String match : matches)
-					{
-
-						final java.io.File file = new java.io.File(folder, match);
-						if (file.isDirectory())
-							i = searchSystemPath(file, tokens, i + 1, destination);
-						else if (!destination.contains(file))
-							destination.add(file);
-
-					}
+			final String comparableToken = tokens[0].toUpperCase();
+			for (final File root : File.listRoots())
+				if (root.getAbsolutePath().toUpperCase().equals(comparableToken)) {
+					// perfect match
+					baseDirectory = root.toPath();
+					break;
 
 				}
 
-			} else
-			{
-				final java.io.File file;
-				if (i == 0)
-				{
-					file = new java.io.File(token);
-				} else
-					file = new java.io.File(folder, token);
+			if (baseDirectory == null)
+				for (final File root : File.listRoots()) {
+					String rootPath = root.getAbsolutePath().toUpperCase();
+					rootPath = rootPath.substring(0, rootPath.length() - 1);
+					if (rootPath.equals(comparableToken)) {
+						baseDirectory = root.toPath();
+						break;
+					}
 
-				if (!file.exists())
-					return i;
-				if (file.isDirectory())
-					folder = file;
-				else if (!destination.contains(file))
-					destination.add(file);
-
-			}
-
+				}
 		}
 
-		return tokens.length;
+		if (baseDirectory == null)
+			throw new IOException("Could not locate base directory " + tokens[0]);
+
+		Path path = baseDirectory;
+		for (int i = 1; i < tokens.length; i++) {
+
+			try {
+				path = Paths.get(path.toString(), tokens[i]);
+			} catch (final Exception e) {
+				// here, we have reach a special character and the start point for the search is
+				// in path
+			}
+		}
+
+		final PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + query);
+		Files.walkFileTree(path, new FileVisitor<Path>() {
+
+			@Override
+			public FileVisitResult postVisitDirectory(final Path dir, final IOException exc) throws IOException {
+
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs)
+					throws IOException {
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+
+				if (pathMatcher.matches(file))
+					destination.add(file.toFile());
+
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFileFailed(final Path file, final IOException exc) throws IOException {
+				return FileVisitResult.CONTINUE;
+			}
+		});
+
+		return destination;
 
 	}
 
@@ -192,8 +190,7 @@ public class Utils
 	 * @param file
 	 * @return
 	 */
-	public static String getMIMEType(final java.io.File file)
-	{
+	public static String getMIMEType(final java.io.File file) {
 
 		final String name = file.getName().toUpperCase();
 
@@ -221,8 +218,7 @@ public class Utils
 	 * @param t
 	 * @return
 	 */
-	public static String formatException(final Throwable t)
-	{
+	public static String formatException(final Throwable t) {
 		if (t == null)
 			return "";
 		// return "[Error while parsingCannot format null Throwable]";
@@ -233,8 +229,8 @@ public class Utils
 
 	}
 
-	private static String formatException(final Class<?> exceptionClass, final String cause, final String msg, final StackTraceElement [] exceptionStack)
-	{
+	private static String formatException(final Class<?> exceptionClass, final String cause, final String msg,
+			final StackTraceElement[] exceptionStack) {
 		final StringBuilder builder = new StringBuilder();
 
 		// if (exceptionClass != null)
@@ -243,11 +239,9 @@ public class Utils
 		if (msg != null)
 			builder.append(msg);
 
-		if (exceptionStack != null)
-		{
+		if (exceptionStack != null) {
 			builder.append(System.lineSeparator());
-			for (int i = 0; i < exceptionStack.length; i++)
-			{
+			for (int i = 0; i < exceptionStack.length; i++) {
 				final String stackElement = exceptionStack[i].toString();
 
 				builder.append(stackElement + System.lineSeparator());
@@ -261,7 +255,8 @@ public class Utils
 	}
 
 	/**
-	 * Remove forbidden <code>char</code> from the path and replace them with <code>substitute</code>
+	 * Remove forbidden <code>char</code> from the path and replace them with
+	 * <code>substitute</code>
 	 * 
 	 * @param path:
 	 *            the path to sanitize
@@ -271,13 +266,11 @@ public class Utils
 	 *            replacement char
 	 * @return
 	 */
-	public static String sanitize(final String path, final Character delimiter, final Character substitute)
-	{
-		final String [] tokens = path.split(Pattern.quote(Character.toString(delimiter)));
+	public static String sanitize(final String path, final Character delimiter, final Character substitute) {
+		final String[] tokens = path.split(Pattern.quote(Character.toString(delimiter)));
 
 		final StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < tokens.length; i++)
-		{
+		for (int i = 0; i < tokens.length; i++) {
 			if (i < tokens.length - 1)
 				sb.append(sanitizeToken(tokens[i], substitute) + delimiter);
 			else
@@ -288,25 +281,21 @@ public class Utils
 		return sb.toString();
 	}
 
-	public static String sanitizeToken(final String token, final Character substitute)
-	{
+	public static String sanitizeToken(final String token, final Character substitute) {
 
 		final StringBuilder sb = new StringBuilder(token);
 
 		final Character replacement = substitute;
 
-		c: for (int i = 0; i < sb.length(); i++)
-		{
+		c: for (int i = 0; i < sb.length(); i++) {
 
-			if (sb.charAt(i) == java.io.File.separatorChar)
-			{
+			if (sb.charAt(i) == java.io.File.separatorChar) {
 				sb.setCharAt(i, Folder.DELIMITER);
 				continue;
 			}
 
 			for (final char c : Environment.getForbidenChars())
-				if (sb.charAt(i) == c)
-				{
+				if (sb.charAt(i) == c) {
 					if (replacement == null)
 						sb.deleteCharAt(i--);
 					else

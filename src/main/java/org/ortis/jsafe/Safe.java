@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -41,18 +42,15 @@ import com.google.gson.reflect.TypeToken;
  * @author Ortis <br>
  *         2018 Apr 26 7:29:29 PM <br>
  */
-public class Safe implements Closeable
-{
+public class Safe implements Closeable {
 
 	private final static DateTimeFormatter FILE_NAME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 	public final static String UTF8 = "UTF-8";
 	public final static Gson GSON = new Gson();
-	private final static Type MAP_STRING_STRING_TYPE = new TypeToken<Map<String, String>>()
-	{
+	private final static Type MAP_STRING_STRING_TYPE = new TypeToken<Map<String, String>>() {
 	}.getType();
 
-	public final static Type BYTE_ARRAY_TYPE = new TypeToken<byte []>()
-	{
+	public final static Type BYTE_ARRAY_TYPE = new TypeToken<byte[]>() {
 	}.getType();
 
 	public final static String ENCRYPTION_LABEL = "encryption";
@@ -78,6 +76,7 @@ public class Safe implements Closeable
 
 	private final Map<String, String> publicHeader;
 	private final Map<String, String> privateProperties;
+	private final Map<String, Block> roBlocks;
 	private final Map<String, Block> blocks;
 	private final Map<String, Block> tempBlocks;
 	private final Map<String, Block> deletedBlocks;
@@ -101,8 +100,8 @@ public class Safe implements Closeable
 	 *            size of the <code>byte</code> buffer to be used in IO operation
 	 * @throws Exception
 	 */
-	public Safe(final File file, final Cipher cipher, final SecretKeySpec keySpec, final AlgorithmParameterSpec algoSpec, final int bufferSize) throws Exception
-	{
+	public Safe(final File file, final Cipher cipher, final SecretKeySpec keySpec,
+			final AlgorithmParameterSpec algoSpec, final int bufferSize) throws Exception {
 
 		this.originalFile = file;
 		this.cipher = cipher;
@@ -114,18 +113,18 @@ public class Safe implements Closeable
 		this.cipher.init(Cipher.DECRYPT_MODE, this.keySpec, this.algoSpec);
 		this.original = new RandomAccessFile(file, "rw");
 		this.tempFile = new File(file.getAbsolutePath() + TEMP_EXTENSION);
-		final HashMap<String, String> publicProps = new HashMap<>();
+		final HashMap<String, String> publicProps = new LinkedHashMap<>();
 		this.publicHeader = Collections.unmodifiableMap(publicProps);
-		final HashMap<String, String> props = new HashMap<>();
+		final HashMap<String, String> props = new LinkedHashMap<>();
 		this.privateProperties = Collections.unmodifiableMap(props);
-		final HashMap<String, Block> blocks = new HashMap<>();
-		this.blocks = Collections.unmodifiableMap(blocks);
-		this.tempBlocks = new HashMap<>();
-		this.deletedBlocks = new HashMap<>();
+		this.blocks = new LinkedHashMap<>();
+		this.roBlocks = Collections.unmodifiableMap(blocks);
+		this.tempBlocks = new LinkedHashMap<>();
+		this.deletedBlocks = new LinkedHashMap<>();
 		this.root = new Folder(null, Folder.ROOT_NAME);
 
-		final byte [] buffer = new byte[bufferSize];
-		final byte [] outBuffer = new byte[bufferSize];
+		final byte[] buffer = new byte[bufferSize];
+		final byte[] outBuffer = new byte[bufferSize];
 
 		long length;
 		int read;
@@ -160,8 +159,7 @@ public class Safe implements Closeable
 
 		baos.reset();
 
-		while (length > 0)
-		{
+		while (length > 0) {
 
 			if (length < buffer.length)
 				read = this.original.read(buffer, 0, (int) length);
@@ -182,16 +180,14 @@ public class Safe implements Closeable
 
 		props.putAll(GSON.fromJson(json, MAP_STRING_STRING_TYPE));
 
-		while (this.original.getFilePointer() < this.original.length())
-		{
+		while (this.original.getFilePointer() < this.original.length()) {
 			baos.reset();
 			final long offset = this.original.getFilePointer();
 			final long metaLength = this.original.readLong();
 			final long metaOffset = this.original.getFilePointer();
 
 			length = metaLength;
-			while (length > 0)
-			{
+			while (length > 0) {
 
 				if (length < buffer.length)
 					read = this.original.read(buffer, 0, (int) length);
@@ -212,9 +208,10 @@ public class Safe implements Closeable
 
 			final long dataLength = this.original.readLong();
 			final long dataOffset = this.original.getFilePointer();
-			final Block block = new Block(path, properties, offset, dataOffset + dataLength - offset, metaOffset, metaLength, dataOffset, dataLength);
+			final Block block = new Block(path, properties, offset, dataOffset + dataLength - offset, metaOffset,
+					metaLength, dataOffset, dataLength);
 
-			final String [] tokens = path.split(Folder.REGEX_DELIMITER);
+			final String[] tokens = path.split(Folder.REGEX_DELIMITER);
 
 			if (blocks.containsValue(block))
 				throw new IllegalStateException("Block path " + block.getPath() + " already exist");
@@ -243,7 +240,8 @@ public class Safe implements Closeable
 	}
 
 	/**
-	 * Add data into the {@link Safe}. <b>Note that the data will be stored into the temporary safe file</b>. Use {@link Safe#save()} to save all temporary data
+	 * Add data into the {@link Safe}. <b>Note that the data will be stored into the
+	 * temporary safe file</b>. Use {@link Safe#save()} to save all temporary data
 	 * 
 	 * @param properties:
 	 *            metadata
@@ -252,8 +250,7 @@ public class Safe implements Closeable
 	 * @return
 	 * @throws Exception
 	 */
-	public Block add(final Map<String, String> properties, final InputStream data) throws Exception
-	{
+	public Block add(final Map<String, String> properties, final InputStream data) throws Exception {
 		final String path = properties.get(Block.PATH_LABEL);
 
 		if (path == null)
@@ -266,7 +263,7 @@ public class Safe implements Closeable
 
 		final String comparablePath = properties.get(Block.PATH_LABEL).toUpperCase(Environment.getLocale());
 
-		final String [] comparableTokens = comparablePath.split(Folder.REGEX_DELIMITER);
+		final String[] comparableTokens = comparablePath.split(Folder.REGEX_DELIMITER);
 
 		if (comparableTokens.length == 2 && root.getComparableName().equals(comparableTokens[0]))
 			destinationFile = this.root;
@@ -284,7 +281,7 @@ public class Safe implements Closeable
 		if (destinationFolder.get(comparableTokens, comparableTokens.length - 1, comparableTokens.length) != null)
 			throw new Exception("Block file " + path + " already exist");
 
-		if (this.blocks.containsKey(path) || this.tempBlocks.containsKey(path))
+		if (this.roBlocks.containsKey(path) || this.tempBlocks.containsKey(path))
 			throw new Exception("Block path " + path + " already exist");
 
 		final String name = properties.get(Block.NAME_LABEL);
@@ -296,7 +293,7 @@ public class Safe implements Closeable
 
 		final String metadataserial = GSON.toJson(properties);
 
-		final byte [] metaBuffer = metadataserial.getBytes();
+		final byte[] metaBuffer = metadataserial.getBytes();
 
 		final RandomAccessFile temp = getTemp();
 
@@ -323,7 +320,8 @@ public class Safe implements Closeable
 
 		temp.seek(temp.length());
 
-		final Block block = new Block(path, properties, offset, temp.getFilePointer() - offset, metaOffset, metaLength, dataOffset, dataLength);
+		final Block block = new Block(path, properties, offset, temp.getFilePointer() - offset, metaOffset, metaLength,
+				dataOffset, dataLength);
 		this.tempBlocks.put(block.getComparablePath(), block);
 
 		destinationFolder.add(block);
@@ -332,13 +330,13 @@ public class Safe implements Closeable
 	}
 
 	/**
-	 * Delete data from the {@link Safe}. <b>Note that the data wont be deleted until a call to {@link Safe#save()} is made</b>
+	 * Delete data from the {@link Safe}. <b>Note that the data wont be deleted
+	 * until a call to {@link Safe#save()} is made</b>
 	 * 
 	 * @param path:
 	 *            path of the data to delete
 	 */
-	public void delete(final String path)
-	{
+	public void delete(final String path) {
 
 		final String comparablePath = path.toUpperCase(Environment.getLocale());
 		Block deleted = this.blocks.remove(comparablePath);
@@ -360,8 +358,7 @@ public class Safe implements Closeable
 	 *            destination of extracted block
 	 * @throws Exception
 	 */
-	public void extract(final Block block, final OutputStream outputStream) throws Exception
-	{
+	public void extract(final Block block, final OutputStream outputStream) throws Exception {
 		extract(block.getPath(), outputStream);
 	}
 
@@ -374,15 +371,13 @@ public class Safe implements Closeable
 	 *            destination of extracted block
 	 * @throws Exception
 	 */
-	public void extract(String path, final OutputStream outputStream) throws Exception
-	{
+	public void extract(String path, final OutputStream outputStream) throws Exception {
 		path = path.toUpperCase(Environment.getLocale());
 
-		Block block = this.blocks.get(path);
+		Block block = this.roBlocks.get(path);
 
 		final RandomAccessFile raf;
-		if (block == null)
-		{
+		if (block == null) {
 			block = this.tempBlocks.get(path);
 			raf = this.temp;
 		} else
@@ -405,8 +400,7 @@ public class Safe implements Closeable
 	 * @return
 	 * @throws Exception
 	 */
-	public Map<String, String> readMetadata(final Block block) throws Exception
-	{
+	public Map<String, String> readMetadata(final Block block) throws Exception {
 
 		this.original.seek(block.getMetaOffset());
 		this.cipher.init(Cipher.DECRYPT_MODE, this.keySpec, this.algoSpec);
@@ -420,13 +414,14 @@ public class Safe implements Closeable
 	}
 
 	/**
-	 * Save the modification into the safe file. The current file is renamed and a new file is written. This is to reduce the risk of data loss. This method calls the {@link Safe#close()} before returning
+	 * Save the modification into the safe file. The current file is renamed and a
+	 * new file is written. This is to reduce the risk of data loss. This method
+	 * calls the {@link Safe#close()} before returning
 	 * 
 	 * @return
 	 * @throws Exception
 	 */
-	public Safe save() throws Exception
-	{
+	public Safe save() throws Exception {
 
 		// add non deleted
 		final File newFile = new File(originalFile.getAbsolutePath() + NEW_EXTENSION);
@@ -459,16 +454,14 @@ public class Safe implements Closeable
 		destination.writeLong(total);
 		destination.seek(position);
 
-		for (final Block block : this.blocks.values())
-		{
+		for (final Block block : this.roBlocks.values()) {
 			this.original.seek(block.getOffset());
 			write(this.original, block.getLength(), destination, this.bufferSize);
 
 		}
 
 		final RandomAccessFile temp = getTemp();
-		for (final Block block : this.tempBlocks.values())
-		{
+		for (final Block block : this.tempBlocks.values()) {
 			temp.seek(block.getOffset());
 			write(temp, block.getLength(), destination, this.bufferSize);
 
@@ -478,7 +471,8 @@ public class Safe implements Closeable
 
 		close();
 
-		this.originalFile.renameTo(new File(this.originalFile.getAbsolutePath() + "." + FILE_NAME_FORMATTER.format(LocalDateTime.now())));
+		this.originalFile.renameTo(
+				new File(this.originalFile.getAbsolutePath() + "." + FILE_NAME_FORMATTER.format(LocalDateTime.now())));
 
 		newFile.renameTo(this.originalFile);
 
@@ -487,13 +481,11 @@ public class Safe implements Closeable
 	}
 
 	@Override
-	public void close() throws IOException
-	{
+	public void close() throws IOException {
 		this.original.close();
 
 		final RandomAccessFile temp = getTemp();
-		if (temp != null)
-		{
+		if (temp != null) {
 			temp.close();
 			tempFile.delete();
 		}
@@ -505,8 +497,7 @@ public class Safe implements Closeable
 	 * 
 	 * @return
 	 */
-	public Map<String, String> getPrivateProperties()
-	{
+	public Map<String, String> getPrivateProperties() {
 		return privateProperties;
 	}
 
@@ -515,8 +506,7 @@ public class Safe implements Closeable
 	 * 
 	 * @return
 	 */
-	public Map<String, String> getPublicHeader()
-	{
+	public Map<String, String> getPublicHeader() {
 		return publicHeader;
 	}
 
@@ -525,9 +515,8 @@ public class Safe implements Closeable
 	 * 
 	 * @return
 	 */
-	public Map<String, Block> getBlocks()
-	{
-		return this.blocks;
+	public Map<String, Block> getBlocks() {
+		return this.roBlocks;
 	}
 
 	/**
@@ -537,12 +526,11 @@ public class Safe implements Closeable
 	 *            path of the {@link Block} to retrieve
 	 * @return
 	 */
-	public Block getBlock(final String path)
-	{
+	public Block getBlock(final String path) {
 
 		final String comparablePath = path.toUpperCase(Environment.getLocale());
 
-		return this.blocks.get(comparablePath);
+		return this.roBlocks.get(comparablePath);
 
 	}
 
@@ -553,8 +541,7 @@ public class Safe implements Closeable
 	 *            path of the {@link Block} to retrieve
 	 * @return
 	 */
-	public Block getTempBlock(final String path)
-	{
+	public Block getTempBlock(final String path) {
 		final String comparablePath = path.toUpperCase(Environment.getLocale());
 
 		return this.tempBlocks.get(comparablePath);
@@ -566,8 +553,7 @@ public class Safe implements Closeable
 	 * 
 	 * @return
 	 */
-	public Map<String, Block> getTempBlocks()
-	{
+	public Map<String, Block> getTempBlocks() {
 		return tempBlocks;
 	}
 
@@ -576,8 +562,7 @@ public class Safe implements Closeable
 	 * 
 	 * @return
 	 */
-	public Map<String, Block> getDeletedBlocks()
-	{
+	public Map<String, Block> getDeletedBlocks() {
 		return deletedBlocks;
 	}
 
@@ -586,8 +571,7 @@ public class Safe implements Closeable
 	 * 
 	 * @return
 	 */
-	public Folder getRootFolder()
-	{
+	public Folder getRootFolder() {
 		return root;
 	}
 
@@ -596,8 +580,7 @@ public class Safe implements Closeable
 	 * 
 	 * @return
 	 */
-	public File getTempFile()
-	{
+	public File getTempFile() {
 		return tempFile;
 	}
 
@@ -606,36 +589,32 @@ public class Safe implements Closeable
 	 * 
 	 * @return
 	 */
-	public RandomAccessFile getTemp() throws IOException
-	{
-		if (this.temp == null)
-		{
+	public RandomAccessFile getTemp() throws IOException {
+		if (this.temp == null) {
 
 			if (this.tempFile.exists())
 				throw new IOException("File " + this.tempFile + " already exist");
 
-			this.tempFile.deleteOnExit();
-
 			this.temp = new RandomAccessFile(this.tempFile, "rw");
+			this.tempFile.deleteOnExit();
 
 		}
 
 		return temp;
 	}
 
-	private static long encrypt(final InputStream data, final Cipher cipher, final RandomAccessFile destination, final int bufferSize) throws Exception
-	{
+	private static long encrypt(final InputStream data, final Cipher cipher, final RandomAccessFile destination,
+			final int bufferSize) throws Exception {
 
-		final byte [] buffer = new byte[bufferSize];
-		final byte [] bufferOut = new byte[bufferSize];
+		final byte[] buffer = new byte[bufferSize];
+		final byte[] bufferOut = new byte[bufferSize];
 		// ByteBuffer in;
 
 		// final ByteBuffer out = ByteBuffer.allocateDirect(buffer.length);
 
 		long total = 0;
 		int read;
-		while ((read = data.read(buffer)) > -1)
-		{
+		while ((read = data.read(buffer)) > -1) {
 
 			read = cipher.update(buffer, 0, read, bufferOut);
 			total += read;
@@ -652,18 +631,17 @@ public class Safe implements Closeable
 
 	}
 
-	private static void decrypt(final RandomAccessFile source, final long length, final Cipher cipher, final OutputStream destination, final int bufferSize) throws Exception
-	{
+	private static void decrypt(final RandomAccessFile source, final long length, final Cipher cipher,
+			final OutputStream destination, final int bufferSize) throws Exception {
 
-		final byte [] buffer = new byte[bufferSize];
-		final byte [] bufferOut = new byte[bufferSize];
+		final byte[] buffer = new byte[bufferSize];
+		final byte[] bufferOut = new byte[bufferSize];
 		// ByteBuffer in;
 
 		// final ByteBuffer out = ByteBuffer.allocateDirect(buffer.length);
 		long remaining = length;
 		int read;
-		while (remaining > 0)
-		{
+		while (remaining > 0) {
 			if (remaining < buffer.length)
 				read = source.read(buffer, 0, (int) remaining);
 			else
@@ -681,15 +659,14 @@ public class Safe implements Closeable
 
 	}
 
-	private static long write(final InputStream data, final RandomAccessFile destination, final int bufferSize) throws IOException
-	{
+	private static long write(final InputStream data, final RandomAccessFile destination, final int bufferSize)
+			throws IOException {
 
-		final byte [] buffer = new byte[bufferSize];
+		final byte[] buffer = new byte[bufferSize];
 
 		long total = 0;
 		int read;
-		while ((read = data.read(buffer)) > -1)
-		{
+		while ((read = data.read(buffer)) > -1) {
 			destination.write(buffer, 0, read);
 			total += read;
 		}
@@ -698,15 +675,14 @@ public class Safe implements Closeable
 
 	}
 
-	private static void write(final RandomAccessFile source, final long length, final RandomAccessFile destination, final int bufferSize) throws IOException
-	{
+	private static void write(final RandomAccessFile source, final long length, final RandomAccessFile destination,
+			final int bufferSize) throws IOException {
 
-		final byte [] buffer = new byte[bufferSize];
+		final byte[] buffer = new byte[bufferSize];
 
 		long remaining = length;
 		int read;
-		while (remaining > 0)
-		{
+		while (remaining > 0) {
 			if (remaining < buffer.length)
 				read = source.read(buffer, 0, (int) remaining);
 			else
@@ -729,14 +705,12 @@ public class Safe implements Closeable
 	 * @return
 	 * @throws IOException
 	 */
-	public static Map<String, String> readHeader(final File file, final int bufferSize) throws IOException
-	{
+	public static Map<String, String> readHeader(final File file, final int bufferSize) throws IOException {
 		RandomAccessFile raf = null;
 
-		try
-		{
+		try {
 			raf = new RandomAccessFile(file, "rw");
-			final byte [] buffer = new byte[bufferSize];
+			final byte[] buffer = new byte[bufferSize];
 			final ByteArrayOutputStream baos = new ByteArrayOutputStream(buffer.length);
 
 			long length = raf.readLong();
@@ -756,8 +730,7 @@ public class Safe implements Closeable
 			}
 			final String header = new String(baos.toByteArray(), UTF8);
 			return GSON.fromJson(header, MAP_STRING_STRING_TYPE);
-		} finally
-		{
+		} finally {
 			if (raf != null)
 				raf.close();
 		}
@@ -775,8 +748,8 @@ public class Safe implements Closeable
 	 * @return
 	 * @throws Exception
 	 */
-	public static Safe create(final File file, final byte [] key, final Map<String, String> publicHeader, final Map<String, String> privateProperties, final int bufferSize) throws Exception
-	{
+	public static Safe create(final File file, final byte[] key, final Map<String, String> publicHeader,
+			final Map<String, String> privateProperties, final int bufferSize) throws Exception {
 
 		final String encryption = publicHeader.get(ENCRYPTION_LABEL);
 

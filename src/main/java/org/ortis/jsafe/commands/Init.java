@@ -99,7 +99,9 @@ public class Init implements Callable<Void>
 
 			final byte [] key = Arrays.copyOf(md.digest(md.digest(Utils.passwordToBytes(this.password.toCharArray()))), 128 >> 3);
 
+			log.info("Creating new safe "+file.getAbsolutePath()+"...");
 			Safe.create(file, key, header, properties, this.bufferSize).close();
+			log.info("Done");
 
 		} catch (final Exception e)
 		{
