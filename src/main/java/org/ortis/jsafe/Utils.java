@@ -12,16 +12,23 @@
 package org.ortis.jsafe;
 
 import java.io.File;
-import java.io.FilenameFilter;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
@@ -97,91 +104,99 @@ public class Utils
 		return new Safe(file, cipher, keySpec, iv, 1024);
 	}
 
-	/**
-	 * Parse the system path whith a support for {@link Utils#WILDCARD}
-	 * 
-	 * @param path:
-	 *            system path to parse
-	 * @param destination
-	 * @return
-	 */
-	public static List<java.io.File> parseSystemPath(final String path, final List<java.io.File> destination)
+	private final static String SYSTEM_PATH_DELIMITER_REGEX = Pattern.quote(File.separator) + "|" + Pattern.quote("/") + "|" + Pattern.quote("\\");
+
+	public static List<java.io.File> parseSystemPath(final String query, final List<java.io.File> destination) throws IOException
 	{
+		final String [] tokens = query.split(SYSTEM_PATH_DELIMITER_REGEX);
 
-		final String [] tokens = path.split(SEPARATOR_REGEX);
-		searchSystemPath(null, tokens, 0, destination);
+		Path baseDirectory = null;
 
-		return destination;
-
-	}
-
-	private static int searchSystemPath(java.io.File folder, final String [] tokens, final int index, final List<java.io.File> destination)
-	{
-
-		// for (final String token : tokens)
-		for (int i = index; i < tokens.length; i++)
+		if (tokens[0].equals(".") || tokens[0].equals(".."))
 		{
-			final String token = tokens[i];
-			if (token.contains(Folder.WILDCARD))
-			{
-				if (i == 0)
-				{// search all root drives
-					for (final java.io.File root : java.io.File.listRoots())
-						i = searchSystemPath(root, tokens, i + 1, destination);
+			baseDirectory = new File(tokens[0]).toPath();
+		} else
+		{
 
-				} else
+			final String comparableToken = tokens[0].toUpperCase();
+			for (final File root : File.listRoots())
+				if (root.getAbsolutePath().toUpperCase().equals(comparableToken))
 				{
-
-					final Pattern regex = Pattern.compile(token.toUpperCase(Environment.getLocale()).replace(Folder.WILDCARD, Folder.WILDCARD_REGEX));
-
-					final String [] matches = folder.list(new FilenameFilter()
-					{
-
-						@Override
-						public boolean accept(final java.io.File dir, String name)
-						{
-							name = name.toUpperCase(Environment.getLocale());
-							final Matcher matcher = regex.matcher(name);
-
-							return matcher.matches();
-						}
-					});
-
-					// System.out.println(Arrays.toString(matches));
-					for (final String match : matches)
-					{
-
-						final java.io.File file = new java.io.File(folder, match);
-						if (file.isDirectory())
-							i = searchSystemPath(file, tokens, i + 1, destination);
-						else if (!destination.contains(file))
-							destination.add(file);
-
-					}
+					// perfect match
+					baseDirectory = root.toPath();
+					break;
 
 				}
 
-			} else
-			{
-				final java.io.File file;
-				if (i == 0)
+			if (baseDirectory == null)
+				for (final File root : File.listRoots())
 				{
-					file = new java.io.File(token);
-				} else
-					file = new java.io.File(folder, token);
+					String rootPath = root.getAbsolutePath().toUpperCase();
+					rootPath = rootPath.substring(0, rootPath.length() - 1);
+					if (rootPath.equals(comparableToken))
+					{
+						baseDirectory = root.toPath();
+						break;
+					}
 
-				if (!file.exists())
-					return i;
-				if (file.isDirectory())
-					folder = file;
-				else if (!destination.contains(file))
-					destination.add(file);
-
-			}
-
+				}
 		}
 
-		return tokens.length;
+		if (baseDirectory == null)
+			throw new IOException("Could not locate base directory " + tokens[0]);
+
+		Path path = baseDirectory;
+		for (int i = 1; i < tokens.length; i++)
+		{
+
+			try
+			{
+				path = Paths.get(path.toString(), tokens[i]);
+			} catch (final Exception e)
+			{
+				// here, we have reach a special character and the start point for the search is
+				// in path
+			}
+		}
+
+		final String escapedQuery = query.replace("\\", "\\\\");// PathMatcher does not escape backslash properly. Need to do the escape manually for Windows OS path handling. This might be a bug of Java implentation.
+																// Need to check on Oracle bug report database.
+
+		final PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + escapedQuery);
+		Files.walkFileTree(path, new FileVisitor<Path>()
+		{
+
+			@Override
+			public FileVisitResult postVisitDirectory(final Path dir, final IOException exc) throws IOException
+			{
+
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException
+			{
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException
+			{
+
+				if (pathMatcher.matches(file))
+					destination.add(file.toFile());
+
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFileFailed(final Path file, final IOException exc) throws IOException
+			{
+				return FileVisitResult.CONTINUE;
+			}
+		});
+
+		return destination;
 
 	}
 
@@ -223,8 +238,7 @@ public class Utils
 	public static String formatException(final Throwable t)
 	{
 		if (t == null)
-			return "";
-		// return "[Error while parsingCannot format null Throwable]";
+			return null;
 
 		final Throwable cause = t.getCause();
 		final String msg = cause == null ? null : formatException(cause);
@@ -235,9 +249,6 @@ public class Utils
 	private static String formatException(final Class<?> exceptionClass, final String cause, final String msg, final StackTraceElement [] exceptionStack)
 	{
 		final StringBuilder builder = new StringBuilder();
-
-		// if (exceptionClass != null)
-		// builder.append(exceptionClass.getCanonicalName());
 
 		if (msg != null)
 			builder.append(msg);

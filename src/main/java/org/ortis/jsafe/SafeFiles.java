@@ -194,6 +194,4 @@ public abstract class SafeFiles
 
 	}
 
-	
-
 }

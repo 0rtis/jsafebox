@@ -13,6 +13,7 @@ package org.ortis.jsafe;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -153,21 +154,40 @@ public class SafeTest
 		final byte [] key = Arrays.copyOf(md.digest(md.digest(TestUtils.randomString(random, 12).getBytes())), 128 >> 3);
 
 		final Map<String, String> header = new HashMap<>();
+
+		try
+		{
+			final Safe safe = Safe.create(safeFile, key, header, null, 1024);
+			safe.close();
+			fail("Uncomplete safe's header should not be allowed");
+		} catch (final Exception e)
+		{
+
+		}
+
 		header.put(Safe.ENCRYPTION_LABEL, "AES/CBC/PKCS5Padding");
+		try
+		{
+			final Safe safe = Safe.create(safeFile, key, header, null, 1024);
+			safe.close();
+			fail("Uncomplete safe's header should not be allowed");
+		} catch (final Exception e)
+		{
+
+		}
+
 		header.put(Safe.KEY_ALGO_LABEL, "AES");
 		final SecureRandom random = new SecureRandom();
 		final byte [] iv = new byte[16];
 		random.nextBytes(iv);
 		header.put(Safe.ENCRYPTION_IV_LABEL, Safe.GSON.toJson(iv));
 
-		Safe safe = Safe.create(safeFile, key, header, null, 1024);
-		try
+		try (Safe safe = Safe.create(safeFile, key, header, null, 1024))
 		{
 			final String name = TestUtils.randomString(random, 20);
 			final String path = Folder.ROOT_NAME + Folder.DELIMITER + name;
 			final Map<String, String> metadatas = new HashMap<>();
-			metadatas.put(Block.PATH_LABEL, path);
-			metadatas.put(Block.NAME_LABEL, name);
+
 			metadatas.put(TestUtils.randomString(random, 5), TestUtils.randomString(random, 20));
 			final ByteArrayOutputStream original = new ByteArrayOutputStream();
 			final InputStream is = SafeTest.class.getResourceAsStream("/img/Gentleman.sh-600x600.png");
@@ -176,6 +196,29 @@ public class SafeTest
 			while ((b = is.read()) > -1)
 				original.write(b);
 
+			// add missing path and name
+			try
+			{
+				safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()));
+				fail("Uncomplete matadata's block should not be allowed");
+			} catch (final Exception e)
+			{
+
+			}
+
+			metadatas.put(Block.PATH_LABEL, path);
+
+			// add missing name
+			try
+			{
+				safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()));
+				fail("Uncomplete matadata's block should not be allowed");
+			} catch (final Exception e)
+			{
+
+			}
+
+			metadatas.put(Block.NAME_LABEL, name);
 			safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()));
 
 			// extract
@@ -199,27 +242,35 @@ public class SafeTest
 			assertArrayEquals(original.toByteArray(), extracted.toByteArray());
 
 			// after saved
-			safe = safe.save();
-			final Block savedBlock = safe.getBlock(path);
-			Assert.assertNotNull(savedBlock);
+			try (Safe savedSafe = safe.save())
+			{
+				final Block savedBlock = savedSafe.getBlock(path);
+				Assert.assertNotNull(savedBlock);
 
-			assertEquals(savedBlock.getName(), name);
-			assertEquals(savedBlock.getComparableName(), name.toUpperCase());
+				assertEquals(savedBlock.getName(), name);
+				assertEquals(savedBlock.getComparableName(), name.toUpperCase());
 
-			assertEquals(savedBlock.getPath(), path);
-			assertEquals(savedBlock.getComparablePath(), path.toUpperCase());
+				assertEquals(savedBlock.getPath(), path);
+				assertEquals(savedBlock.getComparablePath(), path.toUpperCase());
 
-			assertEquals(savedBlock.getProperties(), metadatas);
+				assertEquals(savedBlock.getProperties(), metadatas);
+				assertEquals(savedBlock.getProperties(), savedSafe.readMetadata(savedBlock));
 
-			// assertEquals(savedBlock.getDataLength(), original.size());
+				extracted.reset();
+				savedSafe.extract(savedBlock, extracted);
+				assertArrayEquals(original.toByteArray(), extracted.toByteArray());
 
-			extracted.reset();
-			safe.extract(path, extracted);
-			assertArrayEquals(original.toByteArray(), extracted.toByteArray());
+				// add existing
+				try
+				{
+					savedSafe.add(metadatas, new ByteArrayInputStream(original.toByteArray()));
+					fail("Duplicate block should not be allowed");
+				} catch (final Exception e)
+				{
 
-		} finally
-		{
-			safe.close();
+				}
+			}
+
 		}
 
 	}

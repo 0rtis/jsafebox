@@ -76,15 +76,23 @@ public class CommandTest
 	public void test() throws Exception
 	{
 
+		Bootstrap.main(new String[0]);
+
+		/**
+		 * Init
+		 */
 		final File safeFile = new File(folder, TestUtils.randomString(random, 10) + ".safe");
 		if (safeFile.exists())
 			throw new Exception("Safe file " + safeFile.getAbsolutePath() + " already exists");
 
-		String [] args = new String[] { "init", "--password", "mypassword", safeFile.getAbsolutePath(), "--header", "headerKey", "headerValue", "--property", "propertyKey", "propertyValue" };
+		String [] args = new String[] { "init", "--password", "mypassword", safeFile.getAbsolutePath(), "--header", "headerKey", "headerValue", "--property", "safePropertyKey", "safePropertyValue" };
 		CommandLine.call(new Bootstrap(), System.err, args);
 
 		assertTrue(safeFile.exists());
 
+		/**
+		 * Add
+		 */
 		final InputStream is = SafeTest.class.getResourceAsStream("/img/Gentleman.sh-600x600.png");
 
 		if (is == null)
@@ -109,15 +117,36 @@ public class CommandTest
 			throw new Exception("System file " + systemFile.getAbsolutePath() + " not found");
 
 		final String safeFolderPath = Folder.ROOT_NAME + Folder.DELIMITER + "folder";
-		args = new String[] { "add", "--password", "mypassword", safeFile.getAbsolutePath(), "-m", "-pp", "propertyKey", "propertyValue", systemFile.getAbsolutePath(), safeFolderPath };
+		args = new String[] { "add", "--password", "mypassword", safeFile.getAbsolutePath(), "-m", "-pp", "filePropertyKey", "filePropertyValue", systemFile.getAbsolutePath(), safeFolderPath };
 		Bootstrap.main(args);
 
+		/**
+		 * List
+		 */
 		args = new String[] { "ls", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath };
 		CommandLine.call(new Bootstrap(), System.err, args);
 
+		args = new String[] { "ls", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName() };
+		CommandLine.call(new Bootstrap(), System.err, args);
+
+		/**
+		 * Cat
+		 */
+		// cat folder
+		args = new String[] { "cat", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath };
+		Bootstrap.main(args);
+
+		// cat non existent file
+		args = new String[] { "cat", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName() + "404" };
+		Bootstrap.main(args);
+
+		// cat the file
 		args = new String[] { "cat", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName() };
 		Bootstrap.main(args);
 
+		/**
+		 * Extract
+		 */
 		final File extractTargetSystemFolder = new File(folder, TestUtils.randomString(random, 10) + ".extracted");
 
 		if (!extractTargetSystemFolder.exists())
@@ -135,13 +164,61 @@ public class CommandTest
 		if (extractTargetSystemFile.exists())
 			throw new Exception("Extract target file " + safeFile.getAbsolutePath() + " already exists");
 
+		// extract to non existent directory
+		args = new String[] { "extract", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName(),
+				extractTargetSystemFolder.getAbsolutePath() + "404" };
+		Bootstrap.main(args);
+
+		assertTrue(!extractTargetSystemFile.exists());
+
+		// extract to file path
+		args = new String[] { "extract", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName(), systemFile.getAbsolutePath() };
+		Bootstrap.main(args);
+
+		assertTrue(!extractTargetSystemFile.exists());
+
 		args = new String[] { "extract", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName(),
 				extractTargetSystemFolder.getAbsolutePath() };
 		Bootstrap.main(args);
 
 		assertTrue(extractTargetSystemFile.exists());
 
+		// check if file are identical
 		assertArrayEquals(Files.readAllBytes(systemFile.toPath()), Files.readAllBytes(extractTargetSystemFile.toPath()));
+
+		if (!extractTargetSystemFile.delete())
+			throw new Exception("Could not delete extracted file " + extractTargetSystemFile.getAbsolutePath());
+
+		assertTrue(!extractTargetSystemFile.exists());
+
+		// extract again to check multiple extract works fine
+		args = new String[] { "extract", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName(),
+				extractTargetSystemFolder.getAbsolutePath() };
+		Bootstrap.main(args);
+
+		assertTrue(extractTargetSystemFile.exists());
+
+		if (!extractTargetSystemFile.delete())
+			throw new Exception("Could not delete extracted file " + extractTargetSystemFile.getAbsolutePath());
+
+		assertTrue(!extractTargetSystemFile.exists());
+
+		/**
+		 * Delete
+		 */
+		// delete non existent file
+		args = new String[] { "rm", "--password", "mypassword", "-f", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName() + "404",
+				extractTargetSystemFolder.getAbsolutePath() };
+		Bootstrap.main(args);
+
+		// delete file from safe
+		args = new String[] { "rm", "--password", "mypassword", "-f", safeFile.getAbsolutePath(), safeFolderPath, extractTargetSystemFolder.getAbsolutePath() };
+		Bootstrap.main(args);
+
+		// extract deleted file
+		args = new String[] { "extract", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName(),
+				extractTargetSystemFolder.getAbsolutePath() };
+		Bootstrap.main(args);
 
 	}
 

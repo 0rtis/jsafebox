@@ -54,7 +54,7 @@ public class Extract implements Callable<Void>
 	private String safeFile;
 
 	@Parameters(index = "1", arity = "2...*", description = "Paths of safe's source files followed by the system's destination folder")
-	private String [] paths;
+	private String[] paths;
 
 	@Override
 	public Void call() throws Exception
@@ -93,7 +93,7 @@ public class Extract implements Callable<Void>
 				{
 					if (!safeFile.isBlock())
 					{
-						log.warning("Skipping extracation of " + safeFile + " (not a block)");
+						log.warning("Skipping extraction of " + safeFile + " (not a block)");
 						continue;
 					}
 					List<SafeFile> safeFiles = names.get(safeFile.getComparableName());
@@ -107,6 +107,12 @@ public class Extract implements Callable<Void>
 
 				}
 
+				if (names.isEmpty())
+				{
+					log.info("No file found");
+					return null;
+				}
+
 				for (final Map.Entry<String, List<SafeFile>> safeFiles : names.entrySet())
 					if (safeFiles.getValue().size() > 1)
 					{
@@ -114,7 +120,8 @@ public class Extract implements Callable<Void>
 						for (final SafeFile safeFile : safeFiles.getValue())
 						{
 
-							final File systemFile = new File(destinationFolder, safeFile.getName() + "_" + Utils.sanitize(safeFile.getPath(), Folder.DELIMITER, '-'));
+							final File systemFile = new File(destinationFolder, safeFile.getName() + "_"
+									+ Utils.sanitize(safeFile.getPath(), Folder.DELIMITER, '-'));
 							log.info("Extracting " + safeFile + " to " + systemFile);
 							final FileOutputStream fos = new FileOutputStream(systemFile);
 							safe.extract(safeFile.getPath(), fos);
