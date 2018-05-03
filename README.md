@@ -18,7 +18,7 @@
    
 ```
 
-# JSafe - A standalone, cross-plateform virtual safe
+# JSafe - A lightweight, portable and cross-plateform virtual safe
 
 JSafe encrypt your file using [AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) encryption. It can be used as command line tool or with a _file explorer_ like interface.
 
@@ -33,7 +33,7 @@ JSafe encrypt your file using [AES](https://en.wikipedia.org/wiki/Advanced_Encry
 
 ### Why JSafe ?
 With the rise of online banking, cryptocurrencies and other digital transformation, it has become mandatory to backup sensitive files.
-Those file need to be easily accesible, securely stored and encrypted. But lightweight, standalone, cross platform vault software are surprisingly hard to come by. Password protected archive works fine but they let room for file leakage as there is no convenient way of exploring the vault unless extracting the whole content.
+Those file need to be easily accesible, securely stored and encrypted. But lightweight, portable, cross platform vault software are surprisingly hard to come by. Password protected archive works fine but they let room for file leakage as there is no convenient way of exploring the vault unless extracting the whole content.
 
 
 
@@ -71,7 +71,7 @@ You can download the lastest version of JSafe [here]()
 
 
 ### Install
-JSafe is a standalone application there is not installation required. Just run the JAR a Command Line Interpreter or double click it to run the GUI. 
+JSafe is a portable application. No installation is required. Just run the JAR in a Command Line Interpreter or double click it to run the GUI. 
 
 
 *JSafe is using the mighty tiny [picocli](https://github.com/remkop/picocli)*

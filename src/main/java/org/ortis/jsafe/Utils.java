@@ -13,7 +13,6 @@ package org.ortis.jsafe;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -68,7 +67,7 @@ public class Utils
 		final File file = new File(safeFilePath);
 
 		if (!file.exists())
-			throw new IOException("File " + file + " already exist");
+			throw new IOException("Safe file " + file + " doest not exist");
 
 		final Map<String, String> header = Safe.readHeader(file, bufferSize);
 
