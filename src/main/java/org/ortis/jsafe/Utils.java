@@ -215,6 +215,8 @@ public class Utils
 			return "image/jpg";
 		else if (name.endsWith(".PNG"))
 			return "image/png";
+		else if (name.endsWith(".BM") || name.endsWith(".BMP"))
+			return "image/bmp";
 		else if (name.endsWith(".TXT"))
 			return "text/plain";
 		else if (name.endsWith(".PDF"))
@@ -225,6 +227,10 @@ public class Utils
 			return "video/mpeg";
 		else if (name.endsWith(".MP4"))
 			return "video/mp4";
+		else if (name.endsWith(".MKV"))
+			return "video/x-matroska";
+		else if (name.endsWith(".MP3"))
+			return "audio/mpeg";
 		else
 			return "application/octet-stream";
 	}

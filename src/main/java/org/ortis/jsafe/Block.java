@@ -32,8 +32,10 @@ public class Block implements SafeFile
 
 	private final Map<String, String> properties;
 
+	private final Folder parent;
+
 	public Block(final String path, final Map<String, String> properties, final long offset, final long length, final long metaOffset, final long metaLength, final long dataOffset,
-			final long dataLength)
+			final long dataLength, final Folder parent)
 	{
 		this.path = path;
 		this.comparablePath = path.toUpperCase(Environment.getLocale());
@@ -57,6 +59,7 @@ public class Block implements SafeFile
 
 		this.properties = Collections.unmodifiableMap(props);
 
+		this.parent = parent;
 	}
 
 	@Override
@@ -128,6 +131,12 @@ public class Block implements SafeFile
 	public long getDataLength()
 	{
 		return dataLength;
+	}
+
+	@Override
+	public Folder getParent()
+	{
+		return this.parent;
 	}
 
 	@Override

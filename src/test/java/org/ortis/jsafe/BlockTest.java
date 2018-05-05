@@ -81,7 +81,7 @@ public class BlockTest
 		final long offset = metaOffset;
 		final long length = metaLength + dataLength;
 
-		final Block block = new Block(path, properties, offset, length, metaOffset, metaLength, dataOffset, dataLength);
+		final Block block = new Block(path, properties, offset, length, metaOffset, metaLength, dataOffset, dataLength, null);
 
 		assertTrue(block.isBlock());
 		assertTrue(!block.isFolder());
@@ -106,16 +106,16 @@ public class BlockTest
 		for (final String key : properties.keySet())
 			assertEquals(block.getProperties().get(key), properties.get(key));
 
-		final Block clone = new Block(path, properties, offset, length, metaOffset, metaLength, dataOffset, dataLength);
+		final Block clone = new Block(path, properties, offset, length, metaOffset, metaLength, dataOffset, dataLength, null);
 		assertTrue(block.equals(clone));
 
-		final Block block2 = new Block("a" + Folder.DELIMITER + "different" + Folder.DELIMITER + "path", properties, offset, length, metaOffset, metaLength, dataOffset, dataLength);
+		final Block block2 = new Block("a" + Folder.DELIMITER + "different" + Folder.DELIMITER + "path", properties, offset, length, metaOffset, metaLength, dataOffset, dataLength, null);
 		assertTrue(!block.equals(block2));
 
 		try
 		{
 
-			new Block("a", properties, offset, length, metaOffset, metaLength, dataOffset, dataLength);
+			new Block("a", properties, offset, length, metaOffset, metaLength, dataOffset, dataLength, null);
 			fail("Invalid block path should throw exception");
 		} catch (final Exception e)
 		{

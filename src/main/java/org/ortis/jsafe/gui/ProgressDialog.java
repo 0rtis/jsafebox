@@ -1,0 +1,250 @@
+
+package org.ortis.jsafe.gui;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.util.List;
+
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+import javax.swing.WindowConstants;
+import javax.swing.border.EmptyBorder;
+
+import org.ortis.jsafe.gui.tasks.GuiTask;
+import org.ortis.jsafe.task.Task;
+
+public class ProgressDialog extends JDialog implements WindowListener
+{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private final SafeExplorer safeExplorer;
+	// private final JTextPane textPane;
+	private final JTextArea textPane;
+
+	private final JProgressBar progressBar;
+
+	private Task task;
+
+	public ProgressDialog(final SafeExplorer safeExplorer)
+	{
+
+		super(safeExplorer.getExplorerFrame(), true);
+		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		addWindowListener(this);
+
+		this.safeExplorer = safeExplorer;
+		getContentPane().setLayout(new BorderLayout(0, 0));
+
+		final JPanel infoPanel = new JPanel();
+		infoPanel.setLayout(new BorderLayout(0, 0));
+		/*
+				textPane = new JTextPane();
+				textPane.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+				textPane.setOpaque(false);
+		
+				textPane.setBorder(new EmptyBorder(0, 20, 0, 20));
+				textPane.setFocusable(false);
+				textPane.setEditable(false);
+				StyledDocument doc = textPane.getStyledDocument();
+				SimpleAttributeSet center = new SimpleAttributeSet();
+				StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+				doc.setParagraphAttributes(0, doc.getLength(), center, false);
+		*/
+
+		textPane = new JTextArea();
+		textPane.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+		textPane.setOpaque(false);
+
+		textPane.setBorder(new EmptyBorder(0, 20, 0, 20));
+		textPane.setFocusable(false);
+		textPane.setEditable(false);
+		textPane.setLineWrap(true);
+		textPane.setWrapStyleWord(true);
+
+		// getContentPane().add(textArea, BorderLayout.CENTER);
+		infoPanel.add(textPane, BorderLayout.CENTER);
+
+		/*
+				sourceLabel = new JLabel("Initializing transfert...");
+				sourceLabel.setBorder(new EmptyBorder(0, 20, 0, 20));
+				sourceLabel.setAlignmentY(Component.TOP_ALIGNMENT);
+				sourceLabel.setHorizontalAlignment(SwingConstants.CENTER);
+				sourceLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+				sourceLabel.setOpaque(true);
+				infoPanel.add(sourceLabel, BorderLayout.CENTER);
+		
+				destinationLabel = new JLabel("");
+				destinationLabel.setBorder(new EmptyBorder(0, 20, 0, 20));
+				destinationLabel.setAlignmentY(Component.TOP_ALIGNMENT);
+				destinationLabel.setHorizontalAlignment(SwingConstants.CENTER);
+				destinationLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+				destinationLabel.setOpaque(true);
+				infoPanel.add(destinationLabel, BorderLayout.SOUTH);
+		*/
+		getContentPane().add(infoPanel, BorderLayout.CENTER);
+
+		this.progressBar = new JProgressBar();
+		this.progressBar.setStringPainted(true);
+		this.progressBar.setMinimumSize(new Dimension(this.getMinimumSize().width, this.getMinimumSize().height / 4));
+		this.progressBar.setSize(new Dimension(this.getSize().width, this.getSize().height / 4));
+		getContentPane().add(progressBar, BorderLayout.SOUTH);
+
+		final JFrame parentFrame = safeExplorer.getExplorerFrame();
+		setPreferredSize(new Dimension(400, 150));
+		setMaximumSize(new Dimension(parentFrame.getWidth() / 2, parentFrame.getHeight() / 2));
+		setMinimumSize(new Dimension(parentFrame.getWidth() / 5, parentFrame.getHeight() / 5));
+		setSize(getPreferredSize());
+		setLocationRelativeTo(parentFrame);
+	}
+
+	public void monitor(final GuiTask task, final String defaultMessage)
+	{
+		if (defaultMessage != null)
+			SwingUtilities.invokeLater(new Runnable()
+			{
+
+				@Override
+				public void run()
+				{
+
+					textPane.setText(defaultMessage);
+				}
+			});
+
+		this.task = task;
+		new SwingWorker<Void, Task>()
+		{
+
+			@Override
+			protected Void doInBackground() throws Exception
+			{
+				task.start();
+				while (!task.isTerminated())
+				{
+					task.awaitUpdate();
+					publish(task);
+				}
+
+				return null;
+			}
+
+			@Override
+			protected void process(List<Task> chunks)
+			{
+
+				for (final Task taskMonitor : chunks)
+				{
+
+					if (taskMonitor.isCancelRequested())
+						textPane.setText("Cancelling...");
+					else
+					{
+						final String msg = taskMonitor.getMessage();
+						if (msg != null)
+							textPane.setText(msg);
+						final int progress = (int) (taskMonitor.getProgress() * 100);
+						progressBar.setValue(progress);
+					}
+					break;
+				}
+
+			}
+
+			protected void done()
+			{
+				dispose();
+
+				if (task.getException() != null)
+					SwingUtilities.invokeLater(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							new ErrorDialog(safeExplorer, null, task.getException()).setVisible(true);
+						}
+					});
+
+			}
+
+		}.execute();
+
+		this.setVisible(true);
+
+	}
+
+	@Override
+	public void windowOpened(WindowEvent e)
+	{
+
+	}
+
+	@Override
+	public void windowClosing(final WindowEvent event)
+	{
+
+		new SwingWorker<Void, Void>()
+		{
+
+			protected Void doInBackground() throws Exception
+			{
+
+				if (task != null)
+				{
+					task.cancel();
+
+					try
+					{
+						task.awaitTermination();
+					} catch (final Exception e)
+					{
+						ProgressDialog.this.dispose();
+						new ErrorDialog(safeExplorer, "Error while waiting cancelled task", e).setVisible(true);
+					}
+
+					ProgressDialog.this.dispose();
+				}
+
+				return null;
+			};
+
+		}.execute();
+
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e)
+	{
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e)
+	{
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e)
+	{
+	}
+
+	@Override
+	public void windowActivated(WindowEvent e)
+	{
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent e)
+	{
+	}
+
+}

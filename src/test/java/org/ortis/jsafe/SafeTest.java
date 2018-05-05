@@ -199,7 +199,7 @@ public class SafeTest
 			// add missing path and name
 			try
 			{
-				safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()));
+				safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()), null);
 				fail("Uncomplete matadata's block should not be allowed");
 			} catch (final Exception e)
 			{
@@ -211,7 +211,7 @@ public class SafeTest
 			// add missing name
 			try
 			{
-				safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()));
+				safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()), null);
 				fail("Uncomplete matadata's block should not be allowed");
 			} catch (final Exception e)
 			{
@@ -219,7 +219,7 @@ public class SafeTest
 			}
 
 			metadatas.put(Block.NAME_LABEL, name);
-			safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()));
+			safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()), null);
 
 			// extract
 
@@ -263,7 +263,7 @@ public class SafeTest
 				// add existing
 				try
 				{
-					savedSafe.add(metadatas, new ByteArrayInputStream(original.toByteArray()));
+					savedSafe.add(metadatas, new ByteArrayInputStream(original.toByteArray()), null);
 					fail("Duplicate block should not be allowed");
 				} catch (final Exception e)
 				{

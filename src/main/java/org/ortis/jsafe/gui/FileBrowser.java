@@ -2,34 +2,54 @@
 package org.ortis.jsafe.gui;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Dimension;
-import java.awt.Container;
-import java.awt.Component;
-import java.awt.Graphics;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.Image;
-import java.awt.event.*;
-import java.awt.image.*;
-
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
-import javax.swing.tree.*;
-import javax.swing.table.*;
-import javax.swing.filechooser.FileSystemView;
-
-import javax.imageio.ImageIO;
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.ArrayList;
 
-import java.io.*;
-import java.nio.channels.FileChannel;
-
-import java.net.URL;
+import javax.imageio.ImageIO;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
+import javax.swing.JTree;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.filechooser.FileSystemView;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 /**
  * A basic File Browser. Requires 1.6+ for the Desktop & SwingWorker classes, amongst other minor things.
@@ -146,7 +166,8 @@ public class FileBrowser
 				{
 					DefaultMutableTreeNode node = (DefaultMutableTreeNode) tse.getPath().getLastPathComponent();
 					showChildren(node);
-					setFileDetails((File) node.getUserObject());
+					//setFileDetails((File) node.getUserObject());
+					System.out.println();
 				}
 			};
 
@@ -439,9 +460,9 @@ public class FileBrowser
 	 */
 	private void showChildren(final DefaultMutableTreeNode node)
 	{
-		tree.setEnabled(false);
+	//	tree.setEnabled(false);
 		progressBar.setVisible(true);
-		progressBar.setIndeterminate(true);
+		//progressBar.setIndeterminate(true);
 
 		SwingWorker<Void, File> worker = new SwingWorker<Void, File>()
 		{
@@ -452,7 +473,7 @@ public class FileBrowser
 				if (file.isDirectory())
 				{
 					File [] files = fileSystemView.getFiles(file, true); // !!
-					if (node.isLeaf())
+				//	if (node.isLeaf())
 					{
 						for (File child : files)
 						{
@@ -462,7 +483,7 @@ public class FileBrowser
 							}
 						}
 					}
-					setTableData(files);
+					//setTableData(files);
 				}
 				return null;
 			}
@@ -479,9 +500,9 @@ public class FileBrowser
 			@Override
 			protected void done()
 			{
-				progressBar.setIndeterminate(false);
+				//progressBar.setIndeterminate(false);
 				progressBar.setVisible(false);
-				tree.setEnabled(true);
+			//	tree.setEnabled(true);
 			}
 		};
 		worker.execute();

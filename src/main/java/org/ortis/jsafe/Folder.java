@@ -13,6 +13,7 @@ package org.ortis.jsafe;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -23,6 +24,23 @@ import java.util.List;
  */
 public class Folder implements SafeFile
 {
+	
+	private final Comparator<SafeFile> SAFE_FILE_COMPARATOR = new Comparator<SafeFile>()
+	{
+		
+		@Override
+		public int compare(final SafeFile sf1, final SafeFile sf2)
+		{
+			
+			if(sf1.isFolder() && !sf2.isFolder())
+				return -1;
+			
+			if(sf2.isFolder() && !sf1.isFolder())
+				return 1;
+			
+			return sf1.getName().compareTo(sf2.getName());
+		}
+	};
 
 	public final static String ROOT_NAME = "";
 	public final static char DELIMITER = '/';
@@ -101,7 +119,9 @@ public class Folder implements SafeFile
 				throw new Exception("Block " + block + " already exist");
 
 		this.blocks.add(block);
+		
 		this.files.add(block);
+		this.files.sort(SAFE_FILE_COMPARATOR);
 	}
 
 	/**
@@ -197,6 +217,7 @@ public class Folder implements SafeFile
 		final Folder folder = new Folder(this, name);
 		this.folders.add(folder);
 		this.files.add(folder);
+		this.files.sort(SAFE_FILE_COMPARATOR);
 		return folder;
 	}
 

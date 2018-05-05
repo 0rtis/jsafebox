@@ -167,7 +167,7 @@ public class FolderTest
 
 		final Map<String, String> properties = new HashMap<>();
 
-		Block block = new Block(path, properties, 0, 0, 0, 0, 0, 0);
+		Block block = new Block(path, properties, 0, 0, 0, 0, 0, 0, root);
 
 		root.add(block);
 
@@ -188,7 +188,7 @@ public class FolderTest
 		{
 			path = rootName + Folder.DELIMITER + "non existant folder" + Folder.DELIMITER + "block name";
 
-			block = new Block(path, properties, 0, 0, 0, 0, 0, 0);
+			block = new Block(path, properties, 0, 0, 0, 0, 0, 0, root);
 
 			root.add(block);
 

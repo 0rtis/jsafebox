@@ -26,4 +26,5 @@ public interface SafeFile
 
 	boolean isFolder();
 
+	Folder getParent();
 }

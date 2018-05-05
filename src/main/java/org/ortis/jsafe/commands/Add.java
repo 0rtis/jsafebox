@@ -15,9 +15,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Logger;
 
 import org.ortis.jsafe.Block;
@@ -27,6 +29,7 @@ import org.ortis.jsafe.Safe;
 import org.ortis.jsafe.SafeFile;
 import org.ortis.jsafe.SafeFiles;
 import org.ortis.jsafe.Utils;
+import org.ortis.jsafe.task.TaskProbe;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -89,7 +92,7 @@ public class Add implements Callable<Void>
 				{
 					final String key = this.properties[i];
 					final String value = this.properties[i + 1];
-					log.info("Adding property entry '" + key + "' -> '" + value+"'");
+					log.info("Adding property entry '" + key + "' -> '" + value + "'");
 					properties.put(key, value);
 				}
 
@@ -111,20 +114,13 @@ public class Add implements Callable<Void>
 			for (final File source : sources)
 			{
 				final Map<String, String> props = new TreeMap<>(properties);
-
-				props.put(Block.PATH_LABEL, Utils.sanitize(folder.getPath() + Folder.DELIMITER + source.getName(), Folder.DELIMITER, Environment.getSubstitute()));
-
-				props.put(Block.NAME_LABEL, source.getName());
-				props.put("content-type", Utils.getMIMEType(source));
 				log.info("Encrypting " + source + " to " + props.get(Block.PATH_LABEL));
-				
-				final FileInputStream fis = new FileInputStream(source);
-				safe.add(props, fis);
-				fis.close();
+				add(source, props, safe, folder, null);
 			}
 
 			log.info("Writting safe file...");
-			safe.save().close();;
+			safe.save().close();
+			;
 			log.info("Done");
 
 		} catch (final Exception e)
@@ -135,4 +131,19 @@ public class Add implements Callable<Void>
 		return null;
 	}
 
+	public static void add(final File source, final Map<String, String> properties, final Safe safe, final Folder folder, final TaskProbe probe) throws CancellationException, Exception
+	{
+
+		final Map<String, String> props = properties == null ? new LinkedHashMap<>() : new LinkedHashMap<>(properties);
+
+		props.put(Block.PATH_LABEL, Utils.sanitize(folder.getPath() + Folder.DELIMITER + source.getName(), Folder.DELIMITER, Environment.getSubstitute()));
+
+		props.put(Block.NAME_LABEL, source.getName());
+		props.put("content-type", Utils.getMIMEType(source));
+
+		final FileInputStream fis = new FileInputStream(source);
+		safe.add(props, fis, probe);
+		fis.close();
+
+	}
 }
