@@ -1,9 +1,24 @@
-
+/*******************************************************************************
+ * Copyright 2018 Ortis (cao.ortis.org@gmail.com)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.  You may obtain a copy
+ * of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
 package org.ortis.jsafe.gui.tree;
 
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.event.InputEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -62,7 +77,7 @@ public class FileTransferHandler extends TransferHandler
 				protected Void doInBackground() throws Exception
 				{
 					final SafeTreeModel model = (SafeTreeModel) tree.getModel();
-					final ProgressDialog pd = new ProgressDialog(model.getSafeExplorer());
+					final ProgressDialog pd = new ProgressDialog(model.getSafeExplorer().getExplorerFrame());
 
 					final Folder destination;
 					if (node.getSafeFile().isFolder())
@@ -74,9 +89,9 @@ public class FileTransferHandler extends TransferHandler
 					final AddTask addTask = new AddTask(model.getSafeExplorer(), sources, destination);
 					pd.monitor(addTask, "Initializing transfert...");
 
-					if (addTask.isCompleted() && model.getSafeExplorer().getAutoSave().isSelected())
+					if (addTask.isCompleted() && model.getSafeExplorer().getConfiguration().getAutoSave())
 					{
-						pd.setTitle("Saving...");
+						pd.setTitle("Saving safe...");
 						final SaveTask saveTask = new SaveTask(model.getSafeExplorer());
 						pd.monitor(saveTask, "Saving safe...");
 					}
@@ -85,7 +100,7 @@ public class FileTransferHandler extends TransferHandler
 
 				}
 			}.execute();
-			;
+			
 
 			return true;
 		} catch (Exception ioe)
@@ -162,7 +177,7 @@ public class FileTransferHandler extends TransferHandler
 	protected Transferable createTransferable(final JComponent c)
 	{
 
-		System.out.println("Create tranferable");
+//		System.out.println("Create tranferable");
 		TreePath p = ((JTree) c).getSelectionPath();
 		DefaultMutableTreeNode n = (DefaultMutableTreeNode) p.getLastPathComponent();
 
@@ -178,7 +193,7 @@ public class FileTransferHandler extends TransferHandler
 				@Override
 				public Object getTransferData(DataFlavor flavor)
 				{
-					return Arrays.asList(file);
+					return  Arrays.asList(file);
 				}
 
 				@Override
@@ -203,9 +218,16 @@ public class FileTransferHandler extends TransferHandler
 	}
 
 	@Override
+	public void exportAsDrag(JComponent comp, InputEvent e, int action)
+	{
+		
+		super.exportAsDrag(comp, e, action);
+	}
+
+	@Override
 	protected void exportDone(JComponent c, Transferable d, int a)
 	{
-		System.out.println("Export done");
+		
 	}
 
 }

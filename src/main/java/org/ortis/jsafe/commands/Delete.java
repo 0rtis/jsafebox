@@ -13,6 +13,7 @@ package org.ortis.jsafe.commands;
 
 import java.util.LinkedHashSet;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Logger;
 
 import org.ortis.jsafe.Environment;
@@ -21,6 +22,10 @@ import org.ortis.jsafe.Safe;
 import org.ortis.jsafe.SafeFile;
 import org.ortis.jsafe.SafeFiles;
 import org.ortis.jsafe.Utils;
+import org.ortis.jsafe.task.Task;
+import org.ortis.jsafe.task.TaskListener;
+import org.ortis.jsafe.task.TaskProbe;
+import org.ortis.jsafe.task.TaskProbeAdapter;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -49,7 +54,7 @@ public class Delete implements Callable<Void>
 	private String safeFile;
 
 	@Parameters(index = "1", arity = "1...*", description = "Safe's paths to delete")
-	private String[] paths;
+	private String [] paths;
 
 	@Override
 	public Void call() throws Exception
@@ -74,11 +79,48 @@ public class Delete implements Callable<Void>
 				return null;
 			}
 
+			final TaskProbeAdapter adapter = new TaskProbeAdapter();
+
+			adapter.addListener(new TaskListener()
+			{
+
+				@Override
+				public void onTerminated(Task task)
+				{
+				}
+
+				@Override
+				public void onProgress(Task task, double progress)
+				{
+				}
+
+				@Override
+				public void onMessage(final Task task, final String message)
+				{
+					log.info(message);
+				}
+
+				@Override
+				public void onException(Task task, Exception exception)
+				{
+				}
+
+				@Override
+				public void onCancelled(Task task)
+				{
+				}
+
+				@Override
+				public void onCancellationRequested(Task task)
+				{
+				}
+			});
+
 			for (final SafeFile safeFile : safeFiles)
 			{
 
 				if (safeFile.isBlock())
-					delete(safe, safeFile, log);
+					delete(safe, safeFile, adapter);
 				else if (safeFile.isFolder())
 				{
 					final Folder folder = (Folder) safeFile;
@@ -86,7 +128,7 @@ public class Delete implements Callable<Void>
 					if (!folder.listFiles().isEmpty())
 					{
 						if (this.force)
-							delete(safe, safeFile, log);
+							delete(safe, safeFile, adapter);
 						else
 							log.severe("Cannot delete non empty folder '" + folder + "'");
 					}
@@ -106,18 +148,29 @@ public class Delete implements Callable<Void>
 		return null;
 	}
 
-	private void delete(final Safe safe, final SafeFile safeFile, final Logger log)
+	public static void delete(final Safe safe, final SafeFile safeFile, TaskProbe probe) throws Exception
 	{
+
+		if (probe == null)
+			probe = TaskProbe.DULL_PROBE;
+
+		if (probe.isCancelRequested())
+			throw new CancellationException();
+
+		probe.fireProgress(Double.NaN);
+
 		if (safeFile.isBlock())
 		{
-			log.info("Deleting block " + safeFile);
+			probe.fireMessage("Deleting block " + safeFile);
 			safe.delete(safeFile.getPath());
 		} else
 		{
 
 			final Folder folder = (Folder) safeFile;
 			for (final SafeFile sf : folder.listFiles())
-				delete(safe, sf, log);
+				delete(safe, sf, probe);
+
+		//	folder.getParent().rm(folder.getName());
 		}
 
 	}

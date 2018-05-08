@@ -60,41 +60,6 @@ public class Safe implements Closeable
 	{
 	}.getType();
 
-	private final static TaskProbe EMPTY_PROBE = new TaskProbe()
-	{
-
-		@Override
-		public boolean isCancelRequested()
-		{
-			return false;
-		}
-
-		@Override
-		public void fireException(final Exception exception)
-		{
-		}
-
-		@Override
-		public void fireTerminated()
-		{
-		}
-
-		@Override
-		public void fireProgress(final double progress)
-		{
-		}
-
-		@Override
-		public void fireMessage(final String message)
-		{
-		}
-
-		@Override
-		public void fireCanceled()
-		{
-		}
-	};
-
 	public final static String ENCRYPTION_LABEL = "encryption";
 	public final static String ENCRYPTION_IV_LABEL = "iv";
 	public final static String KEY_ALGO_LABEL = "algo";
@@ -142,7 +107,7 @@ public class Safe implements Closeable
 	public Safe(final File file, final Cipher cipher, final SecretKeySpec keySpec, final AlgorithmParameterSpec algoSpec, final int bufferSize) throws Exception
 	{
 
-		this.originalFile = file;
+		this.originalFile = file.getAbsoluteFile();
 		this.cipher = cipher;
 
 		this.keySpec = keySpec;
@@ -256,9 +221,9 @@ public class Safe implements Closeable
 			final long dataLength = this.original.readLong();
 			final long dataOffset = this.original.getFilePointer();
 
-			this.root.mkdir(path, true);
-
 			final String [] tokens = path.split(Folder.REGEX_DELIMITER);
+
+			this.root.mkdir(tokens, 1, true);
 
 			final org.ortis.jsafe.SafeFile dstFile;
 
@@ -295,10 +260,10 @@ public class Safe implements Closeable
 	 * @return
 	 * @throws Exception
 	 */
-	public Block add(final Map<String, String> properties, final InputStream data,  TaskProbe probe) throws Exception
+	public Block add(final Map<String, String> properties, final InputStream data, TaskProbe probe) throws Exception
 	{
-		if(probe == null)
-			probe = EMPTY_PROBE;
+		if (probe == null)
+			probe = TaskProbe.DULL_PROBE;
 
 		try
 		{
@@ -307,7 +272,7 @@ public class Safe implements Closeable
 			if (path == null)
 				throw new IllegalArgumentException("Property " + Block.PATH_LABEL + " is missing");
 
-			org.ortis.jsafe.SafeFile destinationFile = this.root.get(path);
+			org.ortis.jsafe.SafeFile destinationFile = SafeFiles.get(path, this.root, this.root);
 
 			if (destinationFile != null)
 				throw new Exception("Block file " + destinationFile + " already exist");
@@ -442,6 +407,7 @@ public class Safe implements Closeable
 	 */
 	public void extract(String path, final OutputStream outputStream) throws Exception
 	{
+
 		path = path.toUpperCase(Environment.getLocale());
 
 		Block block = this.roBlocks.get(path);
@@ -502,12 +468,14 @@ public class Safe implements Closeable
 	 */
 	public Safe save() throws Exception
 	{
-		return save(EMPTY_PROBE);
+		return save(null);
 	}
 
-	public Safe save(final TaskProbe probe) throws Exception
+	public Safe save(TaskProbe probe) throws Exception
 	{
 
+		if (probe == null)
+			probe = TaskProbe.DULL_PROBE;
 		try
 		{
 			double progress = 0;
@@ -729,6 +697,11 @@ public class Safe implements Closeable
 	{
 		return root;
 	}
+	
+	public File getFile()
+	{
+		return this.originalFile;
+	}
 
 	/**
 	 * Get the temporary safe file
@@ -740,6 +713,8 @@ public class Safe implements Closeable
 		return tempFile;
 	}
 
+	
+	
 	/**
 	 * Get the temporary safe file
 	 * 
@@ -969,7 +944,7 @@ public class Safe implements Closeable
 
 		previousPosition = raf.getFilePointer();
 		raf.writeLong(0);
-		total = write(new ByteArrayInputStream(header.getBytes(UTF8)), raf, bufferSize, EMPTY_PROBE);
+		total = write(new ByteArrayInputStream(header.getBytes(UTF8)), raf, bufferSize, TaskProbe.DULL_PROBE);
 		position = raf.getFilePointer();
 		raf.seek(previousPosition);
 		raf.writeLong(total);
@@ -979,7 +954,7 @@ public class Safe implements Closeable
 		final String privatePropsJson = GSON.toJson(privateProperties == null ? new HashMap<>() : privateProperties);
 		previousPosition = raf.getFilePointer();
 		raf.writeLong(0L);
-		total = encrypt(new ByteArrayInputStream(privatePropsJson.getBytes(UTF8)), cipher, raf, bufferSize, EMPTY_PROBE);
+		total = encrypt(new ByteArrayInputStream(privatePropsJson.getBytes(UTF8)), cipher, raf, bufferSize, TaskProbe.DULL_PROBE);
 		position = raf.getFilePointer();
 		raf.seek(previousPosition);
 		raf.writeLong(total);

@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
@@ -66,7 +66,7 @@ public class Init implements Callable<Void>
 			if (file.exists())
 				throw new IOException("File " + file + " already exist");
 
-			final Map<String, String> header = new HashMap<>();
+			final Map<String, String> header = new LinkedHashMap<>();
 			if (this.headers != null)
 				for (int i = 0; i < headers.length; i += 2)
 				{
@@ -76,7 +76,7 @@ public class Init implements Callable<Void>
 					header.put(key, value);
 				}
 
-			final Map<String, String> properties = new HashMap<>();
+			final Map<String, String> properties = new LinkedHashMap<>();
 			if (this.properties != null)
 				for (int i = 0; i < this.properties.length; i += 2)
 				{
@@ -86,21 +86,8 @@ public class Init implements Callable<Void>
 					properties.put(key, value);
 				}
 
-			header.put(Safe.PROTOCOL_SPEC_LABEL, Safe.PROTOCOL_SPEC);
-			header.put(Safe.ENCRYPTION_LABEL, "AES/CBC/PKCS5Padding");
-			header.put(Safe.KEY_ALGO_LABEL, "AES");
-
-			final SecureRandom random = new SecureRandom();
-			final byte [] iv = new byte[16];
-			random.nextBytes(iv);
-			header.put(Safe.ENCRYPTION_IV_LABEL, Safe.GSON.toJson(iv));
-
-			final MessageDigest md = MessageDigest.getInstance("SHA-256");
-
-			final byte [] key = Arrays.copyOf(md.digest(md.digest(Utils.passwordToBytes(this.password.toCharArray()))), 128 >> 3);
-
-			log.info("Creating new safe "+file.getAbsolutePath()+"...");
-			Safe.create(file, key, header, properties, this.bufferSize).close();
+			log.info("Creating new safe " + file.getAbsolutePath() + "...");
+			init(file, password.toCharArray(), header, properties, this.bufferSize);
 			log.info("Done");
 
 		} catch (final Exception e)
@@ -110,4 +97,32 @@ public class Init implements Callable<Void>
 
 		return null;
 	}
+
+	public static void init(final File file, final char [] password, final Map<String, String> header, final Map<String, String> properties, final int bufferSize) throws Exception
+	{
+
+		final Map<String, String> innerProperties = new LinkedHashMap<>();
+		if (properties != null)
+			innerProperties.putAll(properties);
+
+		final Map<String, String> innerHeader = new LinkedHashMap<>();
+		if (header != null)
+			innerHeader.putAll(header);
+
+		innerHeader.put(Safe.PROTOCOL_SPEC_LABEL, Safe.PROTOCOL_SPEC);
+		innerHeader.put(Safe.ENCRYPTION_LABEL, "AES/CBC/PKCS5Padding");
+		innerHeader.put(Safe.KEY_ALGO_LABEL, "AES");
+
+		final SecureRandom random = new SecureRandom();
+		final byte [] iv = new byte[16];
+		random.nextBytes(iv);
+		innerHeader.put(Safe.ENCRYPTION_IV_LABEL, Safe.GSON.toJson(iv));
+
+		final MessageDigest md = MessageDigest.getInstance("SHA-256");
+
+		final byte [] key = Arrays.copyOf(md.digest(md.digest(Utils.passwordToBytes(password))), 128 >> 3);
+		Safe.create(file, key, innerHeader, innerProperties, bufferSize).close();
+
+	}
+
 }

@@ -29,7 +29,7 @@ import org.ortis.jsafe.Safe;
 import org.ortis.jsafe.SafeFile;
 import org.ortis.jsafe.SafeFiles;
 import org.ortis.jsafe.Utils;
-import org.ortis.jsafe.task.TaskProbe;
+import org.ortis.jsafe.task.TaskProbeAdapter;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -114,7 +114,7 @@ public class Add implements Callable<Void>
 			for (final File source : sources)
 			{
 				final Map<String, String> props = new TreeMap<>(properties);
-				log.info("Encrypting " + source + " to " + props.get(Block.PATH_LABEL));
+				log.info("Encrypting " + source );
 				add(source, props, safe, folder, null);
 			}
 
@@ -131,19 +131,56 @@ public class Add implements Callable<Void>
 		return null;
 	}
 
-	public static void add(final File source, final Map<String, String> properties, final Safe safe, final Folder folder, final TaskProbe probe) throws CancellationException, Exception
+	public static void add(final File source, final Map<String, String> properties, final Safe safe, final Folder folder, TaskProbeAdapter adaper) throws CancellationException, Exception
 	{
+		if (adaper == null)
+			adaper = new TaskProbeAdapter();
 
-		final Map<String, String> props = properties == null ? new LinkedHashMap<>() : new LinkedHashMap<>(properties);
+		try
+		{
+			if (source.isDirectory())
+			{
 
-		props.put(Block.PATH_LABEL, Utils.sanitize(folder.getPath() + Folder.DELIMITER + source.getName(), Folder.DELIMITER, Environment.getSubstitute()));
+				final String name = Utils.sanitizeToken(source.getName(), Environment.getSubstitute());
+				final SafeFile sf = folder.getChild(name);
+				final Folder currentFolder;
+				if (sf == null)
+				{
+					folder.mkdir(name);
+					currentFolder = (Folder) folder.getChild(name);
+				} else if (sf.isFolder())
+					currentFolder = (Folder) sf;
+				else
+					throw new Exception("Folder " + folder.getPath() + Folder.DELIMITER + name + " cannot be created. A block with the same path already exists");
 
-		props.put(Block.NAME_LABEL, source.getName());
-		props.put("content-type", Utils.getMIMEType(source));
+				for (final File file : source.listFiles())
+					add(file, properties, safe, currentFolder, adaper);
 
-		final FileInputStream fis = new FileInputStream(source);
-		safe.add(props, fis, probe);
-		fis.close();
+			} else
+			{
+				final Map<String, String> props = properties == null ? new LinkedHashMap<>() : new LinkedHashMap<>(properties);
+
+				props.put(Block.PATH_LABEL, Utils.sanitize(folder.getPath() + Folder.DELIMITER + source.getName(), Folder.DELIMITER, Environment.getSubstitute()));
+				props.put(Block.NAME_LABEL, Utils.sanitizeToken(source.getName(), Environment.getSubstitute()));
+				props.put("content-type", Utils.getMIMEType(source));
+
+				adaper.fireMessage("Encrypting " + source + " to " + props.get(Block.PATH_LABEL));
+
+				final FileInputStream fis = new FileInputStream(source);
+				safe.add(props, fis, adaper);
+				fis.close();
+			}
+		} catch (final CancellationException e)
+		{
+			if (!adaper.isCancelled())
+				adaper.fireCanceled();
+			throw e;
+		} catch (final Exception e)
+		{
+			if (adaper.getException() == null)
+				adaper.fireException(e);
+			throw e;
+		}
 
 	}
 }

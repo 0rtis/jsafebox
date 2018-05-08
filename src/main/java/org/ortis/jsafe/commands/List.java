@@ -50,7 +50,7 @@ public class List implements Callable<Void>
 	private String safeFile;
 
 	@Parameters(index = "1", arity = "1...*", description = "Path to list")
-	private String[] paths;
+	private String [] paths;
 
 	@Override
 	public Void call() throws Exception
@@ -63,7 +63,7 @@ public class List implements Callable<Void>
 			final java.util.Set<SafeFile> safeFiles = new LinkedHashSet<>();
 			final java.util.List<SafeFile> buffer = new ArrayList<>();
 
-			for (final String path : this.paths)
+			for (String path : this.paths)
 			{
 				log.fine("Lookup " + path + "...");
 				buffer.clear();

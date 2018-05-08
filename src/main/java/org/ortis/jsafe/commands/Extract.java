@@ -13,13 +13,11 @@ package org.ortis.jsafe.commands;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.io.IOException;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.logging.Logger;
 
 import org.ortis.jsafe.Block;
@@ -29,6 +27,10 @@ import org.ortis.jsafe.Safe;
 import org.ortis.jsafe.SafeFile;
 import org.ortis.jsafe.SafeFiles;
 import org.ortis.jsafe.Utils;
+import org.ortis.jsafe.task.Task;
+import org.ortis.jsafe.task.TaskListener;
+import org.ortis.jsafe.task.TaskProbe;
+import org.ortis.jsafe.task.TaskProbeAdapter;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -54,7 +56,7 @@ public class Extract implements Callable<Void>
 	private String safeFile;
 
 	@Parameters(index = "1", arity = "2...*", description = "Paths of safe's source files followed by the system's destination folder")
-	private String[] paths;
+	private String [] paths;
 
 	@Override
 	public Void call() throws Exception
@@ -88,56 +90,57 @@ public class Extract implements Callable<Void>
 				for (int i = 0; i < this.paths.length - 1; i++)
 					SafeFiles.match(this.paths[i], safe.getRootFolder(), safe.getRootFolder(), matches);
 
-				final Map<String, List<SafeFile>> names = new LinkedHashMap<>();
-				for (final SafeFile safeFile : matches)
-				{
-					if (!safeFile.isBlock())
-					{
-						log.warning("Skipping extraction of " + safeFile + " (not a block)");
-						continue;
-					}
-					List<SafeFile> safeFiles = names.get(safeFile.getComparableName());
-					if (safeFiles == null)
-					{
-						safeFiles = new ArrayList<>();
-						names.put(safeFile.getComparableName(), safeFiles);
-					}
-
-					safeFiles.add(safeFile);
-
-				}
-
-				if (names.isEmpty())
+				if (matches.isEmpty())
 				{
 					log.info("No file found");
 					return null;
 				}
 
-				for (final Map.Entry<String, List<SafeFile>> safeFiles : names.entrySet())
-					if (safeFiles.getValue().size() > 1)
+				final TaskProbeAdapter adapater = new TaskProbeAdapter();
+				adapater.addListener(new TaskListener()
+				{
+
+					@Override
+					public void onTerminated(Task task)
 					{
-
-						for (final SafeFile safeFile : safeFiles.getValue())
-						{
-
-							final File systemFile = new File(destinationFolder, safeFile.getName() + "_"
-									+ Utils.sanitize(safeFile.getPath(), Folder.DELIMITER, '-'));
-							log.info("Extracting " + safeFile + " to " + systemFile);
-							final FileOutputStream fos = new FileOutputStream(systemFile);
-							safe.extract(safeFile.getPath(), fos);
-							fos.close();
-						}
-
-					} else
-					{
-
-						final SafeFile safeFile = safeFiles.getValue().get(0);
-						final File systemFile = new File(destinationFolder, safeFile.getName());
-						log.info("Extracting " + safeFile + " to " + systemFile);
-						final FileOutputStream fos = new FileOutputStream(systemFile);
-						safe.extract(safeFile.getPath(), fos);
-						fos.close();
 					}
+
+					@Override
+					public void onProgress(Task task, double progress)
+					{
+					}
+
+					@Override
+					public void onMessage(final Task task, final String message)
+					{
+						log.info(message);
+
+					}
+
+					@Override
+					public void onException(Task task, Exception exception)
+					{
+					}
+
+					@Override
+					public void onCancelled(Task task)
+					{
+					}
+
+					@Override
+					public void onCancellationRequested(Task task)
+					{
+					}
+				});
+
+				for (final SafeFile safeFile : matches)
+				{
+
+					final File systemFile = new File(destinationFolder, safeFile.getName());
+					log.info("Extracting " + safeFile + " to " + systemFile);
+					extract(safe, safeFile, destinationFolder, null);
+
+				}
 			}
 
 		} catch (final Exception e)
@@ -146,6 +149,46 @@ public class Extract implements Callable<Void>
 		}
 
 		return null;
+	}
+
+	public static void extract(final Safe safe, final SafeFile safeFile, final File directory, TaskProbe probe) throws Exception
+	{
+		
+		if(probe == null)
+			probe = TaskProbe.DULL_PROBE;
+		
+		if(probe.isCancelRequested())
+			throw new CancellationException();
+		
+		probe.fireProgress(Double.NaN);
+		
+		if (!directory.isDirectory())
+			throw new Exception("Destination must be a directory");
+
+		if (safeFile.isFolder())
+		{
+
+			final Folder folder = (Folder) safeFile;
+			final File targetDirectory = new File(directory, safeFile.getName());
+			if (!targetDirectory.exists())
+			{
+				probe.fireMessage("Creating directory " + targetDirectory.getAbsolutePath());
+				if (!targetDirectory.mkdirs())
+					throw new IOException("Could not create directory " + targetDirectory);
+			}
+
+			for (final SafeFile sf : folder.listFiles())
+				extract(safe, sf, targetDirectory, probe);
+
+		} else
+		{
+
+			final File file = new File(directory, safeFile.getName());
+			probe.fireMessage("Extracting block " + safeFile.getName() + " to " + file.getAbsolutePath());
+			final FileOutputStream fos = new FileOutputStream(file);
+			safe.extract(safeFile.getPath(), fos);
+			fos.close();
+		}
 	}
 
 }

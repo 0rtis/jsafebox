@@ -24,20 +24,20 @@ import java.util.List;
  */
 public class Folder implements SafeFile
 {
-	
+
 	private final Comparator<SafeFile> SAFE_FILE_COMPARATOR = new Comparator<SafeFile>()
 	{
-		
+
 		@Override
 		public int compare(final SafeFile sf1, final SafeFile sf2)
 		{
-			
-			if(sf1.isFolder() && !sf2.isFolder())
+
+			if (sf1.isFolder() && !sf2.isFolder())
 				return -1;
-			
-			if(sf2.isFolder() && !sf1.isFolder())
+
+			if (sf2.isFolder() && !sf1.isFolder())
 				return 1;
-			
+
 			return sf1.getName().compareTo(sf2.getName());
 		}
 	};
@@ -119,7 +119,7 @@ public class Folder implements SafeFile
 				throw new Exception("Block " + block + " already exist");
 
 		this.blocks.add(block);
-		
+
 		this.files.add(block);
 		this.files.sort(SAFE_FILE_COMPARATOR);
 	}
@@ -173,31 +173,22 @@ public class Folder implements SafeFile
 	}
 
 	/**
-	 * Search the {@link SafeFile} that match the path
+	 * Return the {@link SafeFile} that match the name
 	 * 
-	 * @param path:
-	 *            path to search
+	 * @param name:
+	 *            name of the {@link SafeFile}
 	 * @return
 	 * @throws Exception
 	 */
-	public SafeFile get(final String path) throws Exception
+	public SafeFile getChild(String name) throws Exception
 	{
-		final String [] tokens = path.split(REGEX_DELIMITER);
+		name = name.toUpperCase(Environment.getLocale());
 
-		if (tokens.length == 0)
-			return null;
+		for (final SafeFile sf : this.files)
+			if (sf.getComparableName().equals(name))
+				return sf;
 
-		final int start;
-		if (tokens[0].toUpperCase(Environment.getLocale()).equals(this.comparableName))
-		{
-			if (tokens.length == 1)
-				return this;
-			start = 1;
-		} else
-			start = 0;
-
-		return unsafeGet(tokens, start, tokens.length);
-
+		return null;
 	}
 
 	/**
@@ -209,6 +200,9 @@ public class Folder implements SafeFile
 	 */
 	public Folder mkdir(final String name) throws Exception
 	{
+		if (name.length() < 1)
+			throw new Exception("Folder name length must be greater than 0");
+
 		final String comparableName = name.toUpperCase(Environment.getLocale());
 		for (final Folder f : this.folders)
 			if (f.getComparableName().equals(comparableName))
@@ -271,15 +265,10 @@ public class Folder implements SafeFile
 
 		final int size = blockPath ? pathTokens.length - 1 : pathTokens.length;
 		Folder folder = this;
-		final StringBuilder path = new StringBuilder();
 		for (int i = from; i < size; i++)
 		{
-			if (path.length() == 0)
-				path.append(pathTokens[i]);
-			else
-				path.append(Folder.DELIMITER + pathTokens[i]);
 
-			SafeFile file = folder.get(pathTokens[i]);
+			SafeFile file = folder.getChild(pathTokens[i]);
 			if (file == null)
 				folder = folder.mkdir(pathTokens[i]);
 			else if (file.isFolder())
@@ -289,6 +278,26 @@ public class Folder implements SafeFile
 
 		}
 	}
+
+	/**
+	 * Delete an empty {@link Folder}
+	 * 
+	 * @param name
+	 * @return
+	 * 
+	 * 		public boolean rm(String name) throws Exception {
+	 * 
+	 *         name = name.toUpperCase(Environment.getLocale());
+	 * 
+	 *         for (int i = 0; i < this.folders.size(); i++) { final Folder folder = this.folders.get(i); if (folder.getComparableName().equals(name)) { if (!folder.listFiles().isEmpty()) throw new Exception("Folder " +
+	 *         folder.getPath() + " is not empty");
+	 * 
+	 *         this.folders.remove(i); this.files.remove(folder); this.files.sort(SAFE_FILE_COMPARATOR); return true; }
+	 * 
+	 *         }
+	 * 
+	 *         return false; }
+	 */
 
 	/**
 	 * Get all {@link SafeFile} within the {@link Folder}

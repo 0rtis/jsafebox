@@ -1,4 +1,18 @@
-
+/*******************************************************************************
+ * Copyright 2018 Ortis (cao.ortis.org@gmail.com)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.  You may obtain a copy
+ * of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
 package org.ortis.jsafe.gui;
 
 import java.awt.BorderLayout;
@@ -28,7 +42,8 @@ public class ProgressDialog extends JDialog implements WindowListener
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private final SafeExplorer safeExplorer;
+
+	private JFrame parentFrame;
 	// private final JTextPane textPane;
 	private final JTextArea textPane;
 
@@ -36,14 +51,17 @@ public class ProgressDialog extends JDialog implements WindowListener
 
 	private Task task;
 
-	public ProgressDialog(final SafeExplorer safeExplorer)
+	public ProgressDialog(final JFrame parentFrame)
 	{
 
-		super(safeExplorer.getExplorerFrame(), true);
+		super(parentFrame, true);
+		
+		this.parentFrame=parentFrame;
+		
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		addWindowListener(this);
 
-		this.safeExplorer = safeExplorer;
+
 		getContentPane().setLayout(new BorderLayout(0, 0));
 
 		final JPanel infoPanel = new JPanel();
@@ -100,7 +118,6 @@ public class ProgressDialog extends JDialog implements WindowListener
 		this.progressBar.setSize(new Dimension(this.getSize().width, this.getSize().height / 4));
 		getContentPane().add(progressBar, BorderLayout.SOUTH);
 
-		final JFrame parentFrame = safeExplorer.getExplorerFrame();
 		setPreferredSize(new Dimension(400, 150));
 		setMaximumSize(new Dimension(parentFrame.getWidth() / 2, parentFrame.getHeight() / 2));
 		setMinimumSize(new Dimension(parentFrame.getWidth() / 5, parentFrame.getHeight() / 5));
@@ -153,8 +170,18 @@ public class ProgressDialog extends JDialog implements WindowListener
 						final String msg = taskMonitor.getMessage();
 						if (msg != null)
 							textPane.setText(msg);
-						final int progress = (int) (taskMonitor.getProgress() * 100);
-						progressBar.setValue(progress);
+
+						final double progress = taskMonitor.getProgress();
+
+						if (Double.isFinite(progress))
+						{
+							final int iProgress = (int) (progress * 100);
+							progressBar.setValue(iProgress);
+						} else if (!progressBar.isIndeterminate())
+						{
+							progressBar.setStringPainted(false);
+							progressBar.setIndeterminate(true);
+						}
 					}
 					break;
 				}
@@ -171,7 +198,7 @@ public class ProgressDialog extends JDialog implements WindowListener
 						@Override
 						public void run()
 						{
-							new ErrorDialog(safeExplorer, null, task.getException()).setVisible(true);
+							new ErrorDialog(ProgressDialog.this.parentFrame, null, task.getException()).setVisible(true);
 						}
 					});
 
@@ -203,13 +230,16 @@ public class ProgressDialog extends JDialog implements WindowListener
 				{
 					task.cancel();
 
+					
+					ProgressDialog.this.textPane.setText("Cancelling task...");
 					try
 					{
+
 						task.awaitTermination();
 					} catch (final Exception e)
 					{
 						ProgressDialog.this.dispose();
-						new ErrorDialog(safeExplorer, "Error while waiting cancelled task", e).setVisible(true);
+						new ErrorDialog(ProgressDialog.this.parentFrame, "Error while waiting cancelled task", e).setVisible(true);
 					}
 
 					ProgressDialog.this.dispose();

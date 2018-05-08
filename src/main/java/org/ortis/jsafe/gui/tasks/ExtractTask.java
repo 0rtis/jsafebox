@@ -15,53 +15,67 @@
  ******************************************************************************/
 package org.ortis.jsafe.gui.tasks;
 
+import java.io.File;
+
 import javax.swing.SwingWorker;
 
 import org.ortis.jsafe.Safe;
+import org.ortis.jsafe.SafeFile;
+import org.ortis.jsafe.commands.Extract;
 import org.ortis.jsafe.gui.SafeExplorer;
 import org.ortis.jsafe.task.MultipartTask;
 import org.ortis.jsafe.task.TaskProbeAdapter;
 
-public class SaveTask extends MultipartTask implements GuiTask
+public class ExtractTask extends MultipartTask implements GuiTask
 {
 
 	private final SafeExplorer safeExplorer;
 	private final Safe safe;
+	private final SafeFile safeFile;
+	private final File destination;
 
-	public SaveTask(final SafeExplorer safeExplorer)
+	public ExtractTask(final SafeExplorer safeExplorer, final SafeFile safeFile, final File destination) throws Exception
 	{
 
 		this.safeExplorer = safeExplorer;
 		this.safe = this.safeExplorer.getSafe();
+		this.safeFile = safeFile;
+		this.destination = destination;
+		if (!this.destination.isDirectory())
+			throw new Exception("Destination must be a directory");
 	}
 
 	public void start()
 	{
-		final TaskProbeAdapter adapter = new TaskProbeAdapter();
-		this.fireMessage("Saving safe...");
+
+		this.fireMessage("Initalizing transfert...");
 		this.fireProgress(0);
 		new SwingWorker<Void, String>()
 		{
-			private Safe newSafe = null;
 
 			@Override
 			protected Void doInBackground() throws Exception
 			{
 
+				ExtractTask.this.fireMessage("Extracting " + safeFile.getName() + "...");
+				final TaskProbeAdapter adapter = new TaskProbeAdapter();
+				ExtractTask.this.setSubTask(adapter);
 				try
 				{
-
-					SaveTask.this.setSubTask(adapter);
-					newSafe = safe.save(adapter);
+					Extract.extract(safe, safeFile, destination, adapter);
 
 				} catch (final Exception e)
 				{
-					//safe.discardChanges();
+					
+					if (ExtractTask.this.isCancelRequested())
+					{
+						ExtractTask.this.fireCanceled();
+					}
 					return null;
 
 				} finally
 				{
-					SaveTask.this.setSubTask(null);
+					ExtractTask.this.setSubTask(null);
 				}
 
 				return null;
@@ -70,18 +84,7 @@ public class SaveTask extends MultipartTask implements GuiTask
 			@Override
 			protected void done()
 			{
-
-				if (SaveTask.this.getException() == null)
-				{
-					SaveTask.this.fireProgress(1);
-					SaveTask.this.fireMessage("Updating tree...");
-
-					if (!SaveTask.this.isCancelled() && SaveTask.this.getException() == null)
-						safeExplorer.setSafe(newSafe);
-
-				}
-
-				SaveTask.this.fireTerminated();
+				ExtractTask.this.fireTerminated();
 			}
 
 		}.execute();

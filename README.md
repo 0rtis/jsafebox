@@ -33,7 +33,7 @@ JSafe encrypt your file using [AES](https://en.wikipedia.org/wiki/Advanced_Encry
 
 ### Why JSafe ?
 With the rise of online banking, cryptocurrencies and other digital transformation, it has become mandatory to backup sensitive files.
-Those file need to be easily accesible, securely stored and encrypted. But lightweight, portable, cross platform vault software are surprisingly hard to come by. Password protected archive works fine but they let room for file leakage as there is no convenient way of exploring the vault unless extracting the whole content.
+Those file need to be easily accessible, securely stored and encrypted. But lightweight, portable, cross platform vault software are surprisingly hard to come by. Password protected archive works fine but they let room for file leakage as there is no convenient way of exploring the vault without extracting the whole content.
 
 
 
@@ -59,7 +59,9 @@ The following datagrams (from 2 to N) are the encrypted files. They work by pair
 ### TODO
 - [x] Command line
 - [x] Wildcard path support
-- [ ] File explorer
+- [x] File explorer
+- [x] Import with Drag & Drop
+- [ ] Export with Drag & Drop
 - [ ] Text viewer
 - [ ] Picture viewer
 - [ ] Interactive shell
@@ -67,7 +69,7 @@ The following datagrams (from 2 to N) are the encrypted files. They work by pair
 ### Download
 **This project is still under development and file loss might occur. Make sure to have a backup of your files !**
 
-You can download the lastest version of JSafe [here]()
+You can download the latest version of JSafe [here]()
 
 
 ### Install

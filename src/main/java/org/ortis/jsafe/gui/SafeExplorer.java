@@ -1,10 +1,19 @@
+/*******************************************************************************
+ * Copyright 2018 Ortis (cao.ortis.org@gmail.com)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under the License.
+ ******************************************************************************/
 
 package org.ortis.jsafe.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Image;
@@ -20,13 +29,12 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -59,11 +67,12 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
 import org.ortis.jsafe.Block;
+import org.ortis.jsafe.Folder;
 import org.ortis.jsafe.Safe;
 import org.ortis.jsafe.SafeFile;
-import org.ortis.jsafe.Utils;
 import org.ortis.jsafe.gui.preview.ErrorPreview;
 import org.ortis.jsafe.gui.preview.ImagePreview;
 import org.ortis.jsafe.gui.tasks.SaveTask;
@@ -76,11 +85,11 @@ import org.ortis.jsafe.gui.tree.SafeTreeModel;
 
 public class SafeExplorer implements WindowListener, ActionListener
 {
+	public final static String CONFIG_FILE = "jsafe.gui.properties";
 
-	private static final String CONFIG_AUTOSAVE_KEY = "gui.autosave";
-	private static final String CONFIG_PREVIEW_KEY = "gui.preview";
+	private final static String TITLE = "JSafe";
+	private final Configuration configuration;
 
-	private final Properties config = new Properties();
 	private JFrame explorerFrame;
 
 	private JTable propertyTable;
@@ -88,6 +97,9 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 	private JRadioButtonMenuItem showPreview;
 	private JRadioButtonMenuItem autoSave;
+	private JMenuItem helpFrameMenuItem;
+	private JMenuItem aboutMenuItem;
+
 	private JProgressBar progressBar;
 	private JPanel previewPanel;
 
@@ -98,34 +110,12 @@ public class SafeExplorer implements WindowListener, ActionListener
 	private AtomicBoolean modificationPending = new AtomicBoolean(false);
 
 	/**
-	 * Launch the application.
-	 */
-	public static void main(String [] args)
-	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				try
-				{
-					SafeExplorer window = new SafeExplorer();
-					window.explorerFrame.setVisible(true);
-					window.setSafe(Utils.open("target/test", "password".toCharArray(), 1024, Logger.getAnonymousLogger()));
-
-				} catch (Exception e)
-				{
-					e.printStackTrace();
-				}
-			}
-		});
-
-	}
-
-	/**
 	 * Create the application.
 	 */
-	public SafeExplorer()
+	public SafeExplorer(final Configuration configuration)
 	{
+		this.configuration = configuration;
+
 		initialize();
 	}
 
@@ -145,6 +135,9 @@ public class SafeExplorer implements WindowListener, ActionListener
 		tree.expandRow(0);
 		tree.repaint();
 
+		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+		this.explorerFrame.setTitle(TITLE + " - " + safe.getFile().getAbsolutePath());
 	}
 
 	private void loadNode(final SafeFileTreeNode node)
@@ -169,14 +162,14 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 					SafeFile file = (SafeFile) node.getUserObject();
 					if (file.isFolder())
-					{/*
-						node.removeAllChildren();
+					{
+						// node.removeAllChildren();
 						final Folder folder = (Folder) file;
-						//if (node.isLeaf())// if not children
+						if (node.isLeaf())// if not children
 							for (SafeFile sf : folder.listFiles())
 								publish(sf);
-						*/
-					} else if (showPreview.isSelected())
+
+					} else
 					{
 						// preview
 						final Block block = (Block) file;
@@ -185,29 +178,53 @@ public class SafeExplorer implements WindowListener, ActionListener
 							propertyModel.addRow(new Object[] { metadata.getKey(), metadata.getValue() });
 
 						final String mime = block.getProperties().get("content-type");
-						if (mime != null)
-						{
-							if (mime.startsWith("text"))
+						if (showPreview.isSelected())
+							if (mime != null)
 							{
-							} else if (mime.startsWith("image"))
-							{
-
-								try
+								if (mime.startsWith("text"))
+								{
+								} else if (mime.startsWith("image"))
 								{
 
-									final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-									safe.extract(block, baos);
-									final ImagePreview imagePreview = new ImagePreview(ImageIO.read(new ByteArrayInputStream(baos.toByteArray())));
+									try
+									{
 
-									previewPanel.add(imagePreview, BorderLayout.CENTER);
-								} catch (final Exception e)
+										final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+										safe.extract(block, baos);
+										final ImagePreview imagePreview = new ImagePreview(ImageIO.read(new ByteArrayInputStream(baos.toByteArray())));
+
+										previewPanel.add(imagePreview, BorderLayout.CENTER);
+									} catch (final Exception e)
+									{
+										previewPanel.removeAll();
+										previewPanel.add(new ErrorPreview(e), BorderLayout.CENTER);
+									}
+
+								} else
 								{
-									previewPanel.removeAll();
-									previewPanel.add(new ErrorPreview(e), BorderLayout.CENTER);
+
+									final String img;
+									if (mime.startsWith("video"))
+										img = "/img/icons8-video-file-100.png";
+									else if (mime.startsWith("audio"))
+										img = "/img/icons8-audio-file-100.png";
+									else
+										img = "/img/icons8-document-100.png";
+
+									try
+									{
+
+										final ImagePreview imagePreview = new ImagePreview(ImageIO.read(SafeExplorer.class.getResourceAsStream(img)));
+
+										previewPanel.add(imagePreview, BorderLayout.CENTER);
+									} catch (final Exception e)
+									{
+										previewPanel.removeAll();
+										previewPanel.add(new ErrorPreview(e), BorderLayout.CENTER);
+									}
+
 								}
-
 							}
-						}
 
 					}
 
@@ -243,25 +260,11 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 	}
 
-	public void configUI()
+	private void configUI()
 	{
-		String conf = this.config.getProperty(CONFIG_AUTOSAVE_KEY);
-		if (conf != null)
-		{
-			if (conf.toUpperCase(Locale.ENGLISH).equals("TRUE"))
-				this.autoSave.setSelected(true);
-			else if (conf.toUpperCase(Locale.ENGLISH).equals("FALSE"))
-				this.autoSave.setSelected(false);
-		}
 
-		conf = this.config.getProperty(CONFIG_PREVIEW_KEY);
-		if (conf != null)
-		{
-			if (conf.toUpperCase(Locale.ENGLISH).equals("TRUE"))
-				this.showPreview.setSelected(true);
-			else if (conf.toUpperCase(Locale.ENGLISH).equals("FALSE"))
-				this.showPreview.setSelected(false);
-		}
+		this.autoSave.setSelected(this.configuration.getAutoSave());
+		this.showPreview.setSelected(this.configuration.getPreview());
 
 	}
 
@@ -278,7 +281,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 		}
 
 		explorerFrame = new JFrame();
-		explorerFrame.setTitle("JSafe");
+		explorerFrame.setTitle(TITLE);
 
 		final JPanel main = new JPanel(new BorderLayout(3, 3));
 		main.setBackground(Color.WHITE);
@@ -301,8 +304,6 @@ public class SafeExplorer implements WindowListener, ActionListener
 				if (node.getParent() != null)
 				{
 					loadNode((SafeFileTreeNode) node);
-					// setFileDetails((File) node.getUserObject());
-					System.out.println(node);
 				}
 			}
 		};
@@ -315,7 +316,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 		final SafeTreeCellEditor safeTreeCellEditor = new SafeTreeCellEditor(tree, (DefaultTreeCellRenderer) tree.getCellRenderer());
 		tree.setCellEditor(safeTreeCellEditor);
 
-		tree.setDragEnabled(true);
+		// tree.setDragEnabled(true);
 		tree.setTransferHandler(new FileTransferHandler());
 
 		final MouseListener ml = new MouseAdapter()
@@ -326,7 +327,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 				final TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
 				if (selRow != -1)
 				{
-					
+
 					DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
 
 					if (node.getParent() != null)
@@ -403,12 +404,14 @@ public class SafeExplorer implements WindowListener, ActionListener
 		btnNewButton.setToolTipText("Extract");
 		btnNewButton.setIcon(new ImageIcon(SafeExplorer.class.getResource("/img/icons8-downloading-updates-20.png")));
 		btnNewButton.setBackground(Color.WHITE);
+		btnNewButton.setVisible(false);
 		toolBar.add(btnNewButton);
 
 		JButton btnDelete = new JButton("");
 		btnDelete.setIcon(new ImageIcon(SafeExplorer.class.getResource("/img/icons8-trash-20.png")));
 		btnDelete.setToolTipText("Delete");
 		btnDelete.setBackground(Color.WHITE);
+		btnDelete.setVisible(false);
 		toolBar.add(btnDelete);
 		splitPane.setResizeWeight(0.3);
 		splitPane.setOneTouchExpandable(true);
@@ -420,9 +423,11 @@ public class SafeExplorer implements WindowListener, ActionListener
 		explorerFrame.getContentPane().add(panel, BorderLayout.SOUTH);
 		panel.setLayout(new BorderLayout(0, 0));
 
-		statusLabel = new JLabel(" Status");
+		statusLabel = new JLabel("Status");
 		statusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 		statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
+		new StatusUpdater(statusLabel).start();
+
 		panel.add(statusLabel, BorderLayout.WEST);
 
 		progressBar = new JProgressBar();
@@ -449,6 +454,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 		mnFile.add(saveMenuItem);
 
 		autoSave = new JRadioButtonMenuItem("Auto save");
+		autoSave.addActionListener(this);
 		keyStrokeAccelerator = KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.SHIFT_DOWN_MASK);
 		autoSave.setAccelerator(keyStrokeAccelerator);
 		autoSave.setSelected(true);
@@ -459,24 +465,37 @@ public class SafeExplorer implements WindowListener, ActionListener
 		menuBar.add(mnNewMenu);
 
 		showPreview = new JRadioButtonMenuItem("Show preview");
+		showPreview.addActionListener(this);
 		showPreview.setSelected(true);
 		keyStrokeAccelerator = KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.CTRL_DOWN_MASK);
 		showPreview.setAccelerator(keyStrokeAccelerator);
 
 		mnNewMenu.add(showPreview);
 
+		JMenu helpMenuItem = new JMenu("Help");
+		menuBar.add(helpMenuItem);
+
+		helpFrameMenuItem = new JMenuItem("Help frame...");
+		helpFrameMenuItem.addActionListener(this);
+		keyStrokeAccelerator = KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0);
+		helpFrameMenuItem.setAccelerator(keyStrokeAccelerator);
+		helpMenuItem.add(helpFrameMenuItem);
+
+		aboutMenuItem = new JMenuItem("About");
+		aboutMenuItem.addActionListener(this);
+		helpMenuItem.add(aboutMenuItem);
+
 		final List<Image> icons = new ArrayList<>();
 		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-16.png")));
 		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-32.png")));
 		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-64.png")));
 		explorerFrame.setIconImages(icons);
-		// frmJsafe.setIconImage(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-drawing-100.png")));
-		// explorerFrame.setBounds(100, 100, 909, 615);
-		// explorerFrame.setSize(Toolkit.getDefaultToolkit().getScreenSize().width/2, Toolkit.getDefaultToolkit().getScreenSize().height/2);
 
 		explorerFrame.setSize(Toolkit.getDefaultToolkit().getScreenSize().width * 2 / 3, Toolkit.getDefaultToolkit().getScreenSize().height * 2 / 3);
 		explorerFrame.setLocation(Toolkit.getDefaultToolkit().getScreenSize().width / 2 - explorerFrame.getSize().width / 2,
 				Toolkit.getDefaultToolkit().getScreenSize().height / 2 - explorerFrame.getSize().height / 2);
+
+		configUI();
 
 		explorerFrame.addWindowListener(this);
 		explorerFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -496,22 +515,42 @@ public class SafeExplorer implements WindowListener, ActionListener
 	}
 
 	@Override
-	public void actionPerformed(final ActionEvent e)
+	public void actionPerformed(final ActionEvent event)
 	{
 
-		switch (e.getActionCommand())
+		if (event.getActionCommand().equals("Save"))
 		{
-			case "Save":
+			final ProgressDialog pd = new ProgressDialog(this.explorerFrame);
+			pd.setTitle("Saving safe...");
+			final SaveTask saveTask = new SaveTask(SafeExplorer.this);
+			pd.monitor(saveTask, "Saving safe...");
 
-				final ProgressDialog pd = new ProgressDialog(SafeExplorer.this);
-				pd.setTitle("Saving...");
-				final SaveTask saveTask = new SaveTask(SafeExplorer.this);
-				pd.monitor(saveTask, "Saving safe...");
+		} else if (event.getActionCommand().equals(this.autoSave.getActionCommand()))
+			this.configuration.setAutoSave(this.autoSave.isSelected());
+		else if (event.getActionCommand().equals(this.showPreview.getActionCommand()))
+			this.configuration.setPreview(this.showPreview.isSelected());
+		else if (event.getActionCommand().equals(this.helpFrameMenuItem.getActionCommand()))
+		{
+			try
+			{
+				final HelpFrame helpFrame = new HelpFrame(this);
+				helpFrame.setVisible(true);
+			} catch (final Exception e)
+			{
+				new ErrorDialog(this.explorerFrame, "Error while opening help frame", e).setVisible(true);
+			}
 
-				break;
+		} else if (event.getActionCommand().equals(this.aboutMenuItem.getActionCommand()))
+		{
+			try
+			{
+				final AboutFrame aboutFrame = new AboutFrame(this);
+				aboutFrame.setVisible(true);
+			} catch (final Exception e)
+			{
+				new ErrorDialog(this.explorerFrame, "Error while opening about frame", e).setVisible(true);
+			}
 
-			default:
-				break;
 		}
 
 	}
@@ -531,7 +570,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 			if (modificationPending.get())
 			{
 
-				new ErrorDialog(this, "Implement exit without saving frame", null).setVisible(true);
+				new ErrorDialog(this.explorerFrame, "Implement exit without saving frame", null).setVisible(true);
 			}
 
 			statusLabel.setText("Closing safe...");
@@ -540,18 +579,27 @@ public class SafeExplorer implements WindowListener, ActionListener
 				this.safe.close();
 			} catch (final Exception e)
 			{
-				new ErrorDialog(this, "Error while closing safe", e).setVisible(true);
+				new ErrorDialog(this.explorerFrame, "Error while closing safe", e).setVisible(true);
 
 			}
 		}
 
 		this.explorerFrame.dispose();
-		System.exit(0);
+
 	}
 
 	@Override
-	public void windowClosed(WindowEvent e)
+	public void windowClosed(final WindowEvent event)
 	{
+		try
+		{
+			this.configuration.store(new FileOutputStream(CONFIG_FILE), "Safe Explorer settings");
+		} catch (final IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		System.exit(0);
 	}
 
 	@Override
@@ -589,9 +637,8 @@ public class SafeExplorer implements WindowListener, ActionListener
 		return autoSave;
 	}
 
-	public Properties getConfig()
+	public Configuration getConfiguration()
 	{
-		return config;
+		return configuration;
 	}
-
 }

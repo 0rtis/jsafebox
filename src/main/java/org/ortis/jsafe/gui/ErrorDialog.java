@@ -1,9 +1,23 @@
+/*******************************************************************************
+ * Copyright 2018 Ortis (cao.ortis.org@gmail.com)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under the License.
+ ******************************************************************************/
 
 package org.ortis.jsafe.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
@@ -25,10 +39,10 @@ public class ErrorDialog extends JDialog
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public ErrorDialog(final SafeExplorer safeExplorer, final String message, final Exception exception)
+	public ErrorDialog(final JFrame parentFrame, final String message, final Exception exception)
 	{
 
-		super(safeExplorer.getExplorerFrame(), "Error", true);
+		super(parentFrame, "Error", true);
 
 		JLabel lblNewLabel = new JLabel("");
 		lblNewLabel.setIcon(new ImageIcon(ErrorPreview.class.getResource("/img/icons8-high-priority-filled-50.png")));
@@ -52,12 +66,61 @@ public class ErrorDialog extends JDialog
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
 		add(lblNewLabel_1, BorderLayout.NORTH);
 
-		final JFrame parentFrame = safeExplorer.getExplorerFrame();
+		addKeyListener(new KeyAdapter()
+		{
+			public void keyPressed(KeyEvent ke)
+			{ // handler
+				if (ke.getKeyCode() == KeyEvent.VK_ESCAPE)
+					ErrorDialog.this.dispose();
+			}
+		});
+
+		addWindowListener(new WindowListener()
+		{
+
+			@Override
+			public void windowOpened(WindowEvent e)
+			{
+				ErrorDialog.this.requestFocus();
+			}
+
+			@Override
+			public void windowIconified(WindowEvent e)
+			{
+			}
+
+			@Override
+			public void windowDeiconified(WindowEvent e)
+			{
+			}
+
+			@Override
+			public void windowDeactivated(WindowEvent e)
+			{
+			}
+
+			@Override
+			public void windowClosing(WindowEvent e)
+			{
+			}
+
+			@Override
+			public void windowClosed(WindowEvent e)
+			{
+			}
+
+			@Override
+			public void windowActivated(WindowEvent e)
+			{
+			}
+		});
+
 		setPreferredSize(new Dimension(400, 400));
 		setMaximumSize(new Dimension(parentFrame.getWidth() * 2 / 3, parentFrame.getHeight() * 2 / 3));
 		setMinimumSize(new Dimension(parentFrame.getWidth() / 2, parentFrame.getHeight() / 2));
 		setSize(getPreferredSize());
 		setLocationRelativeTo(parentFrame);
+
 	}
 
 }

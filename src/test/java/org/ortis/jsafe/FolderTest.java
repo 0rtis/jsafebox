@@ -92,54 +92,54 @@ public class FolderTest
 		assertEquals(1, root.listFiles().size());
 		assertEquals(folder, root.listFiles().get(0));
 
-		final String blockPath = rootName + Folder.DELIMITER + "path" + Folder.DELIMITER + "to" + Folder.DELIMITER + "block" + Folder.DELIMITER + "block name";
+		final String blockPath =  "path" + Folder.DELIMITER + "to" + Folder.DELIMITER + "block" + Folder.DELIMITER + "block name";
 
 		root.mkdir(blockPath, true);
 		assertEquals(2, root.listFiles().size());
 
 		// check folders
-		SafeFile safeFile = root.get("path");
+		SafeFile safeFile = root.getChild("path");
 		assertNotNull(safeFile);
 		assertTrue(safeFile.isFolder());
 		folder = (Folder) safeFile;
 		assertTrue(folder.getName().equals("path"));
 
-		safeFile = folder.get("to");
+		safeFile = folder.getChild("to");
 		assertNotNull(safeFile);
 		assertTrue(safeFile.isFolder());
 		folder = (Folder) safeFile;
 		assertTrue(folder.getName().equals("to"));
 
-		safeFile = folder.get("block");
+		safeFile = folder.getChild("block");
 		assertNotNull(safeFile);
 		assertTrue(safeFile.isFolder());
 		folder = (Folder) safeFile;
 		assertTrue(folder.getName().equals("block"));
 
-		safeFile = folder.get("block name");
+		safeFile = folder.getChild("block name");
 		assertNull(safeFile);
 
 		// not equals test
 		assertTrue(!folder.equals(folder.getParent()));
 
-		final String notBlockPath = rootName + Folder.DELIMITER + "path" + Folder.DELIMITER + "to" + Folder.DELIMITER + "nothing";
+		final String notBlockPath = "path" + Folder.DELIMITER + "to" + Folder.DELIMITER + "nothing";
 
 		root.mkdir(notBlockPath, false);
 		assertEquals(2, root.listFiles().size());
 		// check folders
-		safeFile = root.get("path");
+		safeFile = root.getChild("path");
 		assertNotNull(safeFile);
 		assertTrue(safeFile.isFolder());
 		folder = (Folder) safeFile;
 		assertTrue(folder.getName().equals("path"));
 
-		safeFile = folder.get("to");
+		safeFile = folder.getChild("to");
 		assertNotNull(safeFile);
 		assertTrue(safeFile.isFolder());
 		folder = (Folder) safeFile;
 		assertTrue(folder.getName().equals("to"));
 
-		safeFile = folder.get("nothing");
+		safeFile = folder.getChild("nothing");
 		assertNotNull(safeFile);
 		assertTrue(safeFile.isFolder());
 		folder = (Folder) safeFile;
@@ -147,7 +147,7 @@ public class FolderTest
 
 		assertEquals(0, folder.listFiles().size());
 
-		assertNull(folder.get(""));
+		assertNull(folder.getChild(""));
 		folder.toString();
 		assertNull(folder.get(new String[0], 0, 0));
 	}

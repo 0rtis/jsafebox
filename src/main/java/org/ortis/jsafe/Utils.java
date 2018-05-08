@@ -11,6 +11,9 @@
 
 package org.ortis.jsafe;
 
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.HeadlessException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -82,13 +85,16 @@ public class Utils
 		if (encyption == null)
 			throw new Exception("Could not read property '" + Safe.ENCRYPTION_LABEL + "' from header");
 
-		log.fine("Encryption type " + encyption);
+		if (log != null)
+			log.fine("Encryption type " + encyption);
+
 		final Cipher cipher = javax.crypto.Cipher.getInstance(encyption);
 
 		if (!header.containsKey(Safe.KEY_ALGO_LABEL))
 			throw new Exception("Could not read property '" + Safe.KEY_ALGO_LABEL + "' from header");
 
-		log.fine("Key algorithm " + header.get(Safe.KEY_ALGO_LABEL));
+		if (log != null)
+			log.fine("Key algorithm " + header.get(Safe.KEY_ALGO_LABEL));
 
 		final MessageDigest md = MessageDigest.getInstance("SHA-256");
 		final byte [] key = Arrays.copyOf(md.digest(md.digest(Utils.passwordToBytes(password))), 128 >> 3);
@@ -101,12 +107,12 @@ public class Utils
 		else
 			iv = null;
 
-		return new Safe(file, cipher, keySpec, iv, 1024);
+		return new Safe(file, cipher, keySpec, iv, bufferSize);
 	}
 
 	private final static String SYSTEM_PATH_DELIMITER_REGEX = Pattern.quote(File.separator) + "|" + Pattern.quote("/") + "|" + Pattern.quote("\\");
 
-	public static List<java.io.File> parseSystemPath(final String query, final List<java.io.File> destination) throws IOException
+	public static List<java.io.File> parseSystemPath(String query, final List<java.io.File> destination) throws IOException
 	{
 		final String [] tokens = query.split(SYSTEM_PATH_DELIMITER_REGEX);
 
@@ -115,6 +121,16 @@ public class Utils
 		if (tokens[0].equals(".") || tokens[0].equals(".."))
 		{
 			baseDirectory = new File(tokens[0]).toPath();
+
+			final StringBuilder sb = new StringBuilder();
+			for (int i = 1; i < tokens.length; i++)
+				if (sb.length() == 0)
+					sb.append(tokens[i]);
+				else
+					sb.append(File.separator + tokens[i]);
+
+			query = "**" + File.separator + sb.toString();
+
 		} else
 		{
 
@@ -143,7 +159,7 @@ public class Utils
 		}
 
 		if (baseDirectory == null)
-			throw new IOException("Could not locate base directory " + tokens[0]);
+			throw new IOException("Could not locate base directory '" + tokens[0]+"'");
 
 		Path path = baseDirectory;
 		for (int i = 1; i < tokens.length; i++)
@@ -160,7 +176,7 @@ public class Utils
 		}
 
 		final String escapedQuery = query.replace("\\", "\\\\");// PathMatcher does not escape backslash properly. Need to do the escape manually for Windows OS path handling. This might be a bug of Java implentation.
-																// Need to check on Oracle bug report database.
+		// Need to check on Oracle bug report database.
 
 		final PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + escapedQuery);
 		Files.walkFileTree(path, new FileVisitor<Path>()
@@ -314,10 +330,13 @@ public class Utils
 		c: for (int i = 0; i < sb.length(); i++)
 		{
 
-			if (sb.charAt(i) == java.io.File.separatorChar)
+			if (sb.charAt(i) == java.io.File.separatorChar || sb.charAt(i) == Folder.DELIMITER)
 			{
-				sb.setCharAt(i, Folder.DELIMITER);
-				continue;
+				if (replacement == null)
+					sb.deleteCharAt(i--);
+				else
+					sb.setCharAt(i, replacement);
+				continue c;
 			}
 
 			for (final char c : Environment.getForbidenChars())
@@ -332,6 +351,21 @@ public class Utils
 		}
 		return sb.toString();
 
+	}
+
+	public static boolean isHeadless()
+	{
+		if (GraphicsEnvironment.isHeadless())
+			return true;
+
+		try
+		{
+			GraphicsDevice [] screenDevices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+			return screenDevices == null || screenDevices.length == 0;
+		} catch (HeadlessException e)
+		{
+			return true;
+		}
 	}
 
 }

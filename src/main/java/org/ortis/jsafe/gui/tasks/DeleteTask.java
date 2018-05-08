@@ -18,50 +18,58 @@ package org.ortis.jsafe.gui.tasks;
 import javax.swing.SwingWorker;
 
 import org.ortis.jsafe.Safe;
+import org.ortis.jsafe.SafeFile;
+import org.ortis.jsafe.commands.Delete;
 import org.ortis.jsafe.gui.SafeExplorer;
 import org.ortis.jsafe.task.MultipartTask;
 import org.ortis.jsafe.task.TaskProbeAdapter;
 
-public class SaveTask extends MultipartTask implements GuiTask
+public class DeleteTask extends MultipartTask implements GuiTask
 {
 
 	private final SafeExplorer safeExplorer;
 	private final Safe safe;
+	private final SafeFile safeFile;
 
-	public SaveTask(final SafeExplorer safeExplorer)
+	public DeleteTask(final SafeExplorer safeExplorer, final SafeFile safeFile)
 	{
 
 		this.safeExplorer = safeExplorer;
 		this.safe = this.safeExplorer.getSafe();
+		this.safeFile = safeFile;
 	}
 
 	public void start()
 	{
-		final TaskProbeAdapter adapter = new TaskProbeAdapter();
-		this.fireMessage("Saving safe...");
-		this.fireProgress(0);
+
+		this.fireMessage("Deleting...");
+		DeleteTask.this.fireProgress(Double.NaN);
 		new SwingWorker<Void, String>()
 		{
-			private Safe newSafe = null;
 
 			@Override
 			protected Void doInBackground() throws Exception
 			{
 
+				final TaskProbeAdapter adapter = new TaskProbeAdapter();
+				DeleteTask.this.setSubTask(adapter);
 				try
 				{
-
-					SaveTask.this.setSubTask(adapter);
-					newSafe = safe.save(adapter);
+					Delete.delete(safe, safeFile, adapter);
 
 				} catch (final Exception e)
 				{
-					//safe.discardChanges();
+					safe.discardChanges();
+
+					if (DeleteTask.this.isCancelRequested())
+					{
+						DeleteTask.this.fireCanceled();
+					}
 					return null;
 
 				} finally
 				{
-					SaveTask.this.setSubTask(null);
+					DeleteTask.this.setSubTask(null);
 				}
 
 				return null;
@@ -71,17 +79,13 @@ public class SaveTask extends MultipartTask implements GuiTask
 			protected void done()
 			{
 
-				if (SaveTask.this.getException() == null)
+				if (DeleteTask.this.getException() == null && !DeleteTask.this.isCancelled())
 				{
-					SaveTask.this.fireProgress(1);
-					SaveTask.this.fireMessage("Updating tree...");
-
-					if (!SaveTask.this.isCancelled() && SaveTask.this.getException() == null)
-						safeExplorer.setSafe(newSafe);
-
+					safeExplorer.notifyModificationPending();
 				}
 
-				SaveTask.this.fireTerminated();
+				DeleteTask.this.fireTerminated();
+
 			}
 
 		}.execute();

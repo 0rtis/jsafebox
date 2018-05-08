@@ -70,7 +70,7 @@ public class SafeFilesTest
 		// check mkdir
 		SafeFiles.mkdir(root.getName() + Folder.DELIMITER + "1", false, root, root);
 
-		SafeFile safeFile = root.get("1");
+		SafeFile safeFile = root.getChild("1");
 		assertNotNull(safeFile);
 		assertTrue(safeFile.isFolder());
 		Folder folder = (Folder) safeFile;
@@ -78,7 +78,7 @@ public class SafeFilesTest
 
 		// creating root/1/11 with a block path argument
 		SafeFiles.mkdir(folder.getPath() + Folder.DELIMITER + "11" + Folder.DELIMITER + "block", true, root, root);
-		safeFile = folder.get("11");
+		safeFile = folder.getChild("11");
 		assertNotNull(safeFile);
 		assertEquals(folder.getPath() + Folder.DELIMITER + "11", safeFile.getPath());
 		assertEquals(safeFile.getName(), SafeFiles.getName(safeFile.getPath()));
@@ -89,7 +89,7 @@ public class SafeFilesTest
 
 		// creating root/1/12 from within root/1
 		SafeFiles.mkdir("12", false, folder, root);
-		safeFile = folder.get("12");
+		safeFile = folder.getChild("12");
 		assertNotNull(safeFile);
 		assertEquals(folder.getPath() + Folder.DELIMITER + "12", safeFile.getPath());
 		assertEquals(safeFile.getName(), SafeFiles.getName(safeFile.getPath()));
@@ -98,7 +98,7 @@ public class SafeFilesTest
 
 		// creating root/1/13 from within root/1 and with a block path argument
 		SafeFiles.mkdir("13" + Folder.DELIMITER + "block", true, folder, root);
-		safeFile = folder.get("13");
+		safeFile = folder.getChild("13");
 		assertNotNull(safeFile);
 		assertEquals(folder.getPath() + Folder.DELIMITER + "13", safeFile.getPath());
 		assertEquals(safeFile.getName(), SafeFiles.getName(safeFile.getPath()));
@@ -225,7 +225,7 @@ public class SafeFilesTest
 		{// test all code path
 
 			SafeFiles.mkdir("." + Folder.DELIMITER + "final folder", false, root, root);
-			safeFile = root.get("final folder");
+			safeFile = root.getChild("final folder");
 			assertNotNull(safeFile);
 		}
 
