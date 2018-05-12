@@ -200,6 +200,7 @@ public class CommandTest
 
 		assertTrue(!extractTargetSystemFile.exists());
 
+		System.out.println("Extracting " + extractTargetSystemFile);
 		args = new String[] { "extract", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName(),
 				extractTargetSystemFolder.getAbsolutePath() };
 		Bootstrap.main(args);
