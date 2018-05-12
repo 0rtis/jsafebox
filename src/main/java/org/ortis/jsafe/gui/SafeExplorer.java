@@ -32,6 +32,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +79,7 @@ import org.ortis.jsafe.Safe;
 import org.ortis.jsafe.SafeFile;
 import org.ortis.jsafe.gui.preview.ErrorPreview;
 import org.ortis.jsafe.gui.preview.ImagePreview;
+import org.ortis.jsafe.gui.preview.TextPreview;
 import org.ortis.jsafe.gui.tasks.SaveTask;
 import org.ortis.jsafe.gui.tree.FileTransferHandler;
 import org.ortis.jsafe.gui.tree.SafeFileNodePopupMenu;
@@ -186,6 +188,21 @@ public class SafeExplorer implements WindowListener, ActionListener
 							{
 								if (mime.startsWith("text"))
 								{
+
+									try
+									{
+										final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+										safe.extract(block, baos);
+										final String text = new String(baos.toByteArray());// use local charset
+										final TextPreview textPreview = new TextPreview(text);
+
+										previewPanel.add(textPreview, BorderLayout.CENTER);
+									} catch (final Exception e)
+									{
+										previewPanel.removeAll();
+										previewPanel.add(new ErrorPreview(e), BorderLayout.CENTER);
+									}
+
 								} else if (mime.startsWith("image"))
 								{
 

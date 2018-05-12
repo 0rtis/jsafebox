@@ -105,6 +105,7 @@ public class Delete implements Callable<Void>
 				@Override
 				public void onException(Task task, Exception exception)
 				{
+					System.out.println();
 				}
 
 				@Override
@@ -152,29 +153,40 @@ public class Delete implements Callable<Void>
 
 	public static void delete(final Safe safe, final SafeFile safeFile, TaskProbe probe) throws Exception
 	{
-
-		if (probe == null)
-			probe = TaskProbe.DULL_PROBE;
-
-		if (probe.isCancelRequested())
-			throw new CancellationException();
-
-		probe.fireProgress(Double.NaN);
-
-		if (safeFile.isBlock())
+		try
 		{
-			probe.fireMessage("Deleting block " + safeFile);
-			safe.delete(safeFile.getPath());
-		} else
+			if (probe == null)
+				probe = TaskProbe.DULL_PROBE;
+
+			if (probe.isCancelRequested())
+				throw new CancellationException();
+
+			probe.fireProgress(Double.NaN);
+
+			if (safeFile.isBlock())
+			{
+				probe.fireMessage("Deleting block " + safeFile);
+				safe.delete(safeFile.getPath());
+			} else
+			{
+
+				final Folder folder = (Folder) safeFile;
+				final List<SafeFile> safeFiles = new ArrayList<>(folder.listFiles());
+				for (final SafeFile sf : safeFiles)
+					delete(safe, sf, probe);
+
+				folder.getParent().remove(folder.getName());
+			}
+		} catch (final CancellationException e)
 		{
-
-			final Folder folder = (Folder) safeFile;
-			final List<SafeFile> safeFiles = new ArrayList<>(folder.listFiles());
-			for (final SafeFile sf : safeFiles)
-				delete(safe, sf, probe);
-
-			folder.getParent().remove(folder.getName());
+			probe.fireCanceled();
+			throw e;
+		} catch (final Exception e)
+		{
+			throw e;
+		} finally
+		{
+			probe.fireTerminated();
 		}
-
 	}
 }

@@ -235,6 +235,8 @@ public class Utils
 
 		if (name.endsWith(".TXT"))
 			return "text/plain";
+		else if (name.endsWith(".CSV"))
+			return "text/csv";
 		else if (name.endsWith(".HTM") || name.endsWith(".HTML"))
 			return "text/html";
 		else if (name.endsWith(".JPG") || name.endsWith(".JPEG"))
@@ -243,7 +245,6 @@ public class Utils
 			return "image/png";
 		else if (name.endsWith(".BM") || name.endsWith(".BMP"))
 			return "image/bmp";
-
 		else if (name.endsWith(".PDF"))
 			return "application/pdf";
 		else if (name.endsWith(".AVI"))

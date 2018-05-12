@@ -69,6 +69,11 @@ public class MultipartTaskTest
 
 		};
 
+		final MultipartTask subTask = new MultipartTask()
+		{
+
+		};
+
 		assertEquals(0, task.getProgress(), .0000000001);
 		assertNull(task.getMessage());
 		assertNull(task.getException());
@@ -150,6 +155,9 @@ public class MultipartTaskTest
 			}
 		});
 
+		task.setSilentSubTask(false);
+		task.setSubTask(subTask);
+
 		synchronized (notified)
 		{
 			thread.start();
@@ -157,7 +165,7 @@ public class MultipartTaskTest
 			Thread.sleep(1000);
 		}
 
-		task.fireProgress(1);
+		subTask.fireProgress(1);
 
 		thread.join(1000);
 
@@ -198,7 +206,7 @@ public class MultipartTaskTest
 			Thread.sleep(1000);
 		}
 
-		task.fireMessage("msg");
+		subTask.fireMessage("msg");
 
 		thread.join(1000);
 
@@ -208,7 +216,7 @@ public class MultipartTaskTest
 		assertEquals(message[0], task.getMessage());
 
 		final Exception e = new Exception();
-		task.fireException(e);
+		subTask.fireException(e);
 		assertEquals(e, task.getException());
 		assertEquals(exception[0], task.getException());
 
@@ -245,7 +253,7 @@ public class MultipartTaskTest
 			Thread.sleep(1000);
 		}
 
-		task.fireTerminated();
+		task.fireTerminated();// subtask termination does not mean the parent task is terminated
 		thread.join(1000);
 
 		assertTrue(notified[0]);
@@ -260,7 +268,7 @@ public class MultipartTaskTest
 		assertFalse(task.isCancelled());
 		assertFalse(cancelled[0]);
 
-		task.fireCanceled();
+		subTask.fireCanceled();
 		assertTrue(task.isCancelled());
 		assertTrue(cancelled[0]);
 

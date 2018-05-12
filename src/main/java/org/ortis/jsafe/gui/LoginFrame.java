@@ -116,11 +116,15 @@ public class LoginFrame implements ActionListener
 	{
 		this.frame.setVisible(true);
 
+		focusTextField();
+
+	}
+
+	public void focusTextField()
+	{
 		final JTextField field = (JTextField) comboBox.getEditor().getEditorComponent();
 		field.requestFocus();
 		field.selectAll();
-
-		
 
 	}
 
@@ -148,23 +152,22 @@ public class LoginFrame implements ActionListener
 			field.setText("Select a safe or create a new one");
 		} else
 			field.setText(pastPaths[0]);
-		
-		
+
 		field.addKeyListener(new KeyListener()
 		{
-			
+
 			@Override
 			public void keyTyped(final KeyEvent e)
 			{
 				if (e.getKeyChar() == '\n')
 					openButton.doClick();
 			}
-			
+
 			@Override
 			public void keyReleased(KeyEvent e)
 			{
 			}
-			
+
 			@Override
 			public void keyPressed(KeyEvent e)
 			{
@@ -184,25 +187,40 @@ public class LoginFrame implements ActionListener
 		openButton = new JButton("Open");
 		openButton.addActionListener(this);
 		GroupLayout gl_main = new GroupLayout(main);
-		gl_main.setHorizontalGroup(gl_main.createParallelGroup(Alignment.TRAILING)
+		gl_main.setHorizontalGroup(
+			gl_main.createParallelGroup(Alignment.TRAILING)
 				.addGroup(gl_main.createSequentialGroup()
-						.addGroup(gl_main.createParallelGroup(Alignment.LEADING).addComponent(lblNewLabel_1, GroupLayout.PREFERRED_SIZE, 329, GroupLayout.PREFERRED_SIZE)
-								.addGroup(gl_main.createSequentialGroup().addContainerGap().addGroup(gl_main.createParallelGroup(Alignment.LEADING)
-										.addGroup(Alignment.TRAILING,
-												gl_main.createSequentialGroup().addComponent(comboBox, 0, 335, Short.MAX_VALUE).addGap(18).addComponent(browseButton, GroupLayout.PREFERRED_SIZE, 87,
-														GroupLayout.PREFERRED_SIZE))
-										.addGroup(Alignment.TRAILING,
-												gl_main.createSequentialGroup().addPreferredGap(ComponentPlacement.RELATED, 353, GroupLayout.PREFERRED_SIZE).addComponent(openButton,
-														GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE))
-										.addGroup(Alignment.TRAILING,
-												gl_main.createSequentialGroup().addGap(353).addComponent(newButton, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
-						.addContainerGap()));
-		gl_main.setVerticalGroup(gl_main.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_main.createSequentialGroup().addComponent(lblNewLabel_1).addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(newButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE).addPreferredGap(ComponentPlacement.UNRELATED)
-						.addGroup(gl_main.createParallelGroup(Alignment.BASELINE).addComponent(comboBox, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE).addComponent(browseButton,
-								GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE))
-						.addPreferredGap(ComponentPlacement.UNRELATED).addComponent(openButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE).addGap(54)));
+					.addGroup(gl_main.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_main.createSequentialGroup()
+							.addContainerGap()
+							.addComponent(comboBox, 0, 335, Short.MAX_VALUE)
+							.addGap(18))
+						.addGroup(gl_main.createSequentialGroup()
+							.addComponent(lblNewLabel_1, GroupLayout.PREFERRED_SIZE, 292, GroupLayout.PREFERRED_SIZE)
+							.addGap(73)))
+					.addGap(6)
+					.addGroup(gl_main.createParallelGroup(Alignment.TRAILING)
+						.addComponent(browseButton, GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE)
+						.addComponent(openButton, GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE)
+						.addComponent(newButton, GroupLayout.DEFAULT_SIZE, 87, Short.MAX_VALUE))
+					.addContainerGap())
+		);
+		gl_main.setVerticalGroup(
+			gl_main.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_main.createSequentialGroup()
+					.addGroup(gl_main.createParallelGroup(Alignment.TRAILING)
+						.addGroup(gl_main.createSequentialGroup()
+							.addComponent(newButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)
+							.addPreferredGap(ComponentPlacement.UNRELATED)
+							.addComponent(browseButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)
+							.addPreferredGap(ComponentPlacement.UNRELATED)
+							.addComponent(openButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE))
+						.addGroup(gl_main.createSequentialGroup()
+							.addComponent(lblNewLabel_1)
+							.addGap(45)
+							.addComponent(comboBox, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)))
+					.addGap(93))
+		);
 		main.setLayout(gl_main);
 
 		final List<Image> icons = new ArrayList<>();
@@ -277,11 +295,11 @@ public class LoginFrame implements ActionListener
 				});
 				dialog.setVisible(true);
 
-				 Integer action = (Integer) optionPane.getValue();
+				Integer action = (Integer) optionPane.getValue();
 
 				if (action == null)
 					return;
-				
+
 				if (action == 0)
 				{
 					final char [] pwd1 = pwd.getPassword();
@@ -318,7 +336,7 @@ public class LoginFrame implements ActionListener
 
 					if (action == null)
 						return;
-					
+
 					action = (int) optionPane.getValue();
 					if (action == 0)
 					{
@@ -333,6 +351,8 @@ public class LoginFrame implements ActionListener
 							pd.setTitle("Creating safe...");
 							final InitTask initTask = new InitTask(destination, pwd1, this);
 							pd.monitor(initTask, "Creating safe...");
+
+							focusTextField();
 						} else
 							new ErrorDialog(this.frame, "Passwords does not match", null).setVisible(true);
 					}

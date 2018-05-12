@@ -114,7 +114,6 @@ public class Extract implements Callable<Void>
 					public void onMessage(final Task task, final String message)
 					{
 						log.info(message);
-
 					}
 
 					@Override
@@ -138,7 +137,7 @@ public class Extract implements Callable<Void>
 
 					final File systemFile = new File(destinationFolder, safeFile.getName());
 					log.info("Extracting " + safeFile + " to " + systemFile);
-					extract(safe, safeFile, destinationFolder, null);
+					extract(safe, safeFile, destinationFolder, adapater);
 
 				}
 			}
@@ -153,42 +152,55 @@ public class Extract implements Callable<Void>
 
 	public static void extract(final Safe safe, final SafeFile safeFile, final File directory, TaskProbe probe) throws Exception
 	{
-		
-		if(probe == null)
-			probe = TaskProbe.DULL_PROBE;
-		
-		if(probe.isCancelRequested())
-			throw new CancellationException();
-		
-		probe.fireProgress(Double.NaN);
-		
-		if (!directory.isDirectory())
-			throw new Exception("Destination must be a directory");
 
-		if (safeFile.isFolder())
+		try
 		{
+			if (probe == null)
+				probe = TaskProbe.DULL_PROBE;
 
-			final Folder folder = (Folder) safeFile;
-			final File targetDirectory = new File(directory, safeFile.getName());
-			if (!targetDirectory.exists())
+			if (probe.isCancelRequested())
+				throw new CancellationException();
+
+			probe.fireProgress(Double.NaN);
+
+			if (!directory.isDirectory())
+				throw new Exception("Destination must be a directory");
+
+			if (safeFile.isFolder())
 			{
-				probe.fireMessage("Creating directory " + targetDirectory.getAbsolutePath());
-				if (!targetDirectory.mkdirs())
-					throw new IOException("Could not create directory " + targetDirectory);
+
+				final Folder folder = (Folder) safeFile;
+				final File targetDirectory = new File(directory, safeFile.getName());
+				if (!targetDirectory.exists())
+				{
+					probe.fireMessage("Creating directory " + targetDirectory.getAbsolutePath());
+					if (!targetDirectory.mkdirs())
+						throw new IOException("Could not create directory " + targetDirectory);
+				}
+
+				for (final SafeFile sf : folder.listFiles())
+					extract(safe, sf, targetDirectory, probe);
+
+			} else
+			{
+
+				final File file = new File(directory, safeFile.getName());
+				probe.fireMessage("Extracting block " + safeFile.getName() + " to " + file.getAbsolutePath());
+				final FileOutputStream fos = new FileOutputStream(file);
+				safe.extract(safeFile.getPath(), fos);
+				fos.close();
 			}
-
-			for (final SafeFile sf : folder.listFiles())
-				extract(safe, sf, targetDirectory, probe);
-
-		} else
+		} catch (final CancellationException e)
 		{
-
-			final File file = new File(directory, safeFile.getName());
-			probe.fireMessage("Extracting block " + safeFile.getName() + " to " + file.getAbsolutePath());
-			final FileOutputStream fos = new FileOutputStream(file);
-			safe.extract(safeFile.getPath(), fos);
-			fos.close();
+			probe.fireCanceled();
+			throw e;
+		} catch (final Exception e)
+		{
+			throw e;
+		} finally
+		{
+			probe.fireTerminated();
 		}
-	}
 
+	}
 }

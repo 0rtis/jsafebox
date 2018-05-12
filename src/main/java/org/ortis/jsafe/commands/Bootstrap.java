@@ -38,9 +38,7 @@ public class Bootstrap implements Callable<Void>
 	@Override
 	public Void call() throws Exception
 	{
-
 		displayMessage();
-
 		return null;
 	}
 
@@ -71,10 +69,10 @@ public class Bootstrap implements Callable<Void>
 				new GUI().call();
 			} catch (final Exception e)
 			{
-
+				CommandLine.call(new Bootstrap(), System.err, args);
 			}
 
-		CommandLine.call(new Bootstrap(), System.err, args);
+		
 	}
 
 }

@@ -76,7 +76,7 @@ public class CommandTest
 	public void test() throws Exception
 	{
 
-		Bootstrap.displayMessage();
+		Bootstrap.main(new String[] { "something to trigger ascii art display" });
 
 		/**
 		 * Init
@@ -252,7 +252,7 @@ public class CommandTest
 		Bootstrap.main(args);
 
 		// delete file from safe
-		args = new String[] { "rm", "--password", "mypassword", "-f", safeFile.getAbsolutePath(), safeFolderPath };
+		args = new String[] { "rm", "--password", "mypassword", "-f", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName() };
 		Bootstrap.main(args);
 
 		// extract deleted file
@@ -264,8 +264,7 @@ public class CommandTest
 		 * GUI
 		 */
 
-		args = new String[] { "gui" };
-		Bootstrap.main(args);
+		Bootstrap.main(new String[] {});
 
 	}
 

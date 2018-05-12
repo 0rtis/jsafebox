@@ -12,11 +12,19 @@
 package org.ortis.jsafe;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -26,11 +34,15 @@ import org.junit.Test;
 
 public class UtilsTest
 {
+	private static File folder;
+	private static Random random;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception
 	{
 
+		folder = TestUtils.mkdir();
+		random = TestUtils.getRandom();
 	}
 
 	/**
@@ -39,7 +51,7 @@ public class UtilsTest
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception
 	{
-
+		TestUtils.delete(folder);
 	}
 
 	/**
@@ -57,6 +69,52 @@ public class UtilsTest
 	@After
 	public void tearDown() throws Exception
 	{
+
+	}
+
+	@Test
+	public void openTest() throws Exception
+	{
+		final String safeFileName = TestUtils.randomString(random, 10) + ".safe";
+		final File safeFile = new File(folder, safeFileName);
+
+		final MessageDigest md = MessageDigest.getInstance("SHA-256");
+		final String password = TestUtils.randomString(random, 12);
+		final byte [] key = Arrays.copyOf(md.digest(md.digest(password.getBytes())), 128 >> 3);
+
+		final Map<String, String> header = new HashMap<>();
+		header.put(Safe.ENCRYPTION_LABEL, "AES/CBC/PKCS5Padding");
+		header.put(Safe.KEY_ALGO_LABEL, "AES");
+
+		final SecureRandom random = new SecureRandom();
+		final byte [] iv = new byte[16];
+		random.nextBytes(iv);
+		header.put(Safe.ENCRYPTION_IV_LABEL, Safe.GSON.toJson(iv));
+		header.put(Safe.PROTOCOL_SPEC_LABEL, Safe.PROTOCOL_SPEC);
+		header.put(TestUtils.randomString(random, 5), TestUtils.randomString(random, 20));
+		header.put(TestUtils.randomString(random, 5), TestUtils.randomString(random, 20));
+		header.put(TestUtils.randomString(random, 5), TestUtils.randomString(random, 20));
+
+		final Map<String, String> properties = new HashMap<>();
+		header.put(TestUtils.randomString(random, 5), TestUtils.randomString(random, 20));
+		header.put(TestUtils.randomString(random, 5), TestUtils.randomString(random, 20));
+		header.put(TestUtils.randomString(random, 5), TestUtils.randomString(random, 20));
+
+		Safe.create(safeFile, key, header, properties, 1024).close();
+
+		try
+		{
+			Utils.open(safeFile.getAbsolutePath() + "404", password.toCharArray(), 1024, null);
+			fail("Opening non existant file should not be allowed");
+		} catch (final Exception e)
+		{
+
+		}
+
+		try (final Safe safe = Utils.open(safeFile.getAbsolutePath(), password.toCharArray(), 1024, null))
+		{
+			assertNotNull(safe);
+		}
 
 	}
 
@@ -83,6 +141,7 @@ public class UtilsTest
 	public void mimeTypeTest() throws Exception
 	{
 		assertEquals("text/plain", Utils.getMIMEType(new File("doc.txt")));
+		assertEquals("text/csv", Utils.getMIMEType(new File("doc.csv")));
 		assertEquals("text/html", Utils.getMIMEType(new File("webpage.html")));
 		assertEquals("application/pdf", Utils.getMIMEType(new File("doc.pdf")));
 		assertEquals("image/jpg", Utils.getMIMEType(new File("img.jpg")));
@@ -111,18 +170,18 @@ public class UtilsTest
 	@Test
 	public void sanitizeTokenTest() throws Exception
 	{
-		final String token = "before"+File.separator+"after";
+		final String token = "before" + File.separator + "after";
 		final char substitute = '_';
 		final String sanitized = Utils.sanitizeToken(token, substitute);
-		assertEquals("before"+substitute+"after", sanitized);
-	
+		assertEquals("before" + substitute + "after", sanitized);
+
 	}
 
 	@Test
 	public void headlessTest() throws Exception
 	{
 		Utils.isHeadless();
-	
+
 	}
-	
+
 }

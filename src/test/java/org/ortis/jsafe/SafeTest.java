@@ -145,6 +145,8 @@ public class SafeTest
 			safe.close();
 		}
 
+		
+
 	}
 
 	@Test
@@ -342,11 +344,10 @@ public class SafeTest
 					assertEquals(0, lastSafe.getDeletedBlocks().size());
 					assertEquals(safeFile.getAbsolutePath(), lastSafe.getFile().getAbsolutePath());
 					assertTrue(lastSafe.getTempFile().exists());
-					
-					
+
 					assertNotNull(lastSafe.getBlock(path2));
 					lastSafe.delete(path2);
-					assertNotNull(lastSafe.getBlock(path2));//not removed until the safe is saved
+					assertNotNull(lastSafe.getBlock(path2));// not removed until the safe is saved
 					assertEquals(1, lastSafe.getDeletedBlocks().size());
 				}
 			}

@@ -1,6 +1,7 @@
 
-[![Build Status](https://travis-ci.org/0rtis/jsafe.svg?branch=master)](https://travis-ci.org/0rtis/jsafe)
-[![codecov](https://codecov.io/gh/0rtis/jsafe/branch/master/graph/badge.svg)](https://codecov.io/gh/0rtis/jsafe)
+[![GitHub license](https://img.shields.io/github/license/0rtis/jsafe.svg?style=flat-square)](https://github.com/0rtis/jsafe/blob/master/LICENSE)
+[![Build Status](https://img.shields.io/travis/0rtis/jsafe.svg?style=flat-square)](https://travis-ci.org/storj/core)
+[![codecov](https://img.shields.io/codecov/c/github/0rtis/jsafe.svg?style=flat-square)](https://codecov.io/gh/0rtis/jsafe)
 
 
 ```
@@ -24,9 +25,9 @@ JSafe encrypt your file using [AES](https://en.wikipedia.org/wiki/Advanced_Encry
 
 **Decrypted data is never written on the drive** (except during file extraction requested by user).
 
-![JSafe GUI demo](docs/img/gui-demo.gif?raw=true)
+![JSafe GUI demo](docs/img/demo-gui.gif?raw=true)
 
-![JSafe CLI demo](docs/img/cli-demo.png?raw=false)
+![JSafe CLI demo](docs/img/demo-cli.png?raw=true)
 
 
 
