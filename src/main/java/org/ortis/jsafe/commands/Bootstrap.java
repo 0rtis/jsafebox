@@ -12,13 +12,13 @@
 package org.ortis.jsafe.commands;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 import org.ortis.jsafe.Environment;
-import org.ortis.jsafe.gui.LoginFrame;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -39,15 +39,13 @@ public class Bootstrap implements Callable<Void>
 	public Void call() throws Exception
 	{
 
-		try
-		{
+		displayMessage();
 
-			LoginFrame.main(new String[0]);
-			return null;
-		} catch (final Exception e)
-		{
+		return null;
+	}
 
-		}
+	public static void displayMessage() throws IOException
+	{
 
 		final Logger log = Environment.getLogger();
 		final InputStream is = Bootstrap.class.getResourceAsStream("/ascii-art/jsafe-ascii-art");
@@ -57,8 +55,6 @@ public class Bootstrap implements Callable<Void>
 			baos.write(b);
 		final String art = new String(baos.toByteArray(), Charset.forName("UTF-8"));
 		log.info(art);
-
-		return null;
 	}
 
 	/**
@@ -68,6 +64,15 @@ public class Bootstrap implements Callable<Void>
 	 */
 	public static void main(String [] args)
 	{
+
+		if (args.length == 0)
+			try
+			{
+				new GUI().call();
+			} catch (final Exception e)
+			{
+
+			}
 
 		CommandLine.call(new Bootstrap(), System.err, args);
 	}

@@ -18,15 +18,15 @@
    
 ```
 
-# JSafe - A lightweight, portable and cross-plateform virtual safe
+# JSafe - A lightweight, portable and cross-plateform safe
 
 JSafe encrypt your file using [AES](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) encryption. It can be used as command line tool or with a _file explorer_ like interface.
 
-**Decrypted data is never wrote on the drive** (except during file extraction requested by user).
+**Decrypted data is never written on the drive** (except during file extraction requested by user).
 
-*picture of file explorer*
+![JSafe GUI demo](docs/img/gui-demo.gif?raw=true)
 
-*picture of command line and example*
+![JSafe CLI demo](docs/img/cli-demo.png?raw=false)
 
 
 

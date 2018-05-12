@@ -73,6 +73,24 @@ public class FolderTest
 		assertEquals(rootName.toUpperCase(), root.getComparablePath());
 		assertEquals(0, root.listFiles().size());
 
+		try
+		{
+			root.mkdir("");
+			fail("0 length name folder should not be allowed");
+		} catch (final Exception e)
+		{
+
+		}
+
+		try
+		{
+			root.mkdir(new String[0], 0, true);
+			fail("0 length token path folder should not be allowed");
+		} catch (final Exception e)
+		{
+
+		}
+
 		final String folderName = "folder";
 		final String folderPath = rootName + Folder.DELIMITER + folderName;
 		Folder folder = root.mkdir(folderName);
@@ -92,7 +110,7 @@ public class FolderTest
 		assertEquals(1, root.listFiles().size());
 		assertEquals(folder, root.listFiles().get(0));
 
-		final String blockPath =  "path" + Folder.DELIMITER + "to" + Folder.DELIMITER + "block" + Folder.DELIMITER + "block name";
+		final String blockPath = "path" + Folder.DELIMITER + "to" + Folder.DELIMITER + "block" + Folder.DELIMITER + "block name";
 
 		root.mkdir(blockPath, true);
 		assertEquals(2, root.listFiles().size());
@@ -187,6 +205,20 @@ public class FolderTest
 		try
 		{
 			path = rootName + Folder.DELIMITER + "non existant folder" + Folder.DELIMITER + "block name";
+
+			block = new Block(path, properties, 0, 0, 0, 0, 0, 0, root);
+
+			root.add(block);
+
+			fail("Non matching block path should not be allowed");
+		} catch (final Exception e)
+		{
+
+		}
+
+		try
+		{
+			path = "somehting" + Folder.DELIMITER + "block name";
 
 			block = new Block(path, properties, 0, 0, 0, 0, 0, 0, root);
 

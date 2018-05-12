@@ -12,6 +12,7 @@
 package org.ortis.jsafe;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -87,6 +88,7 @@ public class BlockTest
 		assertTrue(!block.isFolder());
 
 		assertEquals(block, block);
+		assertNotEquals(name, block);
 
 		assertEquals(block.getName(), name);
 		assertEquals(block.getComparableName(), name.toUpperCase());
@@ -107,10 +109,10 @@ public class BlockTest
 			assertEquals(block.getProperties().get(key), properties.get(key));
 
 		final Block clone = new Block(path, properties, offset, length, metaOffset, metaLength, dataOffset, dataLength, null);
-		assertTrue(block.equals(clone));
+		assertEquals(block, clone);
 
 		final Block block2 = new Block("a" + Folder.DELIMITER + "different" + Folder.DELIMITER + "path", properties, offset, length, metaOffset, metaLength, dataOffset, dataLength, null);
-		assertTrue(!block.equals(block2));
+		assertNotEquals(block, block2);
 
 		try
 		{

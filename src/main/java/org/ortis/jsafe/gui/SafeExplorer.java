@@ -21,6 +21,7 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -39,11 +40,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButtonMenuItem;
@@ -570,7 +573,24 @@ public class SafeExplorer implements WindowListener, ActionListener
 			if (modificationPending.get())
 			{
 
-				new ErrorDialog(this.explorerFrame, "Implement exit without saving frame", null).setVisible(true);
+				final JOptionPane optionPane = new JOptionPane("Exit without saving ?", JOptionPane.WARNING_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+				final JDialog dialog = optionPane.createDialog(this.explorerFrame, "Warning");
+				dialog.addKeyListener(new KeyAdapter()
+				{
+					public void keyPressed(KeyEvent ke)
+					{ // handler
+						if (ke.getKeyCode() == KeyEvent.VK_ESCAPE)
+							dialog.dispose();
+					}
+				});
+
+				dialog.setVisible(true);
+
+				final Integer action = (Integer) optionPane.getValue();
+
+				if (action == null || action != JOptionPane.YES_OPTION)
+					return;
+
 			}
 
 			statusLabel.setText("Closing safe...");

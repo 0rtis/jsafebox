@@ -11,7 +11,9 @@
 
 package org.ortis.jsafe.commands;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.logging.Logger;
@@ -167,10 +169,11 @@ public class Delete implements Callable<Void>
 		{
 
 			final Folder folder = (Folder) safeFile;
-			for (final SafeFile sf : folder.listFiles())
+			final List<SafeFile> safeFiles = new ArrayList<>(folder.listFiles());
+			for (final SafeFile sf : safeFiles)
 				delete(safe, sf, probe);
 
-		//	folder.getParent().rm(folder.getName());
+			folder.getParent().remove(folder.getName());
 		}
 
 	}

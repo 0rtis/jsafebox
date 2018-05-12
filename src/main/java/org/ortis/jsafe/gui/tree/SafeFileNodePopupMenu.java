@@ -1,27 +1,26 @@
 /*******************************************************************************
  * Copyright 2018 Ortis (cao.ortis.org@gmail.com)
  * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License.  You may obtain a copy
- * of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
  * 
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under the License.
  ******************************************************************************/
+
 package org.ortis.jsafe.gui.tree;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -110,6 +109,24 @@ public class SafeFileNodePopupMenu extends JPopupMenu implements ActionListener
 				try
 				{
 
+					final JOptionPane optionPane = new JOptionPane("Do you want to delete '" + this.safeFile.getName() + "' ?", JOptionPane.WARNING_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+					final JDialog dialog = optionPane.createDialog(this.safeExplorer.getExplorerFrame(), "Confirm delete");
+					dialog.addKeyListener(new KeyAdapter()
+					{
+						public void keyPressed(KeyEvent ke)
+						{ // handler
+							if (ke.getKeyCode() == KeyEvent.VK_ESCAPE)
+								dialog.dispose();
+						}
+					});
+
+					dialog.setVisible(true);
+
+					final Integer action = (Integer) optionPane.getValue();
+
+					if (action == null || action != JOptionPane.YES_OPTION)
+						return;
+
 					final ProgressDialog pd = new ProgressDialog(this.safeExplorer.getExplorerFrame());
 					pd.setTitle("Deleting...");
 					final DeleteTask deleteTask = new DeleteTask(this.safeExplorer, this.safeFile);
@@ -123,7 +140,7 @@ public class SafeFileNodePopupMenu extends JPopupMenu implements ActionListener
 
 				} catch (Exception e)
 				{
-					new ErrorDialog(this.safeExplorer.getExplorerFrame(), "Error while extracting", e).setVisible(true);
+					new ErrorDialog(this.safeExplorer.getExplorerFrame(), "Error while deleting", e).setVisible(true);
 				}
 				break;
 
@@ -202,7 +219,5 @@ public class SafeFileNodePopupMenu extends JPopupMenu implements ActionListener
 
 		return nodes.isEmpty() ? null : new TreePath(nodes.toArray());
 	}
-	
-	
 
 }

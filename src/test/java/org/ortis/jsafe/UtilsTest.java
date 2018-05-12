@@ -82,13 +82,17 @@ public class UtilsTest
 	@Test
 	public void mimeTypeTest() throws Exception
 	{
+		assertEquals("text/plain", Utils.getMIMEType(new File("doc.txt")));
+		assertEquals("text/html", Utils.getMIMEType(new File("webpage.html")));
+		assertEquals("application/pdf", Utils.getMIMEType(new File("doc.pdf")));
 		assertEquals("image/jpg", Utils.getMIMEType(new File("img.jpg")));
 		assertEquals("image/png", Utils.getMIMEType(new File("img.png")));
-		assertEquals("text/plain", Utils.getMIMEType(new File("doc.txt")));
-		assertEquals("application/pdf", Utils.getMIMEType(new File("doc.pdf")));
+		assertEquals("image/bmp", Utils.getMIMEType(new File("img.bmp")));
 		assertEquals("video/x-msvideo", Utils.getMIMEType(new File("movie.avi")));
 		assertEquals("video/mpeg", Utils.getMIMEType(new File("movie.mpeg")));
 		assertEquals("video/mp4", Utils.getMIMEType(new File("movie.mp4")));
+		assertEquals("video/x-matroska", Utils.getMIMEType(new File("movie.mkv")));
+		assertEquals("audio/mpeg", Utils.getMIMEType(new File("audio.mp3")));
 		assertEquals("application/octet-stream", Utils.getMIMEType(new File("img.safe")));
 
 	}
@@ -97,10 +101,28 @@ public class UtilsTest
 	public void formatExceptionTest() throws Exception
 	{
 		final Exception exception = new Exception("Error message");
+		exception.initCause(new Exception("Base exception"));
 		final String msg = Utils.formatException(exception);
 		assertTrue(msg.contains(exception.getMessage()));
 		assertNull(Utils.formatException(null));
 
 	}
 
+	@Test
+	public void sanitizeTokenTest() throws Exception
+	{
+		final String token = "before"+File.separator+"after";
+		final char substitute = '_';
+		final String sanitized = Utils.sanitizeToken(token, substitute);
+		assertEquals("before"+substitute+"after", sanitized);
+	
+	}
+
+	@Test
+	public void headlessTest() throws Exception
+	{
+		Utils.isHeadless();
+	
+	}
+	
 }

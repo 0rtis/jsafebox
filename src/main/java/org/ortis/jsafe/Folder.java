@@ -191,6 +191,40 @@ public class Folder implements SafeFile
 		return null;
 	}
 
+	public boolean remove(String name)
+	{
+		name = name.toUpperCase(Environment.getLocale());
+
+		for (int i = 0; i < this.files.size(); i++)
+		{
+			final SafeFile safeFile = this.files.get(i);
+			if (safeFile.getComparableName().equals(name))
+			{
+				this.files.remove(i);
+
+				if (safeFile.isFolder())
+				{
+					for (int j = 0; j < this.folders.size(); j++)
+						if (this.folders.get(j).getComparableName().equals(name))
+						{
+							this.folders.remove(j);
+							break;
+						}
+				} else
+					for (int j = 0; j < this.blocks.size(); j++)
+						if (this.blocks.get(j).getComparableName().equals(name))
+						{
+							this.blocks.remove(j);
+							break;
+						}
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	/**
 	 * Create a new child {@link Folder}
 	 * 

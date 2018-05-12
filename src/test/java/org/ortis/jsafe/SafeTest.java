@@ -13,6 +13,8 @@ package org.ortis.jsafe;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
@@ -184,6 +186,18 @@ public class SafeTest
 
 		try (Safe safe = Safe.create(safeFile, key, header, null, 1024))
 		{
+
+			assertEquals(0, safe.getPrivateProperties().size());
+
+			try
+			{
+				Safe.create(safeFile, key, header, null, 1024);
+				fail("Should not allow create on existing file");
+			} catch (final Exception e)
+			{
+
+			}
+
 			final String name = TestUtils.randomString(random, 20);
 			final String path = Folder.ROOT_NAME + Folder.DELIMITER + name;
 			final Map<String, String> metadatas = new HashMap<>();
@@ -200,7 +214,7 @@ public class SafeTest
 			try
 			{
 				safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()), null);
-				fail("Uncomplete matadata's block should not be allowed");
+				fail("Uncomplete metadata's block should not be allowed");
 			} catch (final Exception e)
 			{
 
@@ -212,7 +226,7 @@ public class SafeTest
 			try
 			{
 				safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()), null);
-				fail("Uncomplete matadata's block should not be allowed");
+				fail("Uncomplete metadata's block should not be allowed");
 			} catch (final Exception e)
 			{
 
@@ -221,10 +235,34 @@ public class SafeTest
 			metadatas.put(Block.NAME_LABEL, name);
 			safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()), null);
 
-			// extract
+			// add existing block
+			try
+			{
+				safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()), null);
+				fail("Adding existing block should not be allowed");
+			} catch (final Exception e)
+			{
+
+			}
+
+			// add missing destination
+			try
+			{
+				final Map<String, String> metadatas2 = new HashMap<>(metadatas);
+				metadatas2.put(Block.PATH_LABEL, Folder.ROOT_NAME + Folder.DELIMITER + "404" + Folder.DELIMITER + name);
+				safe.add(metadatas2, new ByteArrayInputStream(original.toByteArray()), null);
+				fail("Adding block without desintation should not be allowed");
+			} catch (final Exception e)
+			{
+
+			}
+
+			/**
+			 * extract
+			 */
 
 			// before save
-			final Block block = safe.getTempBlock(path);
+			Block block = safe.getTempBlock(path);
 			Assert.assertNotNull(block);
 
 			assertEquals(block.getName(), name);
@@ -235,11 +273,32 @@ public class SafeTest
 
 			assertEquals(block.getProperties(), metadatas);
 
-			// assertEquals(block.getDataLength(), original.size());
-
 			final ByteArrayOutputStream extracted = new ByteArrayOutputStream();
 			safe.extract(path, extracted);
 			assertArrayEquals(original.toByteArray(), extracted.toByteArray());
+
+			// discard
+			safe.discardChanges();
+
+			// add again
+
+			safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()), null);
+
+			// before save
+			final Block block2 = safe.getTempBlock(path);
+			Assert.assertNotNull(block2);
+
+			assertEquals(block2.getName(), name);
+			assertEquals(block2.getComparableName(), name.toUpperCase());
+
+			assertEquals(block2.getPath(), path);
+			assertEquals(block2.getComparablePath(), path.toUpperCase());
+
+			assertEquals(block2.getProperties(), metadatas);
+
+			final ByteArrayOutputStream extracted2 = new ByteArrayOutputStream();
+			safe.extract(path, extracted2);
+			assertArrayEquals(original.toByteArray(), extracted2.toByteArray());
 
 			// after saved
 			try (Safe savedSafe = safe.save())
@@ -268,6 +327,27 @@ public class SafeTest
 				} catch (final Exception e)
 				{
 
+				}
+
+				// add new
+				final String name2 = name + "2";
+				final String path2 = Folder.ROOT_NAME + Folder.DELIMITER + name2;
+
+				metadatas.put(Block.PATH_LABEL, path2);
+				metadatas.put(Block.NAME_LABEL, name2);
+				savedSafe.add(metadatas, new ByteArrayInputStream(original.toByteArray()), null);
+				try (final Safe lastSafe = savedSafe.save())
+				{
+					assertEquals(0, lastSafe.getTempBlocks().size());
+					assertEquals(0, lastSafe.getDeletedBlocks().size());
+					assertEquals(safeFile.getAbsolutePath(), lastSafe.getFile().getAbsolutePath());
+					assertTrue(lastSafe.getTempFile().exists());
+					
+					
+					assertNotNull(lastSafe.getBlock(path2));
+					lastSafe.delete(path2);
+					assertNotNull(lastSafe.getBlock(path2));//not removed until the safe is saved
+					assertEquals(1, lastSafe.getDeletedBlocks().size());
 				}
 			}
 

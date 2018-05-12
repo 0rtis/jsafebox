@@ -22,8 +22,6 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.security.spec.AlgorithmParameterSpec;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -49,7 +47,6 @@ import com.google.gson.reflect.TypeToken;
 public class Safe implements Closeable
 {
 
-	private final static DateTimeFormatter FILE_NAME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 	public final static String UTF8 = "UTF-8";
 	public final static Gson GSON = new Gson();
 	private final static Type MAP_STRING_STRING_TYPE = new TypeToken<Map<String, String>>()
@@ -294,9 +291,6 @@ public class Safe implements Closeable
 
 			final Folder destinationFolder = (Folder) destinationFile;
 
-			if (destinationFolder.get(comparableTokens, comparableTokens.length - 1, comparableTokens.length) != null)
-				throw new Exception("Block file " + path + " already exist");
-
 			if (this.roBlocks.containsKey(path) || this.tempBlocks.containsKey(path))
 				throw new Exception("Block path " + path + " already exist");
 
@@ -372,14 +366,23 @@ public class Safe implements Closeable
 	{
 
 		final String comparablePath = path.toUpperCase(Environment.getLocale());
-		Block deleted = this.blocks.remove(comparablePath);
+		Block deleted = this.blocks.get(comparablePath);
+
 		if (deleted != null)
+		{
+			final Folder folder = deleted.getParent();
+			folder.remove(deleted.getName());
 			this.deletedBlocks.put(comparablePath, deleted);
+		}
 
 		deleted = this.tempBlocks.remove(comparablePath);
 
 		if (deleted != null)
+		{
+			final Folder folder = deleted.getParent();
+			folder.remove(deleted.getName());
 			this.deletedBlocks.put(comparablePath, deleted);
+		}
 	}
 
 	/**
@@ -454,10 +457,25 @@ public class Safe implements Closeable
 	/**
 	 * Discard pending modification
 	 */
-	public void discardChanges()
+	public void discardChanges() throws Exception
 	{
+
+		for (final Map.Entry<String, Block> temp : this.tempBlocks.entrySet())
+		{
+
+			Folder folder = temp.getValue().getParent();
+			folder.remove(temp.getValue().getName());
+		}
+
 		this.tempBlocks.clear();
+
+		for (final Map.Entry<String, Block> deleted : this.deletedBlocks.entrySet())
+		{
+			Folder folder = deleted.getValue().getParent();
+			folder.add(deleted.getValue());
+		}
 		this.deletedBlocks.clear();
+
 	}
 
 	/**
@@ -536,6 +554,12 @@ public class Safe implements Closeable
 				for (final Block block : this.roBlocks.values())
 				{
 
+					if (this.deletedBlocks.containsKey(block.getComparablePath()))
+					{
+						probe.fireMessage("Skipping deleted block " + block.getPath());
+						continue;
+					}
+
 					probe.fireMessage("Writing block " + block.getPath());
 					this.original.seek(block.getOffset());
 					write(this.original, block.getLength(), destination, this.bufferSize, probe);
@@ -547,6 +571,13 @@ public class Safe implements Closeable
 				final RandomAccessFile temp = getTemp();
 				for (final Block block : this.tempBlocks.values())
 				{
+
+					if (this.deletedBlocks.containsKey(block.getComparablePath()))
+					{
+						probe.fireMessage("Skipping deleted block " + block.getPath());
+						continue;
+					}
+
 					probe.fireMessage("Writing block " + block.getPath());
 					temp.seek(block.getOffset());
 					write(temp, block.getLength(), destination, this.bufferSize, probe);
@@ -561,9 +592,15 @@ public class Safe implements Closeable
 
 				close();
 
-				probe.fireMessage("Renaming files");
-				if (!this.originalFile.renameTo(new File(this.originalFile.getAbsolutePath() + "." + FILE_NAME_FORMATTER.format(LocalDateTime.now()))))
-					throw new IOException("Unable to rename " + this.originalFile.getAbsolutePath());
+				probe.fireMessage("Deleting old file");
+
+				if (!this.originalFile.delete())
+					throw new IOException("Unable to delete " + this.originalFile.getAbsolutePath());
+
+				// if (!this.originalFile.renameTo(new File(this.originalFile.getAbsolutePath() + "." + DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(LocalDateTime.now()))))
+				// throw new IOException("Unable to rename " + this.originalFile.getAbsolutePath());
+
+				probe.fireMessage("Renaming file");
 
 				if (!newFile.renameTo(this.originalFile))
 					throw new IOException("Unable to rename " + newFile.getAbsolutePath());
@@ -697,7 +734,7 @@ public class Safe implements Closeable
 	{
 		return root;
 	}
-	
+
 	public File getFile()
 	{
 		return this.originalFile;
@@ -713,8 +750,6 @@ public class Safe implements Closeable
 		return tempFile;
 	}
 
-	
-	
 	/**
 	 * Get the temporary safe file
 	 * 

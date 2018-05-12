@@ -76,7 +76,7 @@ public class CommandTest
 	public void test() throws Exception
 	{
 
-		Bootstrap.main(new String[0]);
+		Bootstrap.displayMessage();
 
 		/**
 		 * Init
@@ -89,6 +89,10 @@ public class CommandTest
 		CommandLine.call(new Bootstrap(), System.err, args);
 
 		assertTrue(safeFile.exists());
+
+		// try to init on existing file
+		args = new String[] { "init", "--password", "mypassword", safeFile.getAbsolutePath(), "--header", "headerKey", "headerValue", "--property", "safePropertyKey", "safePropertyValue" };
+		CommandLine.call(new Bootstrap(), System.err, args);
 
 		/**
 		 * Add
@@ -117,6 +121,22 @@ public class CommandTest
 			throw new Exception("System file " + systemFile.getAbsolutePath() + " not found");
 
 		final String safeFolderPath = Folder.ROOT_NAME + Folder.DELIMITER + "folder";
+
+		// no destination
+		args = new String[] { "add", "--password", "mypassword", safeFile.getAbsolutePath(), "-pp", "filePropertyKey", "filePropertyValue", systemFile.getAbsolutePath(), "404" };
+		Bootstrap.main(args);
+
+		// no source
+		args = new String[] { "add", "--password", "mypassword", safeFile.getAbsolutePath(), "-m", "-pp", "filePropertyKey", "filePropertyValue", systemFile.getAbsolutePath() + "404",
+				safeFolderPath };
+		Bootstrap.main(args);
+
+		// add folder
+		args = new String[] { "add", "--password", "mypassword", safeFile.getAbsolutePath(), "-m", "-pp", "filePropertyKey", "filePropertyValue", systemFile.getParentFile().getAbsolutePath(),
+				safeFolderPath };
+		Bootstrap.main(args);
+
+		// add file
 		args = new String[] { "add", "--password", "mypassword", safeFile.getAbsolutePath(), "-m", "-pp", "filePropertyKey", "filePropertyValue", systemFile.getAbsolutePath(), safeFolderPath };
 		Bootstrap.main(args);
 
@@ -127,6 +147,9 @@ public class CommandTest
 		CommandLine.call(new Bootstrap(), System.err, args);
 
 		args = new String[] { "ls", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName() };
+		CommandLine.call(new Bootstrap(), System.err, args);
+
+		args = new String[] { "ls", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getParentFile().getName() };
 		CommandLine.call(new Bootstrap(), System.err, args);
 
 		/**
@@ -162,7 +185,7 @@ public class CommandTest
 
 		final File extractTargetSystemFile = new File(extractTargetSystemFolder, systemFile.getName());
 		if (extractTargetSystemFile.exists())
-			throw new Exception("Extract target file " + safeFile.getAbsolutePath() + " already exists");
+			throw new Exception("Extract target file " + extractTargetSystemFile.getAbsolutePath() + " already exists");
 
 		// extract to non existent directory
 		args = new String[] { "extract", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName(),
@@ -203,6 +226,19 @@ public class CommandTest
 
 		assertTrue(!extractTargetSystemFile.exists());
 
+		// extract folder
+
+		final File extractTargetSystemDirectory = new File(extractTargetSystemFolder, systemFile.getParentFile().getName());
+		if (extractTargetSystemDirectory.exists())
+			throw new Exception("Extract target directory " + extractTargetSystemDirectory.getAbsolutePath() + " already exists");
+
+		args = new String[] { "extract", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getParentFile().getName(),
+				extractTargetSystemFolder.getAbsolutePath() };
+		Bootstrap.main(args);
+
+		assertTrue(extractTargetSystemDirectory.exists());
+		assertTrue(new File(extractTargetSystemDirectory, systemFile.getName()).exists());
+
 		/**
 		 * Delete
 		 */
@@ -211,13 +247,24 @@ public class CommandTest
 				extractTargetSystemFolder.getAbsolutePath() };
 		Bootstrap.main(args);
 
+		// delete folder from safe
+		args = new String[] { "rm", "--password", "mypassword", "-f", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getParentFile().getName() };
+		Bootstrap.main(args);
+
 		// delete file from safe
-		args = new String[] { "rm", "--password", "mypassword", "-f", safeFile.getAbsolutePath(), safeFolderPath, extractTargetSystemFolder.getAbsolutePath() };
+		args = new String[] { "rm", "--password", "mypassword", "-f", safeFile.getAbsolutePath(), safeFolderPath };
 		Bootstrap.main(args);
 
 		// extract deleted file
 		args = new String[] { "extract", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName(),
 				extractTargetSystemFolder.getAbsolutePath() };
+		Bootstrap.main(args);
+
+		/**
+		 * GUI
+		 */
+
+		args = new String[] { "gui" };
 		Bootstrap.main(args);
 
 	}

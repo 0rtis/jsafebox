@@ -159,7 +159,7 @@ public class Utils
 		}
 
 		if (baseDirectory == null)
-			throw new IOException("Could not locate base directory '" + tokens[0]+"'");
+			throw new IOException("Could not locate base directory '" + tokens[0] + "'");
 
 		Path path = baseDirectory;
 		for (int i = 1; i < tokens.length; i++)
@@ -192,6 +192,12 @@ public class Utils
 			@Override
 			public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException
 			{
+				if (pathMatcher.matches(dir))
+				{
+					destination.add(dir.toFile());
+					return FileVisitResult.SKIP_SUBTREE;
+				}
+
 				return FileVisitResult.CONTINUE;
 			}
 
@@ -227,14 +233,17 @@ public class Utils
 
 		final String name = file.getName().toUpperCase();
 
-		if (name.endsWith(".JPG") || name.endsWith(".JPEG"))
+		if (name.endsWith(".TXT"))
+			return "text/plain";
+		else if (name.endsWith(".HTM") || name.endsWith(".HTML"))
+			return "text/html";
+		else if (name.endsWith(".JPG") || name.endsWith(".JPEG"))
 			return "image/jpg";
 		else if (name.endsWith(".PNG"))
 			return "image/png";
 		else if (name.endsWith(".BM") || name.endsWith(".BMP"))
 			return "image/bmp";
-		else if (name.endsWith(".TXT"))
-			return "text/plain";
+
 		else if (name.endsWith(".PDF"))
 			return "application/pdf";
 		else if (name.endsWith(".AVI"))

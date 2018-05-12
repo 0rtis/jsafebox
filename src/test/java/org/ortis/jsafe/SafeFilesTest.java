@@ -214,6 +214,9 @@ public class SafeFilesTest
 			assertEquals(1, matches.size());
 			assertEquals(root, matches.get(0));
 
+			matches = SafeFiles.match("../*", folder, root, new ArrayList<>());
+			assertEquals(4, matches.size());
+
 			matches = SafeFiles.match(Folder.WILDCARD, root, root, new ArrayList<>());
 			assertEquals(4, matches.size());
 			contains(root.getName() + Folder.DELIMITER + "1", matches);

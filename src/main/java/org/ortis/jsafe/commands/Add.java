@@ -102,25 +102,18 @@ public class Add implements Callable<Void>
 				Utils.parseSystemPath(this.paths[i], sources);
 
 			for (final File source : sources)
-			{
 				if (!source.exists())
 					throw new Exception("File '" + source + "' does not exist");
-
-				if (!source.isFile())
-					throw new Exception("Path '" + source + "' is not a file");
-
-			}
 
 			for (final File source : sources)
 			{
 				final Map<String, String> props = new TreeMap<>(properties);
-				log.info("Encrypting " + source );
+				log.info("Encrypting " + source);
 				add(source, props, safe, folder, null);
 			}
 
 			log.info("Writting safe file...");
 			safe.save().close();
-			;
 			log.info("Done");
 
 		} catch (final Exception e)
@@ -164,6 +157,9 @@ public class Add implements Callable<Void>
 				props.put(Block.NAME_LABEL, Utils.sanitizeToken(source.getName(), Environment.getSubstitute()));
 				props.put("content-type", Utils.getMIMEType(source));
 
+				
+				
+				
 				adaper.fireMessage("Encrypting " + source + " to " + props.get(Block.PATH_LABEL));
 
 				final FileInputStream fis = new FileInputStream(source);

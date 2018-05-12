@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright 2018 Ortis (cao.ortis.org@gmail.com)
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under the License.
+ ******************************************************************************/
 
 package org.ortis.jsafe.gui;
 
@@ -10,6 +20,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -108,6 +120,8 @@ public class LoginFrame implements ActionListener
 		field.requestFocus();
 		field.selectAll();
 
+		
+
 	}
 
 	/**
@@ -134,6 +148,28 @@ public class LoginFrame implements ActionListener
 			field.setText("Select a safe or create a new one");
 		} else
 			field.setText(pastPaths[0]);
+		
+		
+		field.addKeyListener(new KeyListener()
+		{
+			
+			@Override
+			public void keyTyped(final KeyEvent e)
+			{
+				if (e.getKeyChar() == '\n')
+					openButton.doClick();
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e)
+			{
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e)
+			{
+			}
+		});
 
 		browseButton = new JButton("Browse");
 		browseButton.addActionListener(this);
@@ -241,7 +277,11 @@ public class LoginFrame implements ActionListener
 				});
 				dialog.setVisible(true);
 
-				int action = (int) optionPane.getValue();
+				 Integer action = (Integer) optionPane.getValue();
+
+				if (action == null)
+					return;
+				
 				if (action == 0)
 				{
 					final char [] pwd1 = pwd.getPassword();
@@ -274,6 +314,11 @@ public class LoginFrame implements ActionListener
 					});
 					dialog.setVisible(true);
 
+					action = (Integer) optionPane.getValue();
+
+					if (action == null)
+						return;
+					
 					action = (int) optionPane.getValue();
 					if (action == 0)
 					{
@@ -321,6 +366,7 @@ public class LoginFrame implements ActionListener
 					destination = jfc.getSelectedFile();
 					this.configuration.addSafeFilePath(destination.getAbsolutePath());
 					this.comboBox.setSelectedItem(destination.getAbsolutePath());
+					this.openButton.requestFocus();
 				}
 
 		} else if (event.getActionCommand().equals(this.openButton.getActionCommand()))
@@ -369,16 +415,17 @@ public class LoginFrame implements ActionListener
 				});
 				dialog.setVisible(true);
 
-				int action = (int) optionPane.getValue();
-				if (action == 0)
-				{
+				Integer action = (Integer) optionPane.getValue();
+				if (action != null)
+					if (action == 0)
+					{
 
-					final ProgressDialog pd = new ProgressDialog(this.frame);
-					pd.setTitle("Opening safe...");
-					final OpenTask saveTask = new OpenTask(safeFile, pwd.getPassword(), this);
-					pwd.setText("");
-					pd.monitor(saveTask, "Opening safe...");
-				}
+						final ProgressDialog pd = new ProgressDialog(this.frame);
+						pd.setTitle("Opening safe...");
+						final OpenTask saveTask = new OpenTask(safeFile, pwd.getPassword(), this);
+						pwd.setText("");
+						pd.monitor(saveTask, "Opening safe...");
+					}
 			}
 
 		}

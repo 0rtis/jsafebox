@@ -162,10 +162,7 @@ public abstract class SafeFiles
 
 		final String [] tokens = path.split(Folder.REGEX_DELIMITER);
 
-		if (tokens.length == 0)
-			return;
-
-		final String [] comparableTokens = path.toUpperCase(Environment.getLocale()).split(Folder.REGEX_DELIMITER);
+				final String [] comparableTokens = path.toUpperCase(Environment.getLocale()).split(Folder.REGEX_DELIMITER);
 
 		if (comparableTokens[0].trim().equals(Folder.ROOT_NAME))
 		{

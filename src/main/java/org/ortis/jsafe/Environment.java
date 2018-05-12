@@ -43,9 +43,11 @@ public abstract class Environment
 		chars.add('<');
 		chars.add('>');
 		chars.add('|');
-	chars.add('\u0000');
-		
-		chars.remove((Character)Folder.DELIMITER);
+		chars.add('\u0000');
+		chars.add('\n');
+		chars.add('\t');
+
+		chars.remove((Character) Folder.DELIMITER);
 
 		FORBIDEN_CHARS = Collections.unmodifiableList(chars);
 
@@ -58,10 +60,6 @@ public abstract class Environment
 		setLogger(log);
 	}
 
-	
-	
-	
-	
 	public static void setLogger(final Logger log)
 	{
 		synchronized (logSync)
