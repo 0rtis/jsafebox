@@ -76,7 +76,7 @@ public class CommandTest
 	public void test() throws Exception
 	{
 
-		Bootstrap.main(new String[] { "something to trigger ascii art display" });
+		new Bootstrap().call();
 
 		/**
 		 * Init
@@ -247,7 +247,11 @@ public class CommandTest
 				extractTargetSystemFolder.getAbsolutePath() };
 		Bootstrap.main(args);
 
-		// delete folder from safe
+		// delete non empty folder from safe
+		args = new String[] { "rm", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getParentFile().getName() };
+		Bootstrap.main(args);
+
+		// delete non empty folder from safe (force)
 		args = new String[] { "rm", "--password", "mypassword", "-f", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getParentFile().getName() };
 		Bootstrap.main(args);
 

@@ -2,9 +2,12 @@
 package org.ortis.jsafe.gui.viewers;
 
 import java.awt.BorderLayout;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -13,6 +16,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+
+import org.ortis.jsafe.gui.SafeExplorer;
 
 public class TextViewer extends JFrame implements ActionListener
 {
@@ -65,6 +70,14 @@ public class TextViewer extends JFrame implements ActionListener
 		wordWrapMenuItem.addActionListener(this);
 		mnNewMenu.add(wordWrapMenuItem);
 
+		
+		final List<Image> icons = new ArrayList<>();
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-txt-16.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-txt-32.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-txt-64.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-txt-100.png")));
+		setIconImages(icons);
+		
 		setSize(Toolkit.getDefaultToolkit().getScreenSize().width / 2, Toolkit.getDefaultToolkit().getScreenSize().height * 2 / 3);
 		setLocation(Toolkit.getDefaultToolkit().getScreenSize().width / 2 - getSize().width / 2, Toolkit.getDefaultToolkit().getScreenSize().height / 2 - getSize().height / 2);
 

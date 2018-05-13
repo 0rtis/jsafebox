@@ -105,7 +105,6 @@ public class Delete implements Callable<Void>
 				@Override
 				public void onException(Task task, Exception exception)
 				{
-					System.out.println();
 				}
 
 				@Override

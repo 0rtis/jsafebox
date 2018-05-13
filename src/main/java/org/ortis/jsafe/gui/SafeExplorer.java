@@ -23,6 +23,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -32,7 +33,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -283,6 +283,41 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 	}
 
+	private void openNode(final SafeFileTreeNode node)
+	{
+		SafeFile file = (SafeFile) node.getUserObject();
+		if (file.isBlock())
+		{
+			final Block block = (Block) file;
+
+			final String mime = block.getProperties().get("content-type");
+			if (mime != null)
+				if (mime.startsWith("text"))
+				{
+					try
+					{
+						final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						safe.extract(block, baos);
+						final String text = new String(baos.toByteArray());// use local charset
+						final TextViewer viewer = new TextViewer(text);
+						viewer.setTitle(explorerFrame.getTitle() + " - " + block.getPath());
+						viewer.addWindowListener(SafeExplorer.this);
+						viewer.setVisible(true);
+
+					} catch (final Exception exception)
+					{
+						new ErrorDialog(explorerFrame, "Error while opening text viewer", exception).setVisible(true);
+					}
+
+				} else if (mime.startsWith("image"))
+				{
+
+				}
+
+		}
+
+	}
+
 	private void configUI()
 	{
 
@@ -359,38 +394,8 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 						if (e.getClickCount() == 2)
 						{
-
-							SafeFile file = (SafeFile) node.getUserObject();
-							if (file.isBlock())
-							{
-								final Block block = (Block) file;
-
-								final String mime = block.getProperties().get("content-type");
-								if (mime != null)
-									if (mime.startsWith("text"))
-									{
-										try
-										{
-											final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-											safe.extract(block, baos);
-											final String text = new String(baos.toByteArray());// use local charset
-											final TextViewer viewer = new TextViewer(text);
-											viewer.addWindowListener(SafeExplorer.this);
-											viewer.setVisible(true);
-
-										} catch (final Exception exception)
-										{
-											new ErrorDialog(explorerFrame, "Error while opening text viewer", exception).setVisible(true);
-										}
-
-									} else if (mime.startsWith("image"))
-									{
-
-									}
-
-							}
-						}
-						if (SwingUtilities.isRightMouseButton(e))
+							openNode(sfNode);
+						} else if (SwingUtilities.isRightMouseButton(e))
 						{
 							tree.setSelectionRow(selRow);
 							final SafeFileNodePopupMenu menu = new SafeFileNodePopupMenu(tree, sfNode);
@@ -402,6 +407,36 @@ public class SafeExplorer implements WindowListener, ActionListener
 		};
 		tree.addMouseListener(ml);
 
+		final KeyListener kl = new KeyListener()
+		{
+
+			@Override
+			public void keyTyped(final KeyEvent e)
+			{
+				if (e.getKeyChar() == '\n')
+				{
+
+					final DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+					if (node.getParent() != null)
+					{
+						final SafeFileTreeNode sfNode = (SafeFileTreeNode) node;
+						openNode(sfNode);
+					}
+				}
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e)
+			{
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e)
+			{
+			}
+		};
+
+		tree.addKeyListener(kl);
 		tree.setEditable(true);
 
 		leftPanel.add(tree);
@@ -540,6 +575,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-16.png")));
 		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-32.png")));
 		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-64.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-100.png")));
 		explorerFrame.setIconImages(icons);
 
 		explorerFrame.setSize(Toolkit.getDefaultToolkit().getScreenSize().width * 2 / 3, Toolkit.getDefaultToolkit().getScreenSize().height * 2 / 3);

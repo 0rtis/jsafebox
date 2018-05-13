@@ -187,46 +187,28 @@ public class LoginFrame implements ActionListener
 		openButton = new JButton("Open");
 		openButton.addActionListener(this);
 		GroupLayout gl_main = new GroupLayout(main);
-		gl_main.setHorizontalGroup(
-			gl_main.createParallelGroup(Alignment.TRAILING)
+		gl_main.setHorizontalGroup(gl_main.createParallelGroup(Alignment.TRAILING)
 				.addGroup(gl_main.createSequentialGroup()
-					.addGroup(gl_main.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_main.createSequentialGroup()
-							.addContainerGap()
-							.addComponent(comboBox, 0, 335, Short.MAX_VALUE)
-							.addGap(18))
-						.addGroup(gl_main.createSequentialGroup()
-							.addComponent(lblNewLabel_1, GroupLayout.PREFERRED_SIZE, 292, GroupLayout.PREFERRED_SIZE)
-							.addGap(73)))
-					.addGap(6)
-					.addGroup(gl_main.createParallelGroup(Alignment.TRAILING)
-						.addComponent(browseButton, GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE)
-						.addComponent(openButton, GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE)
-						.addComponent(newButton, GroupLayout.DEFAULT_SIZE, 87, Short.MAX_VALUE))
-					.addContainerGap())
-		);
-		gl_main.setVerticalGroup(
-			gl_main.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_main.createSequentialGroup()
-					.addGroup(gl_main.createParallelGroup(Alignment.TRAILING)
-						.addGroup(gl_main.createSequentialGroup()
-							.addComponent(newButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.UNRELATED)
-							.addComponent(browseButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.UNRELATED)
-							.addComponent(openButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE))
-						.addGroup(gl_main.createSequentialGroup()
-							.addComponent(lblNewLabel_1)
-							.addGap(45)
-							.addComponent(comboBox, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)))
-					.addGap(93))
-		);
+						.addGroup(gl_main.createParallelGroup(Alignment.LEADING).addGroup(gl_main.createSequentialGroup().addContainerGap().addComponent(comboBox, 0, 335, Short.MAX_VALUE).addGap(18))
+								.addGroup(gl_main.createSequentialGroup().addComponent(lblNewLabel_1, GroupLayout.PREFERRED_SIZE, 292, GroupLayout.PREFERRED_SIZE).addGap(73)))
+						.addGap(6)
+						.addGroup(gl_main.createParallelGroup(Alignment.TRAILING).addComponent(browseButton, GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE)
+								.addComponent(openButton, GroupLayout.PREFERRED_SIZE, 87, GroupLayout.PREFERRED_SIZE).addComponent(newButton, GroupLayout.DEFAULT_SIZE, 87, Short.MAX_VALUE))
+						.addContainerGap()));
+		gl_main.setVerticalGroup(gl_main.createParallelGroup(Alignment.LEADING).addGroup(gl_main.createSequentialGroup()
+				.addGroup(gl_main.createParallelGroup(Alignment.TRAILING)
+						.addGroup(gl_main.createSequentialGroup().addComponent(newButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE).addPreferredGap(ComponentPlacement.UNRELATED)
+								.addComponent(browseButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE).addPreferredGap(ComponentPlacement.UNRELATED)
+								.addComponent(openButton, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE))
+						.addGroup(gl_main.createSequentialGroup().addComponent(lblNewLabel_1).addGap(45).addComponent(comboBox, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)))
+				.addGap(93)));
 		main.setLayout(gl_main);
 
 		final List<Image> icons = new ArrayList<>();
 		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-16.png")));
 		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-32.png")));
 		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-64.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-100.png")));
 		frame.setIconImages(icons);
 
 		frame.setSize(Toolkit.getDefaultToolkit().getScreenSize().width * 1 / 4, Toolkit.getDefaultToolkit().getScreenSize().height * 1 / 5);
