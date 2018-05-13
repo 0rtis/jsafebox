@@ -55,7 +55,12 @@ The following datagrams (from 2 to N) are the encrypted files. They work by pair
 
 
 
-
+### Donation
+Like the project? Consider making a donation ! 
+ETH & ERC-20: 0xaE247d13763395aD0B2BE574802B2E8B97074946
+BTC: 18tJbEM2puwPBhTmbBkqKFzRdpwoq4Ja2a
+BCH: 16b8T1LB3ViBUfePCMuRfZhUiZaV7tUxGn
+LTC: Lgi89D1AmniNS8cxyQmXJhKm9SCXt8fQWC
 
 ### TODO
 - [x] Command line
@@ -78,3 +83,8 @@ JSafe is a portable application. No installation is required. Just run the JAR i
 
 
 *JSafe is using the mighty tiny [picocli](https://github.com/remkop/picocli)*
+
+
+
+
+
