@@ -63,12 +63,12 @@ The following datagrams (from 2 to N) are the encrypted files. They work by pair
 - [x] File explorer
 - [x] Import with Drag & Drop
 - [ ] Export with Drag & Drop
-- [ ] Text viewer
+- [x] Text viewer
 - [ ] Picture viewer
 - [ ] Interactive shell
 
 ### Download
-**This project is still under development and file loss might occur. Make sure to have a backup of your files !**
+**This project is still under development and file loss may occur. Make sure to have a backup of your files !**
 
 You can download the latest version of JSafe [here]()
 

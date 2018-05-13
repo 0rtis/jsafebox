@@ -87,6 +87,7 @@ import org.ortis.jsafe.gui.tree.SafeFileTreeCellRenderer;
 import org.ortis.jsafe.gui.tree.SafeFileTreeNode;
 import org.ortis.jsafe.gui.tree.SafeTreeCellEditor;
 import org.ortis.jsafe.gui.tree.SafeTreeModel;
+import org.ortis.jsafe.gui.viewers.TextViewer;
 
 public class SafeExplorer implements WindowListener, ActionListener
 {
@@ -94,6 +95,8 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 	private final static String TITLE = "JSafe";
 	private final Configuration configuration;
+
+	private final List<JFrame> frames = new ArrayList<>();
 
 	private JFrame explorerFrame;
 
@@ -357,7 +360,35 @@ public class SafeExplorer implements WindowListener, ActionListener
 						if (e.getClickCount() == 2)
 						{
 
-							System.out.println(node.getUserObject());
+							SafeFile file = (SafeFile) node.getUserObject();
+							if (file.isBlock())
+							{
+								final Block block = (Block) file;
+
+								final String mime = block.getProperties().get("content-type");
+								if (mime != null)
+									if (mime.startsWith("text"))
+									{
+										try
+										{
+											final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+											safe.extract(block, baos);
+											final String text = new String(baos.toByteArray());// use local charset
+											final TextViewer viewer = new TextViewer(text);
+											viewer.addWindowListener(SafeExplorer.this);
+											viewer.setVisible(true);
+
+										} catch (final Exception exception)
+										{
+											new ErrorDialog(explorerFrame, "Error while opening text viewer", exception).setVisible(true);
+										}
+
+									} else if (mime.startsWith("image"))
+									{
+
+									}
+
+							}
 						}
 						if (SwingUtilities.isRightMouseButton(e))
 						{
@@ -578,50 +609,56 @@ public class SafeExplorer implements WindowListener, ActionListener
 	@Override
 	public void windowOpened(WindowEvent e)
 	{
+		final JFrame jframe = (JFrame) e.getSource();
+		this.frames.add(jframe);
+
 	}
 
 	@Override
 	public void windowClosing(final WindowEvent event)
 	{
 
-		if (this.safe != null)
+		if (event.getSource() == this.explorerFrame)
 		{
-
-			if (modificationPending.get())
+			if (this.safe != null)
 			{
 
-				final JOptionPane optionPane = new JOptionPane("Exit without saving ?", JOptionPane.WARNING_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
-				final JDialog dialog = optionPane.createDialog(this.explorerFrame, "Warning");
-				dialog.addKeyListener(new KeyAdapter()
+				if (modificationPending.get())
 				{
-					public void keyPressed(KeyEvent ke)
-					{ // handler
-						if (ke.getKeyCode() == KeyEvent.VK_ESCAPE)
-							dialog.dispose();
-					}
-				});
 
-				dialog.setVisible(true);
+					final JOptionPane optionPane = new JOptionPane("Exit without saving ?", JOptionPane.WARNING_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+					final JDialog dialog = optionPane.createDialog(this.explorerFrame, "Warning");
+					dialog.addKeyListener(new KeyAdapter()
+					{
+						public void keyPressed(KeyEvent ke)
+						{ // handler
+							if (ke.getKeyCode() == KeyEvent.VK_ESCAPE)
+								dialog.dispose();
+						}
+					});
 
-				final Integer action = (Integer) optionPane.getValue();
+					dialog.setVisible(true);
 
-				if (action == null || action != JOptionPane.YES_OPTION)
-					return;
+					final Integer action = (Integer) optionPane.getValue();
 
+					if (action == null || action != JOptionPane.YES_OPTION)
+						return;
+
+				}
+
+				statusLabel.setText("Closing safe...");
+				try
+				{
+					this.safe.close();
+				} catch (final Exception e)
+				{
+					new ErrorDialog(this.explorerFrame, "Error while closing safe", e).setVisible(true);
+
+				}
 			}
 
-			statusLabel.setText("Closing safe...");
-			try
-			{
-				this.safe.close();
-			} catch (final Exception e)
-			{
-				new ErrorDialog(this.explorerFrame, "Error while closing safe", e).setVisible(true);
-
-			}
+			this.explorerFrame.dispose();
 		}
-
-		this.explorerFrame.dispose();
 
 	}
 
@@ -636,7 +673,15 @@ public class SafeExplorer implements WindowListener, ActionListener
 			e.printStackTrace();
 		}
 
-		System.exit(0);
+		final JFrame frame = (JFrame) event.getSource();
+		frames.remove(frame);
+
+		if (frames.size() == 0)
+		{
+			System.out.println("Exiting.");
+			System.exit(0);
+
+		}
 	}
 
 	@Override

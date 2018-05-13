@@ -69,10 +69,11 @@ public class Bootstrap implements Callable<Void>
 				new GUI().call();
 			} catch (final Exception e)
 			{
-				CommandLine.call(new Bootstrap(), System.err, args);
-			}
 
-		
+			}
+		else
+			CommandLine.call(new Bootstrap(), System.err, args);
+
 	}
 
 }
