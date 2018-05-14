@@ -2,11 +2,11 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <name>jsafe</name>
+  <name>jsafebox</name>
   <url>http://maven.apache.org</url>
 
   <groupId>org.ortis</groupId>
-  <artifactId>jsafe</artifactId>
+  <artifactId>jsafebox</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
@@ -25,7 +25,7 @@
 		                <archive>
 		                <manifest>
 		                    <mainClass>
-		                        org.ortis.jsafe.commands.Bootstrap
+		                        org.ortis.jsafebox.commands.Bootstrap
 		                    </mainClass>
 		                </manifest>
 		                </archive>

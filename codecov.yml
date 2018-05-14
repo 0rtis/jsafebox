@@ -1,3 +1,2 @@
 ignore:
- - "src/main/java/org/ortis/jsafe/gui"  # ignore gui
-# - "src/main/java/org/ortis/jsafe/commands"  # ignore command
+ - "src/main/java/org/ortis/jsafebox/gui"  # ignore gui
