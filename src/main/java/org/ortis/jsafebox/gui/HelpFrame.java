@@ -14,13 +14,18 @@ package org.ortis.jsafebox.gui;
 import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
+import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
@@ -40,8 +45,6 @@ public class HelpFrame extends JFrame
 
 		setPreferredSize(new Dimension(parentFrame.getWidth() / 2, parentFrame.getHeight()));
 		setSize(getPreferredSize());
-
-		setSize(new Dimension(400, 400));
 
 		setLocationRelativeTo(parentFrame);
 
@@ -84,8 +87,17 @@ public class HelpFrame extends JFrame
 			}
 		});
 
-		getContentPane().add(textPane, BorderLayout.CENTER);
+		final JScrollPane scrollPane = new JScrollPane(textPane);
+		getContentPane().add(scrollPane, BorderLayout.CENTER);
 
+		final List<Image> icons = new ArrayList<>();
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-aide-filled-16.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-aide-filled-32.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-aide-filled-64.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-aide-filled-100.png")));
+		this.setIconImages(icons);
+
+		textPane.setCaretPosition(0);
 	}
 
 }

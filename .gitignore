@@ -3,5 +3,6 @@ bin
 target
 .classpath
 .project
+.recommenders
 .settings
-jsafe.gui.properties
+jsafebox.gui.properties

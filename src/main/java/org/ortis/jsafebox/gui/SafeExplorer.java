@@ -87,6 +87,7 @@ import org.ortis.jsafebox.gui.tree.SafeFileTreeCellRenderer;
 import org.ortis.jsafebox.gui.tree.SafeFileTreeNode;
 import org.ortis.jsafebox.gui.tree.SafeTreeCellEditor;
 import org.ortis.jsafebox.gui.tree.SafeTreeModel;
+import org.ortis.jsafebox.gui.viewers.ImageViewer;
 import org.ortis.jsafebox.gui.viewers.TextViewer;
 
 public class SafeExplorer implements WindowListener, ActionListener
@@ -311,6 +312,18 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 				} else if (mime.startsWith("image"))
 				{
+
+					try
+					{
+
+						final ImageViewer viewer = new ImageViewer(safe, block, explorerFrame.getTitle() + " - ");
+						viewer.addWindowListener(SafeExplorer.this);
+						viewer.setVisible(true);
+
+					} catch (final Exception exception)
+					{
+						new ErrorDialog(explorerFrame, "Error while opening text viewer", exception).setVisible(true);
+					}
 
 				}
 
@@ -682,15 +695,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 				}
 
-				statusLabel.setText("Closing safe...");
-				try
-				{
-					this.safe.close();
-				} catch (final Exception e)
-				{
-					new ErrorDialog(this.explorerFrame, "Error while closing safe", e).setVisible(true);
-
-				}
+				
 			}
 
 			this.explorerFrame.dispose();
@@ -714,6 +719,17 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 		if (frames.size() == 0)
 		{
+			
+			statusLabel.setText("Closing safe...");
+			try
+			{
+				this.safe.close();
+			} catch (final Exception e)
+			{
+				new ErrorDialog(this.explorerFrame, "Error while closing safe", e).setVisible(true);
+
+			}
+			
 			System.out.println("Exiting.");
 			System.exit(0);
 

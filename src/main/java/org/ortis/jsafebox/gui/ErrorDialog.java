@@ -14,10 +14,14 @@ package org.ortis.jsafebox.gui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
@@ -120,7 +124,13 @@ public class ErrorDialog extends JDialog
 		setMinimumSize(new Dimension(parentFrame.getWidth() / 2, parentFrame.getHeight() / 2));
 		setSize(getPreferredSize());
 		setLocationRelativeTo(parentFrame);
-
+		
+		final List<Image> icons = new ArrayList<>();
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-high-priority-filled-16.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-high-priority-filled-32.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-high-priority-filled-64.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-high-priority-filled-100.png")));
+		this.setIconImages(icons);
 	}
 
 }

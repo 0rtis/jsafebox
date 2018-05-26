@@ -34,7 +34,7 @@ JSafebox encrypt your file using [AES](https://en.wikipedia.org/wiki/Advanced_En
 
 ### Why JSafebox ?
 With the rise of online banking, cryptocurrencies and other digital transformation, it has become mandatory to backup sensitive files.
-Those file need to be easily accessible, securely stored and encrypted. But lightweight, portable, cross platform vault software are surprisingly hard to come by. Password protected archive works fine but they let room for file leakage as there is no convenient way of exploring the vault without extracting the whole content.
+Those file need to be easily accessible, securely stored and encrypted. But lightweight, portable, cross platform vault software are surprisingly hard to come by. Password protected archive works fine but they let room for file leakage as there is no convenient way of exploring the vault without extracting the whole content. Jsafebox was made to cover these shortfalls.
 
 
 
@@ -69,7 +69,7 @@ The following datagrams (from 2 to N) are the encrypted files. They work by pair
 ### Download
 **This project is still under development and file loss may occur. Make sure to have a backup of your files !**
 
-You can download the latest version of JSafe [here]()
+You can download the latest version of JSafebox [here]()
 
 *JSafebox is using the mighty tiny [picocli](https://github.com/remkop/picocli)*
 
@@ -79,7 +79,7 @@ JSafebox is a portable application. No installation is required. Just run the JA
 
 
 ### Donation
-Like the project ? Consider making a donation ! 
+Like the project ? Consider making a donation :) 
 
 ETH & ERC-20: _0xaE247d13763395aD0B2BE574802B2E8B97074946_
 

@@ -14,13 +14,18 @@ package org.ortis.jsafebox.gui;
 import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
+import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
@@ -38,9 +43,9 @@ public class AboutFrame extends JFrame
 		setTitle("About");
 		final JFrame parentFrame = safeExplorer.getExplorerFrame();
 
-		setPreferredSize(new Dimension(parentFrame.getWidth() / 2, parentFrame.getHeight()));
+		setPreferredSize(new Dimension(parentFrame.getWidth() / 2, parentFrame.getHeight()*2/3));
 		setSize(getPreferredSize());
-		setResizable(false);
+		setResizable(true);
 		// setSize(new Dimension(400, 400));
 
 		setLocationRelativeTo(parentFrame);
@@ -84,8 +89,19 @@ public class AboutFrame extends JFrame
 			}
 		});
 
-		getContentPane().add(textPane, BorderLayout.CENTER);
+		
+		final JScrollPane scrollPane = new JScrollPane(textPane);
+		getContentPane().add(scrollPane, BorderLayout.CENTER);
 
+		
+		final List<Image> icons = new ArrayList<>();
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-16.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-32.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-64.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-100.png")));
+		this.setIconImages(icons);
+		
+		textPane.setCaretPosition(0);
 	}
 
 }
