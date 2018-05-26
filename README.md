@@ -2,7 +2,7 @@
 [![GitHub license](https://img.shields.io/github/license/0rtis/jsafebox.svg?style=flat-square)](https://github.com/0rtis/jsafebox/blob/master/LICENSE)
 [![Build Status](https://img.shields.io/travis/0rtis/jsafebox.svg?style=flat-square)](https://travis-ci.org/0rtis/jsafebox)
 [![codecov](https://img.shields.io/codecov/c/github/0rtis/jsafebox.svg?style=flat-square)](https://codecov.io/gh/0rtis/jsafebox)
-
+[![Follow @Ortis95](https://img.shields.io/twitter/follow/Ortis95.svg?style=flat-square)](https://twitter.com/intent/follow?screen_name=Ortis95) 
 
 ```
      _.---.._    

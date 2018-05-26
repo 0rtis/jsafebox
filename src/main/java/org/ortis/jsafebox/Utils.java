@@ -49,6 +49,8 @@ public class Utils
 
 	public final static String SEPARATOR_REGEX = "[/|" + Pattern.quote(java.io.File.separator) + "]";
 
+	private final static String SYSTEM_PATH_DELIMITER_REGEX = Pattern.quote(File.separator) + "|" + Pattern.quote("/") + "|" + Pattern.quote("\\");
+
 	public static byte [] passwordToBytes(final char [] chars)
 	{
 		final CharBuffer charBuffer = CharBuffer.wrap(chars);
@@ -109,8 +111,6 @@ public class Utils
 
 		return new Safe(file, cipher, keySpec, iv, bufferSize);
 	}
-
-	private final static String SYSTEM_PATH_DELIMITER_REGEX = Pattern.quote(File.separator) + "|" + Pattern.quote("/") + "|" + Pattern.quote("\\");
 
 	public static List<java.io.File> parseSystemPath(String query, final List<java.io.File> destination) throws IOException
 	{
