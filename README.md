@@ -69,7 +69,7 @@ The following datagrams (from 2 to N) are the encrypted files. They work by pair
 ### Download
 **This project is still under development and file loss may occur. Make sure to have a backup of your files !**
 
-You can download the latest version of JSafebox [here]()
+You can download the latest version of JSafebox [here](https://github.com/0rtis/jsafebox/releases/latest)
 
 *JSafebox is using the mighty tiny [picocli](https://github.com/remkop/picocli)*
 
