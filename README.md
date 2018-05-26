@@ -62,7 +62,7 @@ The following datagrams (from 2 to N) are the encrypted files. They work by pair
 - [x] Import with Drag & Drop
 - [ ] Export with Drag & Drop
 - [x] Text viewer
-- [ ] Image viewer
+- [x] Image viewer
 - [ ] Interactive shell
 
 
