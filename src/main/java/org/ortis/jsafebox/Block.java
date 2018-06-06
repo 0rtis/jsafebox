@@ -25,6 +25,8 @@ public class Block implements SafeFile
 	private final String comparablePath;
 	private final long offset;
 	private final long length;
+
+
 	private final long metaOffset;
 	private final long metaLength;
 	private final long dataOffset;
@@ -35,17 +37,19 @@ public class Block implements SafeFile
 	private final Folder parent;
 
 	public Block(final String path, final Map<String, String> properties, final long offset, final long length, final long metaOffset, final long metaLength, final long dataOffset,
-			final long dataLength, final Folder parent)
+			final long dataLength,  final Folder parent)
 	{
 		this.path = path;
 		this.comparablePath = path.toUpperCase(Environment.getLocale());
 		this.offset = offset;
 		this.length = length;
+
 		this.metaOffset = metaOffset;
 		this.metaLength = metaLength;
 		this.dataOffset = dataOffset;
 		this.dataLength = dataLength;
 
+	
 		final Map<String, String> props = new LinkedHashMap<>();
 		props.putAll(properties);
 

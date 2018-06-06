@@ -39,7 +39,7 @@ import picocli.CommandLine.Parameters;
  * @author Ortis <br>
  *         2018 Apr 26 8:17:40 PM <br>
  */
-@Command(description = "Delete file", name = "rm", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, showDefaultValues = true)
+@Command(description = "Delete file", name = "rm", mixinStandardHelpOptions = true, version = Safe.VERSION, showDefaultValues = true)
 public class Delete implements Callable<Void>
 {
 

@@ -35,7 +35,7 @@ import picocli.CommandLine.Parameters;
  * @author Ortis <br>
  *         2018 Apr 26 8:16:31 PM <br>
  */
-@Command(description = "List content", name = "ls", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, showDefaultValues = true)
+@Command(description = "List content", name = "ls", mixinStandardHelpOptions = true, version = Safe.VERSION, showDefaultValues = true)
 public class List implements Callable<Void>
 {
 	private final static DecimalFormat BYTE_FORMAT = new DecimalFormat("###,###");

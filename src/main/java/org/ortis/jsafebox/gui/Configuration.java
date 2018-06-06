@@ -26,6 +26,8 @@ public class Configuration extends Properties
 	private static final String SAFE_FILE_LIST_KEY = "safe.files";
 	private static final String AUTOSAVE_KEY = "gui.autosave";
 	private static final String PREVIEW_KEY = "gui.preview";
+	private static final String AUTOHASH_CHECK_KEY = "gui.autohashcheck";
+	
 	private static final String EXTRACT_DIRECTORY_KEY = "extract.directory";
 
 	public void addSafeFilePath(final String path)
@@ -104,6 +106,25 @@ public class Configuration extends Properties
 		if (value == null)
 		{
 			setPreview(true);
+			return true;
+		}
+
+		return Boolean.parseBoolean(value);
+	}
+	
+	
+	public void setAutoHashCheck(final boolean autoHashCheck) 
+	{
+		setProperty(AUTOHASH_CHECK_KEY, Boolean.toString(autoHashCheck));
+	}
+	
+	public boolean getAutoHashCheck()
+	{
+		final String value = getProperty(AUTOHASH_CHECK_KEY);
+
+		if (value == null)
+		{
+			setAutoHashCheck(true);
 			return true;
 		}
 

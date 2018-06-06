@@ -46,7 +46,9 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileSystemView;
+import javax.xml.bind.DatatypeConverter;
 
+import org.ortis.jsafebox.gui.tasks.HashTask;
 import org.ortis.jsafebox.gui.tasks.InitTask;
 import org.ortis.jsafebox.gui.tasks.OpenTask;
 
@@ -373,8 +375,6 @@ public class LoginFrame implements ActionListener
 
 		} else if (event.getActionCommand().equals(this.openButton.getActionCommand()))
 		{
-
-			// final String item = (String) comboBox.getSelectedItem();
 			final String item = getText();
 			File safeFile = new File(item);
 
@@ -422,11 +422,41 @@ public class LoginFrame implements ActionListener
 					if (action == 0)
 					{
 
-						final ProgressDialog pd = new ProgressDialog(this.frame);
-						pd.setTitle("Opening safe...");
-						final OpenTask saveTask = new OpenTask(safeFile, pwd.getPassword(), this);
+						final ProgressDialog openDialog = new ProgressDialog(this.frame);
+						openDialog.setTitle("Opening safe...");
+						final OpenTask openTask = new OpenTask(safeFile, pwd.getPassword(), this);
 						pwd.setText("");
-						pd.monitor(saveTask, "Opening safe...");
+						openDialog.monitor(openTask, "Opening safe...");
+
+						if (openTask.getSafeExplorer() != null && configuration.getAutoHashCheck())
+						{
+							final ProgressDialog hashCheckDialog = new ProgressDialog(openTask.getSafeExplorer().getExplorerFrame());
+							hashCheckDialog.setTitle("Integrity check");
+
+							final HashTask hashTask = new HashTask(openTask.getSafeExplorer().getSafe());
+							hashCheckDialog.monitor(hashTask, "Computing hash...");
+
+							final String expectedHash = DatatypeConverter.printHexBinary(openTask.getSafeExplorer().getSafe().getHash());
+							if (hashTask.getHash() != null)
+								if (!hashTask.getHash().equals(expectedHash))
+								{
+
+									Object [] options = { "Yes (NOT RECOMMENDED)", "No" };
+									final int selectedOptionId = JOptionPane.showOptionDialog(openTask.getSafeExplorer().getExplorerFrame(),
+											"<html><div><b>CARREFULLY READ THIS MESSAGE !!!!!!!!!</b></div><br><div>The hash of the safe is </div><div><b>" + hashTask.getHash()
+													+ "</b></div><div>but was expected to be</div><div><b>" + expectedHash
+													+ "</b></div><br/><div>The content of the file might have been altered. It is strongly advised to use a backup file</div><br/><div>Do you want to continue with the current file ?</div><html>",
+											"Integrity check failed", JOptionPane.WARNING_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, options, options[1]);
+
+									if (selectedOptionId != 0)
+									{
+										System.out.println("Exiting.");
+										System.exit(0);
+									}
+
+								}
+
+						}
 					}
 			}
 

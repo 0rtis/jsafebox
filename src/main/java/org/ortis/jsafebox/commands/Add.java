@@ -41,7 +41,7 @@ import picocli.CommandLine.Parameters;
  * @author Ortis <br>
  *         2018 Apr 26 8:17:40 PM <br>
  */
-@Command(description = "Add file", name = "add", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, showDefaultValues = true)
+@Command(description = "Add file", name = "add", mixinStandardHelpOptions = true, version = Safe.VERSION, showDefaultValues = true)
 public class Add implements Callable<Void>
 {
 

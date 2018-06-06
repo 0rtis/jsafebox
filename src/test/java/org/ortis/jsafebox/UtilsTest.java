@@ -18,21 +18,20 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.ortis.jsafebox.Safe;
-import org.ortis.jsafebox.Utils;
 
 public class UtilsTest
 {
@@ -80,18 +79,24 @@ public class UtilsTest
 		final String safeFileName = TestUtils.randomString(random, 10) + ".safe";
 		final File safeFile = new File(folder, safeFileName);
 
-		final MessageDigest md = MessageDigest.getInstance("SHA-256");
 		final String password = TestUtils.randomString(random, 12);
-		final byte [] key = Arrays.copyOf(md.digest(md.digest(password.getBytes())), 128 >> 3);
+
+		final SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+		final byte [] salt = new byte[16];
+		random.nextBytes(salt);
+
+		PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, Safe.PBKDF2_ITERATION, 128);
+		SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+		final byte [] key = skf.generateSecret(spec).getEncoded();
 
 		final Map<String, String> header = new HashMap<>();
 		header.put(Safe.ENCRYPTION_LABEL, "AES/CBC/PKCS5Padding");
 		header.put(Safe.KEY_ALGO_LABEL, "AES");
 
-		final SecureRandom random = new SecureRandom();
-		final byte [] iv = new byte[16];
-		random.nextBytes(iv);
-		header.put(Safe.ENCRYPTION_IV_LABEL, Safe.GSON.toJson(iv));
+		header.put(Safe.ENCRYPTION_IV_LENGTH_LABEL, Integer.toString(16));
+		header.put(Safe.PBKDF2_SALT_LABEL, Safe.GSON.toJson(salt));
+		header.put(Safe.PBKDF2_ITERATION_LABEL, Integer.toString(Safe.PBKDF2_ITERATION));
+
 		header.put(Safe.PROTOCOL_SPEC_LABEL, Safe.PROTOCOL_SPEC);
 		header.put(TestUtils.randomString(random, 5), TestUtils.randomString(random, 20));
 		header.put(TestUtils.randomString(random, 5), TestUtils.randomString(random, 20));

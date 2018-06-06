@@ -42,7 +42,7 @@ import picocli.CommandLine.Parameters;
  * @author Ortis <br>
  *         2018 Apr 26 8:16:54 PM <br>
  */
-@Command(description = "Extract file from the safe", name = "extract", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, showDefaultValues = true)
+@Command(description = "Extract file from the safe", name = "extract", mixinStandardHelpOptions = true, version = Safe.VERSION, showDefaultValues = true)
 public class Extract implements Callable<Void>
 {
 

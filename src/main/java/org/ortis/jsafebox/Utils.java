@@ -18,7 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
@@ -27,15 +27,14 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -54,7 +53,7 @@ public class Utils
 	public static byte [] passwordToBytes(final char [] chars)
 	{
 		final CharBuffer charBuffer = CharBuffer.wrap(chars);
-		final ByteBuffer byteBuffer = Charset.forName(Safe.UTF8).encode(charBuffer);
+		final ByteBuffer byteBuffer = StandardCharsets.UTF_8.encode(charBuffer);
 		final byte [] bytes = Arrays.copyOfRange(byteBuffer.array(), byteBuffer.position(), byteBuffer.limit());
 		Arrays.fill(charBuffer.array(), '\u0000'); // clear sensitive data
 		Arrays.fill(byteBuffer.array(), (byte) 0); // clear sensitive data
@@ -90,26 +89,22 @@ public class Utils
 		if (log != null)
 			log.fine("Encryption type " + encyption);
 
-		final Cipher cipher = javax.crypto.Cipher.getInstance(encyption);
-
 		if (!header.containsKey(Safe.KEY_ALGO_LABEL))
 			throw new Exception("Could not read property '" + Safe.KEY_ALGO_LABEL + "' from header");
 
 		if (log != null)
 			log.fine("Key algorithm " + header.get(Safe.KEY_ALGO_LABEL));
 
-		final MessageDigest md = MessageDigest.getInstance("SHA-256");
-		final byte [] key = Arrays.copyOf(md.digest(md.digest(Utils.passwordToBytes(password))), 128 >> 3);
+		
+		final byte [] salt = (byte [])Safe.GSON.fromJson(header.get(Safe.PBKDF2_SALT_LABEL), Safe.BYTE_ARRAY_TYPE);
+	
+		PBEKeySpec spec = new PBEKeySpec(password, salt, Safe.PBKDF2_ITERATION, 128);
+		SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+		final byte [] key = skf.generateSecret(spec).getEncoded();
+
 		final SecretKeySpec keySpec = new SecretKeySpec(key, header.get(Safe.KEY_ALGO_LABEL));
 
-		final IvParameterSpec iv;
-
-		if (header.containsKey(Safe.ENCRYPTION_IV_LABEL))
-			iv = new IvParameterSpec(Safe.GSON.fromJson(header.get(Safe.ENCRYPTION_IV_LABEL), Safe.BYTE_ARRAY_TYPE));
-		else
-			iv = null;
-
-		return new Safe(file, cipher, keySpec, iv, bufferSize);
+		return new Safe(file, keySpec, bufferSize);
 	}
 
 	public static List<java.io.File> parseSystemPath(String query, final List<java.io.File> destination) throws IOException

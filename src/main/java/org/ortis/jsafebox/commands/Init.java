@@ -13,13 +13,14 @@ package org.ortis.jsafebox.commands;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.MessageDigest;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 import org.ortis.jsafebox.Environment;
 import org.ortis.jsafebox.Safe;
@@ -35,7 +36,7 @@ import picocli.CommandLine.Parameters;
  * @author Ortis <br>
  *         2018 Apr 26 8:16:17 PM <br>
  */
-@Command(description = "Init a new safe", name = "init", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, showDefaultValues = true)
+@Command(description = "Init a new safe", name = "init", mixinStandardHelpOptions = true, version = Safe.VERSION, showDefaultValues = true)
 public class Init implements Callable<Void>
 {
 
@@ -100,7 +101,6 @@ public class Init implements Callable<Void>
 
 	public static void init(final File file, final char [] password, final Map<String, String> header, final Map<String, String> properties, final int bufferSize) throws Exception
 	{
-
 		final Map<String, String> innerProperties = new LinkedHashMap<>();
 		if (properties != null)
 			innerProperties.putAll(properties);
@@ -112,17 +112,20 @@ public class Init implements Callable<Void>
 		innerHeader.put(Safe.PROTOCOL_SPEC_LABEL, Safe.PROTOCOL_SPEC);
 		innerHeader.put(Safe.ENCRYPTION_LABEL, "AES/CBC/PKCS5Padding");
 		innerHeader.put(Safe.KEY_ALGO_LABEL, "AES");
+		innerHeader.put(Safe.ENCRYPTION_IV_LENGTH_LABEL, Integer.toString(16));
 
-		final SecureRandom random = new SecureRandom();
-		final byte [] iv = new byte[16];
-		random.nextBytes(iv);
-		innerHeader.put(Safe.ENCRYPTION_IV_LABEL, Safe.GSON.toJson(iv));
+		final SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+		final byte [] salt = new byte[16];
+		random.nextBytes(salt);
 
-		final MessageDigest md = MessageDigest.getInstance("SHA-256");
+		innerHeader.put(Safe.PBKDF2_SALT_LABEL, Safe.GSON.toJson(salt));
+		innerHeader.put(Safe.PBKDF2_ITERATION_LABEL, Integer.toString(Safe.PBKDF2_ITERATION));
 
-		final byte [] key = Arrays.copyOf(md.digest(md.digest(Utils.passwordToBytes(password))), 128 >> 3);
+		PBEKeySpec spec = new PBEKeySpec(password, salt, Safe.PBKDF2_ITERATION, 128);
+		SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+		final byte [] key = skf.generateSecret(spec).getEncoded();
+
 		Safe.create(file, key, innerHeader, innerProperties, bufferSize).close();
-
 	}
 
 }

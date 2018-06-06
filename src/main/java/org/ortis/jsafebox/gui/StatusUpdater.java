@@ -60,7 +60,7 @@ public class StatusUpdater implements Runnable
 		final long max = runtime.maxMemory() / base;
 
 		final long total = free + used;
-		final double ratio = ((double) used) / total;
+		final double ratio = 100 * ((double) used) / total;
 
 		this.label.setText("  Memory:  " + MEMORY_FORMAT.format(used) + " Kb used  " + MEMORY_FORMAT.format(free) + " Kb free  " + MEMORY_FORMAT.format(max) + " Kb available - "
 				+ RATIO_FORMAT.format(ratio) + " %");

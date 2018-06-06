@@ -13,6 +13,7 @@ package org.ortis.jsafebox.commands;
 
 import java.util.concurrent.Callable;
 
+import org.ortis.jsafebox.Safe;
 import org.ortis.jsafebox.gui.LoginFrame;
 
 import picocli.CommandLine.Command;
@@ -23,7 +24,7 @@ import picocli.CommandLine.Command;
  * @author Ortis <br>
  *         2018 May 08 8:35:11 PM <br>
  */
-@Command(description = "Start the GUI", name = "gui", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, showDefaultValues = true)
+@Command(description = "Start the GUI", name = "gui", mixinStandardHelpOptions = true, version = Safe.VERSION, showDefaultValues = true)
 public class GUI implements Callable<Void>
 {
 

@@ -11,17 +11,15 @@
 
 package org.ortis.jsafebox.commands;
 
-import java.io.ByteArrayOutputStream;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.ortis.jsafebox.Block;
 import org.ortis.jsafebox.Environment;
 import org.ortis.jsafebox.Safe;
-import org.ortis.jsafebox.SafeFile;
-import org.ortis.jsafebox.SafeFiles;
 import org.ortis.jsafebox.Utils;
 
 import picocli.CommandLine.Command;
@@ -34,59 +32,43 @@ import picocli.CommandLine.Parameters;
  * @author Ortis <br>
  *         2018 Apr 26 8:16:54 PM <br>
  */
-@Command(description = "Output file content as text", name = "cat", mixinStandardHelpOptions = true, version = Safe.VERSION, showDefaultValues = true)
-public class Cat implements Callable<Void>
+@Command(description = "Check the integrity hash", name = "hash", mixinStandardHelpOptions = true, version = Safe.VERSION, showDefaultValues = true)
+public class Hash implements Callable<Void>
 {
 
 	@Option(names = { "-pw", "-pwd", "--password" }, description = "Password")
 	private String password;
 
 	@Option(names = { "-b", "--buffer" }, description = "Read buffer size")
-	private int bufferSize = 1024;
+	private int bufferSize = 65536;
 
 	@Parameters(index = "0", arity = "0...1", description = "File path of safe file")
 	private String safeFile;
 
-	@Parameters(index = "1", arity = "1...*", description = "Paths of safe's files to cat")
-	private String [] paths;
-
 	@Override
 	public Void call() throws Exception
 	{
-
+		
 		final Logger log = Environment.getLogger();
 
 		try (final Safe safe = Utils.open(this.safeFile, this.password.toCharArray(), this.bufferSize, log))
 		{
+			System.gc();// Somehow, it looks like the GC is having trouble detecting large heap when using ByteBuffer. So we just call it before and after hash computation
+			final byte [] hash = safe.computeHash(null);
+			System.gc();
 
-			final Set<SafeFile> matches = new LinkedHashSet<>();
-
-			for (int i = 0; i < this.paths.length; i++)
-				SafeFiles.match(this.paths[i], safe.getRootFolder(), safe.getRootFolder(), matches);
-
-			if (matches.isEmpty())
+			final String readableHash = DatatypeConverter.printHexBinary(hash);
+			if (Arrays.equals(hash, safe.getHash()))
+			
+				
+				
+				log.info("Integrity hash " + readableHash + " sucessfully verified");
+			else 
 			{
-				log.info("No file found");
-				return null;
-			}
-
-			for (final SafeFile safeFile : matches)
-			{
-
-				if (!safeFile.isBlock())
-				{
-					log.warning(safeFile + " is not a block");
-
-				} else
-				{
-					final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-					safe.extract(safeFile.getPath(), baos);
-					final StringBuilder sb = new StringBuilder("\n");
-					sb.append(new String(baos.toByteArray()));
-					log.info(safeFile + " -> " + sb.toString());
-				}
-
+				
+				final String expectedHash = DatatypeConverter.printHexBinary(safe.getHash());
+				log.warning("Integrity hash is "+readableHash+" but "+expectedHash+" was expected");
+				log.warning("The content of the file might have been altered. It is strongly advised to revert to a backup file");
 			}
 
 		} catch (final Exception e)

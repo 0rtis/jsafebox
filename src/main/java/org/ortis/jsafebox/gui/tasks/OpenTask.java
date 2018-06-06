@@ -28,6 +28,8 @@ public class OpenTask extends MultipartTask implements GuiTask
 	private char [] password;
 	private final LoginFrame loginFrame;
 
+	
+	private  SafeExplorer safeExplorer;
 	public OpenTask(final File safe, final char [] password, final LoginFrame loginFrame)
 	{
 		this.safe = safe;
@@ -52,7 +54,8 @@ public class OpenTask extends MultipartTask implements GuiTask
 
 				try
 				{
-					final Safe safe = Utils.open(OpenTask.this.safe.getAbsolutePath(), password, 1024 * 8, null);
+					final int buffserSize = 65536;
+					final Safe safe = Utils.open(OpenTask.this.safe.getAbsolutePath(), password, buffserSize, null);
 					return safe;
 
 				} catch (final Exception e)
@@ -74,13 +77,13 @@ public class OpenTask extends MultipartTask implements GuiTask
 				if (OpenTask.this.getException() == null && !OpenTask.this.isCancelled())
 				{
 
-					final SafeExplorer safeExplorer = new SafeExplorer(loginFrame.getConfiguration());
+					OpenTask.this.safeExplorer = new SafeExplorer(loginFrame.getConfiguration());
 
 					try
 					{
-						safeExplorer.setSafe(get());
-						loginFrame.getFrame().dispose();
-						safeExplorer.getExplorerFrame().setVisible(true);
+						OpenTask.this.safeExplorer.setSafe(get());
+						OpenTask.this.loginFrame.getFrame().dispose();
+						OpenTask.this.safeExplorer.getExplorerFrame().setVisible(true);
 
 					} catch (final Exception e)
 					{
@@ -94,6 +97,11 @@ public class OpenTask extends MultipartTask implements GuiTask
 
 		}.execute();
 
+	}
+	
+	public SafeExplorer getSafeExplorer()
+	{
+		return safeExplorer;
 	}
 
 }

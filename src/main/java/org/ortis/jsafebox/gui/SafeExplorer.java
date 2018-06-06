@@ -72,6 +72,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import javax.xml.bind.DatatypeConverter;
 
 import org.ortis.jsafebox.Block;
 import org.ortis.jsafebox.Folder;
@@ -80,6 +81,7 @@ import org.ortis.jsafebox.SafeFile;
 import org.ortis.jsafebox.gui.previews.ErrorPreview;
 import org.ortis.jsafebox.gui.previews.ImagePreview;
 import org.ortis.jsafebox.gui.previews.TextPreview;
+import org.ortis.jsafebox.gui.tasks.HashTask;
 import org.ortis.jsafebox.gui.tasks.SaveTask;
 import org.ortis.jsafebox.gui.tree.FileTransferHandler;
 import org.ortis.jsafebox.gui.tree.SafeFileNodePopupMenu;
@@ -106,6 +108,10 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 	private JRadioButtonMenuItem showPreview;
 	private JRadioButtonMenuItem autoSave;
+	private JRadioButtonMenuItem autoHashCheck;
+
+	private JMenuItem checkHashMenuItem;
+
 	private JMenuItem helpFrameMenuItem;
 	private JMenuItem aboutMenuItem;
 
@@ -336,6 +342,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 		this.autoSave.setSelected(this.configuration.getAutoSave());
 		this.showPreview.setSelected(this.configuration.getPreview());
+		this.autoHashCheck.setSelected(this.configuration.getAutoHashCheck());
 
 	}
 
@@ -571,6 +578,24 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 		mnNewMenu.add(showPreview);
 
+		JMenu mnSecurity = new JMenu("Security");
+		menuBar.add(mnSecurity);
+
+		checkHashMenuItem = new JMenuItem("Check hash...");
+		keyStrokeAccelerator = KeyStroke.getKeyStroke(KeyEvent.VK_H, KeyEvent.CTRL_DOWN_MASK);
+		checkHashMenuItem.setAccelerator(keyStrokeAccelerator);
+		checkHashMenuItem.addActionListener(this);
+		mnSecurity.add(checkHashMenuItem);
+
+		autoHashCheck = new JRadioButtonMenuItem("Check hash on opening");
+
+		autoHashCheck.addActionListener(this);
+		keyStrokeAccelerator = KeyStroke.getKeyStroke(KeyEvent.VK_H, KeyEvent.SHIFT_DOWN_MASK);
+		autoHashCheck.setAccelerator(keyStrokeAccelerator);
+		autoHashCheck.setSelected(true);
+		autoHashCheck.setToolTipText("Check safe's hash before opening");
+		mnSecurity.add(autoHashCheck);
+
 		JMenu helpMenuItem = new JMenu("Help");
 		menuBar.add(helpMenuItem);
 
@@ -629,6 +654,8 @@ public class SafeExplorer implements WindowListener, ActionListener
 			this.configuration.setAutoSave(this.autoSave.isSelected());
 		else if (event.getActionCommand().equals(this.showPreview.getActionCommand()))
 			this.configuration.setPreview(this.showPreview.isSelected());
+		else if (event.getActionCommand().equals(this.autoHashCheck.getActionCommand()))
+			this.configuration.setAutoHashCheck(this.autoHashCheck.isSelected());
 		else if (event.getActionCommand().equals(this.helpFrameMenuItem.getActionCommand()))
 		{
 			try
@@ -649,6 +676,40 @@ public class SafeExplorer implements WindowListener, ActionListener
 			} catch (final Exception e)
 			{
 				new ErrorDialog(this.explorerFrame, "Error while opening about frame", e).setVisible(true);
+			}
+
+		} else if (event.getActionCommand().equals(this.checkHashMenuItem.getActionCommand()))
+		{
+			try
+			{
+
+				final ProgressDialog hashCheckDialog = new ProgressDialog(this.explorerFrame);
+				hashCheckDialog.setTitle("Integrity check");
+
+				final HashTask hashTask = new HashTask(this.safe);
+				hashCheckDialog.monitor(hashTask, "Computing hash...");
+
+				final String expectedHash = DatatypeConverter.printHexBinary(this.safe.getHash());
+				if (hashTask.getHash() != null)
+					if (!hashTask.getHash().equals(expectedHash))
+					{
+
+						Object [] options = { "Yes (NOT RECOMMENDED)", "No" };
+						final int selectedOptionId = JOptionPane.showOptionDialog(this.explorerFrame,
+								"<html><div><b>CARREFULLY READ THIS MESSAGE !!!!!!!!!</b></div><br><div>The hash of the safe is </div><div><b>" + hashTask.getHash()
+										+ "</b></div><div>but was expected to be</div><div><b>" + expectedHash
+										+ "</b></div><br/><div>The content of the file might have been altered. It is strongly advised to revert to a backup file</div><br/><div>Do you want to continue with the current file ?</div><html>",
+								"Integrity check failed", JOptionPane.WARNING_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, options, options[1]);
+
+						if (selectedOptionId != 0)
+							this.explorerFrame.dispatchEvent(new WindowEvent(this.explorerFrame, WindowEvent.WINDOW_CLOSING));
+
+					} else
+						JOptionPane.showMessageDialog(this.explorerFrame, "<html><div>Integrity hash</div><br/><div><b>" + expectedHash + "</b><div><br/><div>sucessfully check !<div>", "Integrity check sucessful", JOptionPane.INFORMATION_MESSAGE);
+
+			} catch (final Exception e)
+			{
+				new ErrorDialog(this.explorerFrame, "Error while check integrity hash", e).setVisible(true);
 			}
 
 		}
@@ -695,7 +756,6 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 				}
 
-				
 			}
 
 			this.explorerFrame.dispose();
@@ -719,7 +779,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 		if (frames.size() == 0)
 		{
-			
+
 			statusLabel.setText("Closing safe...");
 			try
 			{
@@ -729,7 +789,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 				new ErrorDialog(this.explorerFrame, "Error while closing safe", e).setVisible(true);
 
 			}
-			
+
 			System.out.println("Exiting.");
 			System.exit(0);
 

@@ -29,6 +29,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -107,16 +110,23 @@ public class SafeTest
 
 		final File safeFile = new File(folder, this.filePath);
 
-		final MessageDigest md = MessageDigest.getInstance("SHA-256");
-		final byte [] key = Arrays.copyOf(md.digest(md.digest(TestUtils.randomString(random, 12).getBytes())), 128 >> 3);
+		final SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+		final byte [] salt = new byte[16];
+		random.nextBytes(salt);
+
+		PBEKeySpec spec = new PBEKeySpec(TestUtils.randomString(random, 12).toCharArray(), salt, Safe.PBKDF2_ITERATION, 128);
+		SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+		final byte [] key = skf.generateSecret(spec).getEncoded();
 
 		final Map<String, String> header = new HashMap<>();
+
 		header.put(Safe.ENCRYPTION_LABEL, "AES/CBC/PKCS5Padding");
 		header.put(Safe.KEY_ALGO_LABEL, "AES");
-		final SecureRandom random = new SecureRandom();
-		final byte [] iv = new byte[16];
-		random.nextBytes(iv);
-		header.put(Safe.ENCRYPTION_IV_LABEL, Safe.GSON.toJson(iv));
+
+		header.put(Safe.PBKDF2_SALT_LABEL, Safe.GSON.toJson(spec.getSalt()));
+		header.put(Safe.PBKDF2_ITERATION_LABEL, Integer.toString(spec.getIterationCount()));
+
+		header.put(Safe.ENCRYPTION_IV_LENGTH_LABEL, Integer.toString(salt.length));
 		header.put(Safe.PROTOCOL_SPEC_LABEL, Safe.PROTOCOL_SPEC);
 		header.put(TestUtils.randomString(random, 5), TestUtils.randomString(random, 20));
 		header.put(TestUtils.randomString(random, 5), TestUtils.randomString(random, 20));
@@ -132,7 +142,7 @@ public class SafeTest
 		{
 			Assert.assertNotNull(safe.getPublicHeader().get(Safe.ENCRYPTION_LABEL));
 			Assert.assertNotNull(safe.getPublicHeader().get(Safe.ENCRYPTION_LABEL));
-			Assert.assertNotNull(safe.getPublicHeader().get(Safe.ENCRYPTION_IV_LABEL));
+			Assert.assertNotNull(safe.getPublicHeader().get(Safe.ENCRYPTION_IV_LENGTH_LABEL));
 			Assert.assertNotNull(safe.getPublicHeader().get(Safe.KEY_ALGO_LABEL));
 			Assert.assertNotNull(safe.getPublicHeader().get(Safe.PROTOCOL_SPEC_LABEL));
 
@@ -148,8 +158,6 @@ public class SafeTest
 			safe.close();
 		}
 
-		
-
 	}
 
 	@Test
@@ -157,11 +165,39 @@ public class SafeTest
 	{
 
 		final File safeFile = new File(folder, this.filePath);
-		final MessageDigest md = MessageDigest.getInstance("SHA-256");
-		final byte [] key = Arrays.copyOf(md.digest(md.digest(TestUtils.randomString(random, 12).getBytes())), 128 >> 3);
 
 		final Map<String, String> header = new HashMap<>();
 
+		final SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+		final byte [] salt = new byte[16];
+		random.nextBytes(salt);
+
+		PBEKeySpec spec = new PBEKeySpec(TestUtils.randomString(random, 12).toCharArray(), salt, Safe.PBKDF2_ITERATION, 128);
+		SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+		final byte [] key = skf.generateSecret(spec).getEncoded();
+
+		try
+		{
+			final Safe safe = Safe.create(safeFile, key, header, null, 1024);
+			safe.close();
+			fail("Uncomplete safe's header should not be allowed");
+		} catch (final Exception e)
+		{
+
+		}
+
+		header.put(Safe.PBKDF2_SALT_LABEL, Safe.GSON.toJson(salt));
+		try
+		{
+			final Safe safe = Safe.create(safeFile, key, header, null, 1024);
+			safe.close();
+			fail("Uncomplete safe's header should not be allowed");
+		} catch (final Exception e)
+		{
+
+		}
+
+		header.put(Safe.PBKDF2_ITERATION_LABEL, Safe.GSON.toJson(Safe.PBKDF2_ITERATION));
 		try
 		{
 			final Safe safe = Safe.create(safeFile, key, header, null, 1024);
@@ -184,11 +220,19 @@ public class SafeTest
 		}
 
 		header.put(Safe.KEY_ALGO_LABEL, "AES");
-		final SecureRandom random = new SecureRandom();
-		final byte [] iv = new byte[16];
-		random.nextBytes(iv);
-		header.put(Safe.ENCRYPTION_IV_LABEL, Safe.GSON.toJson(iv));
+		try
+		{
+			final Safe safe = Safe.create(safeFile, key, header, null, 1024);
+			safe.close();
+			fail("Uncomplete safe's header should not be allowed");
+		} catch (final Exception e)
+		{
 
+		}
+		
+		header.put(Safe.ENCRYPTION_IV_LENGTH_LABEL, Integer.toString(salt.length));
+		
+		
 		try (Safe safe = Safe.create(safeFile, key, header, null, 1024))
 		{
 

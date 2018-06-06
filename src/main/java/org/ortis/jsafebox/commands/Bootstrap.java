@@ -19,6 +19,7 @@ import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 import org.ortis.jsafebox.Environment;
+import org.ortis.jsafebox.Safe;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -29,11 +30,10 @@ import picocli.CommandLine.Command;
  * @author Ortis <br>
  *         2018 Apr 26 8:14:45 PM <br>
  */
-@Command(description = "Bootstrap", mixinStandardHelpOptions = true, version = Bootstrap.VERSION, subcommands = { Init.class, List.class, Add.class, Delete.class, Cat.class, Extract.class,
+@Command(description = "Bootstrap", mixinStandardHelpOptions = true, version = Safe.VERSION, subcommands = { Init.class, Hash.class, List.class, Add.class, Delete.class, Cat.class, Extract.class,
 		GUI.class })
 public class Bootstrap implements Callable<Void>
 {
-	public static final String VERSION = "0.1 alpha";
 
 	@Override
 	public Void call() throws Exception

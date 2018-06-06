@@ -96,6 +96,13 @@ public class CommandTest
 		CommandLine.call(new Bootstrap(), System.err, args);
 
 		/**
+		 * Hash
+		 */
+
+		args = new String[] { "hash", "--password", "mypassword", safeFile.getAbsolutePath() };
+		Bootstrap.main(args);
+
+		/**
 		 * Add
 		 */
 		final InputStream is = SafeTest.class.getResourceAsStream("/img/Gentleman.sh-600x600.png");
