@@ -172,11 +172,9 @@ public class Safe implements Closeable
 		this.original.readLong();// data length 0
 
 		// init cipher
-
 		final Cipher cipher = getCipher();
 
 		// read private properties
-
 		this.original.read(buffer, 0, this.ivLength);// read properties iv
 		IvParameterSpec iv = new IvParameterSpec(Arrays.copyOf(buffer, this.ivLength));
 		cipher.init(Cipher.DECRYPT_MODE, this.encryptionKey, iv);
@@ -197,7 +195,6 @@ public class Safe implements Closeable
 			final int decrypted = cipher.update(buffer, 0, read, outBuffer);
 
 			baos.write(outBuffer, 0, decrypted);
-			// baos.write(buffer, 0, read);
 			length -= read;
 
 		}
@@ -289,7 +286,7 @@ public class Safe implements Closeable
 	 * @return
 	 * @throws Exception
 	 */
-	public Block add(final Map<String, String> properties, final InputStream data, TaskProbe probe) throws Exception
+	public synchronized Block add(final Map<String, String> properties, final InputStream data, TaskProbe probe) throws Exception
 	{
 		if (probe == null)
 			probe = TaskProbe.DULL_PROBE;
@@ -398,7 +395,7 @@ public class Safe implements Closeable
 	 * @param path:
 	 *            path of the data to delete
 	 */
-	public void delete(final String path)
+	public  synchronized  void delete(final String path)
 	{
 
 		final String comparablePath = path.toUpperCase(Environment.getLocale());
@@ -444,7 +441,7 @@ public class Safe implements Closeable
 	 *            destination of extracted block
 	 * @throws Exception
 	 */
-	public void extract(String path, final OutputStream outputStream) throws Exception
+	public  synchronized  void extract(String path, final OutputStream outputStream) throws Exception
 	{
 
 		path = path.toUpperCase(Environment.getLocale());
@@ -485,7 +482,7 @@ public class Safe implements Closeable
 	 * @return
 	 * @throws Exception
 	 */
-	public Map<String, String> readMetadata(final Block block) throws Exception
+	public  synchronized  Map<String, String> readMetadata(final Block block) throws Exception
 	{
 
 		this.original.seek(block.getOffset());
@@ -511,7 +508,7 @@ public class Safe implements Closeable
 	/**
 	 * Discard pending modification
 	 */
-	public void discardChanges() throws Exception
+	public  synchronized  void discardChanges() throws Exception
 	{
 
 		for (final Map.Entry<String, Block> temp : this.tempBlocks.entrySet())
@@ -543,7 +540,7 @@ public class Safe implements Closeable
 		return save(null);
 	}
 
-	public Safe save(TaskProbe probe) throws Exception
+	public  synchronized  Safe save(TaskProbe probe) throws Exception
 	{
 
 		if (probe == null)
@@ -704,7 +701,7 @@ public class Safe implements Closeable
 	 * @return
 	 * @throws Exception
 	 */
-	public byte [] computeHash(final TaskProbe probe) throws Exception
+	public  synchronized  byte [] computeHash(final TaskProbe probe) throws Exception
 	{
 		final byte [] hash = computeHash(this.original, getCipher(), this.ivLength, this.encryptionKey, this.bufferSize, probe);
 		return hash;
@@ -733,7 +730,7 @@ public class Safe implements Closeable
 	}
 
 	@Override
-	public void close() throws IOException
+	public  synchronized  void close() throws IOException
 	{
 		this.original.close();
 
@@ -858,18 +855,7 @@ public class Safe implements Closeable
 	 * @return
 	 */
 	public RandomAccessFile getTemp() throws IOException
-	{/*
-		if (this.temp == null)
-		{
-		
-			if (this.tempFile.exists())
-				throw new IOException("File " + this.tempFile + " already exist");
-		
-			this.temp = new RandomAccessFile(this.tempFile, "rw");
-			this.tempFile.deleteOnExit();
-		
-		}
-		*/
+	{
 		return this.temp;
 	}
 
@@ -878,10 +864,7 @@ public class Safe implements Closeable
 
 		final byte [] buffer = new byte[bufferSize];
 		final byte [] bufferOut = new byte[bufferSize];
-		// ByteBuffer in;
-
-		// final ByteBuffer out = ByteBuffer.allocateDirect(buffer.length);
-
+	
 		long total = 0;
 		int read;
 		while ((read = data.read(buffer)) > -1)
@@ -1064,7 +1047,6 @@ public class Safe implements Closeable
 			final byte [] buffer = new byte[bufferSize];
 			final byte [] bufferOut = new byte[bufferSize];
 
-			// final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 			safeFile.seek(HASHER.getHashLength());
 			final ByteBuffer byteBuffer = ByteBuffer.allocate((int) (safeFile.length() - safeFile.getFilePointer()));
