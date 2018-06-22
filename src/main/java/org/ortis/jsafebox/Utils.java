@@ -95,9 +95,8 @@ public class Utils
 		if (log != null)
 			log.fine("Key algorithm " + header.get(Safe.KEY_ALGO_LABEL));
 
-		
-		final byte [] salt = (byte [])Safe.GSON.fromJson(header.get(Safe.PBKDF2_SALT_LABEL), Safe.BYTE_ARRAY_TYPE);
-	
+		final byte [] salt = (byte []) Safe.GSON.fromJson(header.get(Safe.PBKDF2_SALT_LABEL), Safe.BYTE_ARRAY_TYPE);
+
 		PBEKeySpec spec = new PBEKeySpec(password, salt, Safe.PBKDF2_ITERATION, 128);
 		SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 		final byte [] key = skf.generateSecret(spec).getEncoded();
@@ -113,7 +112,7 @@ public class Utils
 
 		Path baseDirectory = null;
 
-		if (tokens[0].equals(".") || tokens[0].equals(".."))
+		if (tokens[0].equals(".") || tokens[0].equals(".."))// relative path
 		{
 			baseDirectory = new File(tokens[0]).toPath();
 
@@ -126,7 +125,7 @@ public class Utils
 
 			query = "**" + File.separator + sb.toString();
 
-		} else
+		} else // absolute path
 		{
 
 			final String comparableToken = tokens[0].toUpperCase();
@@ -159,7 +158,6 @@ public class Utils
 		Path path = baseDirectory;
 		for (int i = 1; i < tokens.length; i++)
 		{
-
 			try
 			{
 				path = Paths.get(path.toString(), tokens[i]);
@@ -170,17 +168,15 @@ public class Utils
 			}
 		}
 
-		final String escapedQuery = query.replace("\\", "\\\\");// PathMatcher does not escape backslash properly. Need to do the escape manually for Windows OS path handling. This might be a bug of Java implentation.
+		final String escapedQuery = query.replace("\\", "\\\\");// PathMatcher does not escape backslash properly. Need to do the escape manually for Windows OS path handling. This might be a bug of Java implementation.
 		// Need to check on Oracle bug report database.
 
 		final PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + escapedQuery);
 		Files.walkFileTree(path, new FileVisitor<Path>()
 		{
-
 			@Override
 			public FileVisitResult postVisitDirectory(final Path dir, final IOException exc) throws IOException
 			{
-
 				return FileVisitResult.CONTINUE;
 			}
 
@@ -199,7 +195,6 @@ public class Utils
 			@Override
 			public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException
 			{
-
 				if (pathMatcher.matches(file))
 					destination.add(file.toFile());
 
@@ -225,35 +220,83 @@ public class Utils
 	 */
 	public static String getMIMEType(final java.io.File file)
 	{
-
 		final String name = file.getName().toUpperCase();
+		final String [] buffer = name.split("\\.");
+		final String extenstion;
 
-		if (name.endsWith(".TXT"))
-			return "text/plain";
-		else if (name.endsWith(".CSV"))
-			return "text/csv";
-		else if (name.endsWith(".HTM") || name.endsWith(".HTML"))
-			return "text/html";
-		else if (name.endsWith(".JPG") || name.endsWith(".JPEG"))
-			return "image/jpg";
-		else if (name.endsWith(".PNG"))
-			return "image/png";
-		else if (name.endsWith(".BM") || name.endsWith(".BMP"))
-			return "image/bmp";
-		else if (name.endsWith(".PDF"))
-			return "application/pdf";
-		else if (name.endsWith(".AVI"))
-			return "video/x-msvideo";
-		else if (name.endsWith(".MPEG"))
-			return "video/mpeg";
-		else if (name.endsWith(".MP4"))
-			return "video/mp4";
-		else if (name.endsWith(".MKV"))
-			return "video/x-matroska";
-		else if (name.endsWith(".MP3"))
-			return "audio/mpeg";
+		if (buffer.length == 0)
+			extenstion = "";
 		else
-			return "application/octet-stream";
+			extenstion = buffer[buffer.length - 1];
+
+		switch (extenstion)
+		{
+			case "TXT":
+
+				/**
+				 * Log
+				 */
+			case "LOG":
+
+				/**
+				 * Source Code
+				 */
+			case "JAVA":
+			case "PROPERTIES":
+				// C/C++
+			case "H":
+			case "C":
+			case "CPP":
+				// Python
+			case "PY":
+
+				// Javascript
+			case "JS":
+				// .bat
+			case "BAT":
+				// Bash
+			case "SH":
+				return "text/plain";
+
+			case "CSV":
+				return "text/csv";
+
+			case "HTM":
+			case "HTML":
+				return "text/html";
+
+			case "JPG":
+			case "JPEG":
+				return "image/jpg";
+
+			case "PNG":
+				return "image/png";
+
+			case "BM":
+			case "BMP":
+				return "image/bmp";
+
+			case "PDF":
+				return "application/pdf";
+
+			case "AVI":
+				return "video/x-msvideo";
+
+			case "MPEG":
+				return "video/mpeg";
+
+			case "MP4":
+				return "video/mp4";
+
+			case "MKV":
+				return "video/x-matroska";
+
+			case "MP3":
+				return "audio/mpeg";
+
+			default:
+				return "application/octet-stream";
+		}
 	}
 
 	/**
@@ -316,7 +359,7 @@ public class Utils
 		for (int i = 0; i < tokens.length; i++)
 		{
 			if (i < tokens.length - 1)
-				sb.append(sanitizeToken(tokens[i], substitute) + delimiter);
+				sb.append(sanitizeToken(tokens[i], substitute)).append(delimiter);
 			else
 				sb.append(sanitizeToken(tokens[i], substitute));
 

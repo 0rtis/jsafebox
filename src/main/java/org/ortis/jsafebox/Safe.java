@@ -115,17 +115,13 @@ public class Safe implements Closeable
 	 */
 	public Safe(final File file, final SecretKey key, final int bufferSize) throws Exception
 	{
-
+		// Initialize variables
 		this.originalFile = file.getAbsoluteFile();
-
 		this.encryptionKey = key;
-
 		this.bufferSize = bufferSize;
-
 		this.original = new RandomAccessFile(file, "rw");
 		this.tempFile = Files.createTempFile(null, null).toFile();
 		this.temp = new RandomAccessFile(this.tempFile, "rw");
-
 		final HashMap<String, String> publicProps = new LinkedHashMap<>();
 		this.publicHeader = Collections.unmodifiableMap(publicProps);
 		final HashMap<String, String> props = new LinkedHashMap<>();
@@ -137,75 +133,36 @@ public class Safe implements Closeable
 		this.root = new Folder(null, Folder.ROOT_NAME);
 
 		final byte [] buffer = new byte[bufferSize];
-		final byte [] outBuffer = new byte[bufferSize];
+		final byte [] bufferDecrypted = new byte[bufferSize];// Hold decrypted data
 
 		this.original.read(buffer, 0, HASHER.getHashLength());
 		this.hash = new byte[HASHER.getHashLength()];
 		System.arraycopy(buffer, 0, this.hash, 0, this.hash.length);
 
-		long length;
-		int read;
+		final TaskProbe probe = TaskProbe.DULL_PROBE;
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream(buffer.length);
 
-		final long headerLength = this.original.readLong();
-		length = headerLength;
-
-		while (length > 0)
-		{
-
-			if (length < buffer.length)
-				read = this.original.read(buffer, 0, (int) length);
-			else
-				read = this.original.read(buffer);
-
-			baos.write(buffer, 0, read);
-			length -= read;
-
-		}
-
+		// Read header
+		write(this.original, this.original.readLong(), baos, buffer, probe);
 		String json = new String(baos.toByteArray(), StandardCharsets.UTF_8);
-
 		publicProps.putAll(GSON.fromJson(json, MAP_STRING_STRING_TYPE));
+		this.original.readLong();// skip data length 0
 
+		// Initialize cipher
 		this.ivLength = Integer.parseInt(this.publicHeader.get(ENCRYPTION_IV_LENGTH_LABEL));
-
-		this.original.readLong();// data length 0
-
-		// init cipher
 		final Cipher cipher = getCipher();
 
-		// read private properties
+		// Read private properties
 		this.original.read(buffer, 0, this.ivLength);// read properties iv
 		IvParameterSpec iv = new IvParameterSpec(Arrays.copyOf(buffer, this.ivLength));
 		cipher.init(Cipher.DECRYPT_MODE, this.encryptionKey, iv);
-
-		final long propLength = this.original.readLong();
-		length = propLength;
-
 		baos.reset();
-
-		while (length > 0)
-		{
-
-			if (length < buffer.length)
-				read = this.original.read(buffer, 0, (int) length);
-			else
-				read = this.original.read(buffer);
-
-			final int decrypted = cipher.update(buffer, 0, read, outBuffer);
-
-			baos.write(outBuffer, 0, decrypted);
-			length -= read;
-
-		}
-
-		baos.write(cipher.doFinal());
-
+		decrypt(this.original, this.original.readLong(), cipher, baos, buffer, bufferDecrypted);
 		json = new String(baos.toByteArray());
-
 		props.putAll(GSON.fromJson(json, MAP_STRING_STRING_TYPE));
 		this.original.readLong();// data length 0
 
+		// Read blocks
 		while (this.original.getFilePointer() < this.original.length())
 		{
 			baos.reset();
@@ -219,20 +176,7 @@ public class Safe implements Closeable
 			final long metaLength = this.original.readLong();
 			final long metaOffset = this.original.getFilePointer();
 
-			length = metaLength;
-			while (length > 0)
-			{
-
-				if (length < buffer.length)
-					read = this.original.read(buffer, 0, (int) length);
-				else
-					read = this.original.read(buffer);
-
-				final int decrypted = cipher.update(buffer, 0, read, outBuffer);
-				baos.write(outBuffer, 0, decrypted);
-				length -= read;
-			}
-			baos.write(cipher.doFinal());
+			decrypt(this.original, metaLength, cipher, baos, buffer, bufferDecrypted);
 			json = new String(baos.toByteArray());
 
 			final Map<String, String> properties = new HashMap<>(GSON.fromJson(json, MAP_STRING_STRING_TYPE));
@@ -240,14 +184,14 @@ public class Safe implements Closeable
 			if (path == null)
 				throw new IllegalStateException("Path of block starting at " + offset + " is not set");
 
-			if (blocks.containsKey(path.toUpperCase(Environment.getLocale())))
+			if (this.blocks.containsKey(path.toUpperCase(Environment.getLocale())))
 				throw new IllegalStateException("Block path " + path + " already exist");
 
 			final long dataLength = this.original.readLong();
 			final long dataOffset = this.original.getFilePointer();
+			final long blockLength = this.original.getFilePointer() - offset + dataLength;
 
 			final String [] tokens = path.split(Folder.REGEX_DELIMITER);
-
 			this.root.mkdir(tokens, 1, true);
 
 			final org.ortis.jsafebox.SafeFile dstFile;
@@ -264,13 +208,10 @@ public class Safe implements Closeable
 				throw new Exception("Destination folder " + dstFile + " is a block");
 
 			final Folder destinationFolder = ((Folder) dstFile);
-
-			final long blockLength = original.getFilePointer() - offset + dataLength;
 			final Block block = new Block(path, properties, offset, blockLength, metaOffset, metaLength, dataOffset, dataLength, destinationFolder);
-
 			destinationFolder.add(block);
 
-			blocks.put(block.getComparablePath(), block);
+			this.blocks.put(block.getComparablePath(), block);
 			this.original.seek(block.getOffset() + block.getLength());
 		}
 
@@ -293,6 +234,7 @@ public class Safe implements Closeable
 
 		try
 		{
+			// Check inputs
 			final String path = properties.get(Block.PATH_LABEL);
 
 			if (path == null)
@@ -313,7 +255,7 @@ public class Safe implements Closeable
 				destinationFile = this.root.get(comparableTokens, 1, comparableTokens.length - 1);
 
 			if (destinationFile == null)
-				throw new Exception("Destination folder " + destinationFile + " does not exists");
+				throw new Exception("Destination folder not found");
 
 			if (!destinationFile.isFolder())
 				throw new Exception("Destination " + destinationFile + " is not a folder");
@@ -328,15 +270,14 @@ public class Safe implements Closeable
 			if (name == null)
 				throw new IllegalArgumentException("Property " + Block.NAME_LABEL + " is missing");
 
+			probe.checkCancel();
+
+			// Initialize Cipher, io buffers and temporary file
 			final Cipher cipher = getCipher();
-
-			if (probe.isCancelRequested())
-			{
-				probe.fireCanceled();
-				throw new CancellationException();
-			}
-
 			cipher.init(Cipher.ENCRYPT_MODE, this.encryptionKey, getSecureRandom());
+
+			final byte [] buffer = new byte[this.bufferSize];
+			final byte [] bufferDecrypted = new byte[this.bufferSize];
 
 			final RandomAccessFile temp = getTemp();
 
@@ -344,26 +285,25 @@ public class Safe implements Closeable
 
 			temp.write(cipher.getIV());
 
-			// write metadata
-
+			// Write block's metadata
 			temp.writeLong(0);
 			final String metadataserial = GSON.toJson(properties);
 			final byte [] metaBuffer = metadataserial.getBytes();
 			final long metaOffset = temp.getFilePointer();
-			final long metaLength = encrypt(new ByteArrayInputStream(metaBuffer), cipher, temp, this.bufferSize, probe);
+			final long metaLength = encrypt(new ByteArrayInputStream(metaBuffer), cipher, temp, buffer, bufferDecrypted, probe);
 			long position = temp.getFilePointer();
 
 			temp.seek(offset + cipher.getIV().length);
 			temp.writeLong(metaLength);
 			temp.seek(position);
 
-			// write data
+			// Write block's data
 			position = temp.getFilePointer();
 			temp.writeLong(0);
 
 			final long dataOffset = temp.getFilePointer();
 
-			final long dataLength = encrypt(data, cipher, temp, this.bufferSize, probe);
+			final long dataLength = encrypt(data, cipher, temp, buffer, bufferDecrypted, probe);
 
 			temp.seek(position);
 			temp.writeLong(dataLength);
@@ -395,7 +335,7 @@ public class Safe implements Closeable
 	 * @param path:
 	 *            path of the data to delete
 	 */
-	public  synchronized  void delete(final String path)
+	public synchronized void delete(final String path)
 	{
 
 		final String comparablePath = path.toUpperCase(Environment.getLocale());
@@ -441,9 +381,8 @@ public class Safe implements Closeable
 	 *            destination of extracted block
 	 * @throws Exception
 	 */
-	public  synchronized  void extract(String path, final OutputStream outputStream) throws Exception
+	public synchronized void extract(String path, final OutputStream outputStream) throws Exception
 	{
-
 		path = path.toUpperCase(Environment.getLocale());
 
 		Block block = this.roBlocks.get(path);
@@ -470,7 +409,7 @@ public class Safe implements Closeable
 
 		cipher.init(Cipher.DECRYPT_MODE, this.encryptionKey, iv);
 		raf.seek(block.getDataOffset());
-		decrypt(raf, block.getDataLength(), cipher, outputStream, this.bufferSize);
+		decrypt(raf, block.getDataLength(), cipher, outputStream, new byte[this.bufferSize], new byte[this.bufferSize]);
 
 	}
 
@@ -482,9 +421,8 @@ public class Safe implements Closeable
 	 * @return
 	 * @throws Exception
 	 */
-	public  synchronized  Map<String, String> readMetadata(final Block block) throws Exception
+	public synchronized Map<String, String> readMetadata(final Block block) throws Exception
 	{
-
 		this.original.seek(block.getOffset());
 		final byte [] ivBytes = new byte[this.ivLength];
 		this.original.read(ivBytes);
@@ -497,7 +435,7 @@ public class Safe implements Closeable
 		this.original.seek(block.getMetaOffset());
 
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		decrypt(this.original, block.getMetaLength(), cipher, baos, this.bufferSize);
+		decrypt(this.original, block.getMetaLength(), cipher, baos, new byte[this.bufferSize], new byte[this.bufferSize]);
 
 		final String metadata = new String(baos.toByteArray());
 
@@ -508,12 +446,10 @@ public class Safe implements Closeable
 	/**
 	 * Discard pending modification
 	 */
-	public  synchronized  void discardChanges() throws Exception
+	public synchronized void discardChanges() throws Exception
 	{
-
 		for (final Map.Entry<String, Block> temp : this.tempBlocks.entrySet())
 		{
-
 			Folder folder = temp.getValue().getParent();
 			folder.remove(temp.getValue().getName());
 		}
@@ -525,8 +461,8 @@ public class Safe implements Closeable
 			Folder folder = deleted.getValue().getParent();
 			folder.add(deleted.getValue());
 		}
-		this.deletedBlocks.clear();
 
+		this.deletedBlocks.clear();
 	}
 
 	/**
@@ -540,7 +476,7 @@ public class Safe implements Closeable
 		return save(null);
 	}
 
-	public  synchronized  Safe save(TaskProbe probe) throws Exception
+	public synchronized Safe save(TaskProbe probe) throws Exception
 	{
 
 		if (probe == null)
@@ -556,13 +492,12 @@ public class Safe implements Closeable
 			try (RandomAccessFile destination = new RandomAccessFile(newFile, "rw"))
 			{
 
+				final byte [] buffer = new byte[this.bufferSize];
+				final byte [] bufferDecrypted = new byte[this.bufferSize];
+
 				Cipher cipher = getCipher();
 
-				if (probe.isCancelRequested())
-				{
-					probe.fireCanceled();
-					throw new CancellationException();
-				}
+				probe.checkCancel();
 
 				destination.write(HASHER.getEmptyHash());// skip hash
 
@@ -574,18 +509,14 @@ public class Safe implements Closeable
 				long previousPosition = destination.getFilePointer();
 
 				destination.writeLong(0);
-				long total = write(new ByteArrayInputStream(json.getBytes()), destination, this.bufferSize, probe);
+				long total = write(new ByteArrayInputStream(json.getBytes()), destination, buffer, probe);
 				destination.writeLong(0);// no data in header
 				long position = destination.getFilePointer();
 				destination.seek(previousPosition);
 				destination.writeLong(total);
 				destination.seek(position);
 
-				if (probe.isCancelRequested())
-				{
-					probe.fireCanceled();
-					throw new CancellationException();
-				}
+				probe.checkCancel();
 
 				// private properties
 				probe.fireMessage("Writing private properties");
@@ -597,25 +528,21 @@ public class Safe implements Closeable
 
 				previousPosition = destination.getFilePointer();
 				destination.writeLong(0);
-				total = encrypt(new ByteArrayInputStream(json.getBytes()), cipher, destination, this.bufferSize, probe);
+				total = encrypt(new ByteArrayInputStream(json.getBytes()), cipher, destination, buffer, bufferDecrypted, probe);
 				destination.writeLong(0);// no data in header
 				position = destination.getFilePointer();
 				destination.seek(previousPosition);
 				destination.writeLong(total);
 				destination.seek(position);
 
-				if (probe.isCancelRequested())
-				{
-					probe.fireCanceled();
-					throw new CancellationException();
-				}
+				probe.checkCancel();
 
 				final double steps = this.roBlocks.size() + this.tempBlocks.size() + 1;
 				int completed = 0;
 
 				for (final Block block : this.roBlocks.values())
 				{
-					// add non deleted only
+					// only add non deleted block
 					if (this.deletedBlocks.containsKey(block.getComparablePath()))
 					{
 						probe.fireMessage("Skipping deleted block " + block.getPath());
@@ -624,7 +551,7 @@ public class Safe implements Closeable
 
 					probe.fireMessage("Writing block " + block.getPath());
 					this.original.seek(block.getOffset());
-					write(this.original, block.getLength(), destination, this.bufferSize, probe);
+					write(this.original, block.getLength(), destination, buffer, probe);
 					completed++;
 					progress = completed / steps;
 					probe.fireProgress(progress);
@@ -633,7 +560,6 @@ public class Safe implements Closeable
 				final RandomAccessFile temp = getTemp();
 				for (final Block block : this.tempBlocks.values())
 				{
-
 					if (this.deletedBlocks.containsKey(block.getComparablePath()))
 					{
 						probe.fireMessage("Skipping deleted block " + block.getPath());
@@ -643,7 +569,7 @@ public class Safe implements Closeable
 					probe.fireMessage("Writing block " + block.getPath());
 					temp.seek(block.getOffset());
 
-					write(temp, block.getLength(), destination, this.bufferSize, probe);
+					write(temp, block.getLength(), destination, buffer, probe);
 					completed++;
 					progress = completed / steps;
 					probe.fireProgress(progress);
@@ -670,11 +596,7 @@ public class Safe implements Closeable
 				if (!newFile.renameTo(this.originalFile))
 					throw new IOException("Unable to rename " + newFile.getAbsolutePath());
 
-				if (probe.isCancelRequested())
-				{
-					probe.fireCanceled();
-					throw new CancellationException();
-				}
+				probe.checkCancel();
 
 				probe.fireMessage("Opening new safe");
 				probe.fireProgress(1);
@@ -701,7 +623,7 @@ public class Safe implements Closeable
 	 * @return
 	 * @throws Exception
 	 */
-	public  synchronized  byte [] computeHash(final TaskProbe probe) throws Exception
+	public synchronized byte [] computeHash(final TaskProbe probe) throws Exception
 	{
 		final byte [] hash = computeHash(this.original, getCipher(), this.ivLength, this.encryptionKey, this.bufferSize, probe);
 		return hash;
@@ -730,17 +652,15 @@ public class Safe implements Closeable
 	}
 
 	@Override
-	public  synchronized  void close() throws IOException
+	public synchronized void close() throws IOException
 	{
 		this.original.close();
-
 		final RandomAccessFile temp = getTemp();
 		if (temp != null)
 		{
 			temp.close();
 			tempFile.delete();
 		}
-
 	}
 
 	/**
@@ -782,11 +702,8 @@ public class Safe implements Closeable
 	 */
 	public Block getBlock(final String path)
 	{
-
 		final String comparablePath = path.toUpperCase(Environment.getLocale());
-
 		return this.roBlocks.get(comparablePath);
-
 	}
 
 	/**
@@ -799,9 +716,7 @@ public class Safe implements Closeable
 	public Block getTempBlock(final String path)
 	{
 		final String comparablePath = path.toUpperCase(Environment.getLocale());
-
 		return this.tempBlocks.get(comparablePath);
-
 	}
 
 	/**
@@ -859,73 +774,55 @@ public class Safe implements Closeable
 		return this.temp;
 	}
 
-	private static long encrypt(final InputStream data, final Cipher cipher, final RandomAccessFile destination, final int bufferSize, final TaskProbe probe) throws Exception
+	private static long encrypt(final InputStream data, final Cipher cipher, final RandomAccessFile destination, final byte [] buffer, final byte [] bufferDecrypted, final TaskProbe probe)
+			throws Exception
 	{
-
-		final byte [] buffer = new byte[bufferSize];
-		final byte [] bufferOut = new byte[bufferSize];
-	
 		long total = 0;
 		int read;
-		while ((read = data.read(buffer)) > -1)
+		while ((read = data.read(bufferDecrypted)) > -1)
 		{
-
-			read = cipher.update(buffer, 0, read, bufferOut);
+			read = cipher.update(bufferDecrypted, 0, read, buffer);
 			if (read == 0)
 				// data length is less than cipher block size
-				System.arraycopy(buffer, 0, bufferOut, 0, buffer.length);
+				System.arraycopy(bufferDecrypted, 0, buffer, 0, bufferDecrypted.length);
 
 			total += read;
-			destination.write(bufferOut, 0, read);
+			destination.write(buffer, 0, read);
 
-			if (probe.isCancelRequested())
-			{
-				probe.fireCanceled();
-				throw new CancellationException();
-			}
-
+			probe.checkCancel();
 		}
 
-		read = cipher.doFinal(bufferOut, 0);
-		destination.write(bufferOut, 0, read);
+		read = cipher.doFinal(buffer, 0);
+		destination.write(buffer, 0, read);
 		total += read;
 
 		return total;
-
 	}
 
-	private static void decrypt(final RandomAccessFile source, final long length, final Cipher cipher, final OutputStream destination, final int bufferSize) throws Exception
+	private static void decrypt(final RandomAccessFile source, final long length, final Cipher cipher, final OutputStream destination, final byte [] bufferEncrypted, final byte [] bufferDecrypted)
+			throws Exception
 	{
-
-		final byte [] buffer = new byte[bufferSize];
-		final byte [] bufferOut = new byte[bufferSize];
-
 		long remaining = length;
 		int read;
 		while (remaining > 0)
 		{
-			if (remaining < buffer.length)
-				read = source.read(buffer, 0, (int) remaining);
+			if (remaining < bufferEncrypted.length)
+				read = source.read(bufferEncrypted, 0, (int) remaining);
 			else
-				read = source.read(buffer, 0, buffer.length);
+				read = source.read(bufferEncrypted, 0, bufferEncrypted.length);
 
 			remaining -= read;
 
-			read = cipher.update(buffer, 0, read, bufferOut);
-			destination.write(bufferOut, 0, read);
-
+			read = cipher.update(bufferEncrypted, 0, read, bufferDecrypted);
+			destination.write(bufferDecrypted, 0, read);
 		}
 
-		read = cipher.doFinal(bufferOut, 0);
-		destination.write(bufferOut, 0, read);
-
+		read = cipher.doFinal(bufferDecrypted, 0);
+		destination.write(bufferDecrypted, 0, read);
 	}
 
-	private static long write(final InputStream data, final RandomAccessFile destination, final int bufferSize, final TaskProbe probe) throws Exception
+	private static long write(final InputStream data, final RandomAccessFile destination, final byte [] buffer, final TaskProbe probe) throws Exception
 	{
-
-		final byte [] buffer = new byte[bufferSize];
-
 		long total = 0;
 		int read;
 		while ((read = data.read(buffer)) > -1)
@@ -933,22 +830,14 @@ public class Safe implements Closeable
 			destination.write(buffer, 0, read);
 			total += read;
 
-			if (probe.isCancelRequested())
-			{
-				probe.fireCanceled();
-				throw new CancellationException();
-			}
+			probe.checkCancel();
 		}
 
 		return total;
-
 	}
 
-	private static void write(final RandomAccessFile source, final long length, final RandomAccessFile destination, final int bufferSize, final TaskProbe probe) throws Exception
+	private static void write(final RandomAccessFile source, final long length, final OutputStream destination, final byte [] buffer, final TaskProbe probe) throws Exception
 	{
-
-		final byte [] buffer = new byte[bufferSize];
-
 		long remaining = length;
 		int read;
 		while (remaining > 0)
@@ -962,13 +851,27 @@ public class Safe implements Closeable
 
 			remaining -= read;
 
-			if (probe.isCancelRequested())
-			{
-				probe.fireCanceled();
-				throw new CancellationException();
-			}
+			probe.checkCancel();
 		}
+	}
 
+	private static void write(final RandomAccessFile source, final long length, final RandomAccessFile destination, final byte [] buffer, final TaskProbe probe) throws Exception
+	{
+		long remaining = length;
+		int read;
+		while (remaining > 0)
+		{
+			if (remaining < buffer.length)
+				read = source.read(buffer, 0, (int) remaining);
+			else
+				read = source.read(buffer, 0, buffer.length);
+
+			destination.write(buffer, 0, read);
+
+			remaining -= read;
+
+			probe.checkCancel();
+		}
 	}
 
 	private static SecureRandom getSecureRandom()
@@ -1020,7 +923,6 @@ public class Safe implements Closeable
 			if (raf != null)
 				raf.close();
 		}
-
 	}
 
 	/**
@@ -1036,7 +938,6 @@ public class Safe implements Closeable
 	 */
 	public static byte [] computeHash(final RandomAccessFile safeFile, final Cipher cipher, final int ivLength, final Key encryptionKey, final int bufferSize, TaskProbe probe) throws Exception
 	{
-
 		if (probe == null)
 			probe = TaskProbe.DULL_PROBE;
 
@@ -1045,37 +946,22 @@ public class Safe implements Closeable
 			final long previousPosition = safeFile.getFilePointer();
 
 			final byte [] buffer = new byte[bufferSize];
-			final byte [] bufferOut = new byte[bufferSize];
-
+			final byte [] bufferDecrypted = new byte[bufferSize];
 
 			safeFile.seek(HASHER.getHashLength());
 			final ByteBuffer byteBuffer = ByteBuffer.allocate((int) (safeFile.length() - safeFile.getFilePointer()));
+			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 			long length = safeFile.readLong();
 			byteBuffer.putLong(length);
 
-			int read;
-
 			// header
-			while (length > 0)// read header
-			{
-
-				if (length < buffer.length)
-					read = safeFile.read(buffer, 0, (int) length);
-				else
-					read = safeFile.read(buffer);
-
-				byteBuffer.put(buffer, 0, read);
-				length -= read;
-			}
-
+			baos.reset();
+			write(safeFile, length, baos, buffer, probe);
+			byteBuffer.put(baos.toByteArray());
 			byteBuffer.putLong(safeFile.readLong());// header's data length 0
 
-			if (probe.isCancelRequested())
-			{
-				probe.fireCanceled();
-				throw new CancellationException();
-			}
+			probe.checkCancel();
 
 			// properties
 			safeFile.read(buffer, 0, ivLength);// read properties iv
@@ -1087,30 +973,12 @@ public class Safe implements Closeable
 			length = safeFile.readLong();
 			byteBuffer.putLong(length);
 
-			while (length > 0)// read properties
-			{
-				if (length < buffer.length)
-					read = safeFile.read(buffer, 0, (int) length);
-				else
-					read = safeFile.read(buffer, 0, buffer.length);
-
-				length -= read;
-
-				read = cipher.update(buffer, 0, read, bufferOut);
-				byteBuffer.put(bufferOut, 0, read);
-
-			}
-
-			read = cipher.doFinal(bufferOut, 0);
-			byteBuffer.put(bufferOut, 0, read);
-
+			baos.reset();
+			decrypt(safeFile, length, cipher, baos, buffer, bufferDecrypted);
+			byteBuffer.put(baos.toByteArray());
 			byteBuffer.putLong(safeFile.readLong());// properties data length 0
 
-			if (probe.isCancelRequested())
-			{
-				probe.fireCanceled();
-				throw new CancellationException();
-			}
+			probe.checkCancel();
 
 			// blocks
 			while (safeFile.getFilePointer() < safeFile.length())
@@ -1123,57 +991,18 @@ public class Safe implements Closeable
 				// read metadata
 				length = safeFile.readLong();
 				byteBuffer.putLong(length);
+				baos.reset();
+				decrypt(safeFile, length, cipher, baos, buffer, bufferDecrypted);
+				byteBuffer.put(baos.toByteArray());
 
-				while (length > 0)
-				{
-					if (length < buffer.length)
-						read = safeFile.read(buffer, 0, (int) length);
-					else
-						read = safeFile.read(buffer, 0, buffer.length);
-
-					length -= read;
-
-					read = cipher.update(buffer, 0, read, bufferOut);
-					byteBuffer.put(bufferOut, 0, read);
-
-				}
-
-				read = cipher.doFinal(bufferOut, 0);
-				byteBuffer.put(bufferOut, 0, read);
-
-				if (probe.isCancelRequested())
-				{
-					probe.fireCanceled();
-					throw new CancellationException();
-				}
+				probe.checkCancel();
 
 				// read data
 				length = safeFile.readLong();
 				byteBuffer.putLong(length);
-
-				while (length > 0)
-				{
-					if (length < buffer.length)
-						read = safeFile.read(buffer, 0, (int) length);
-					else
-						read = safeFile.read(buffer, 0, buffer.length);
-
-					length -= read;
-
-					read = cipher.update(buffer, 0, read, bufferOut);
-					byteBuffer.put(bufferOut, 0, read);
-
-					if (probe.isCancelRequested())
-					{
-						probe.fireCanceled();
-						throw new CancellationException();
-					}
-
-				}
-
-				read = cipher.doFinal(bufferOut, 0);
-				byteBuffer.put(bufferOut, 0, read);
-
+				baos.reset();
+				decrypt(safeFile, length, cipher, baos, buffer, bufferDecrypted);
+				byteBuffer.put(baos.toByteArray());
 			}
 
 			safeFile.seek(previousPosition);
@@ -1237,6 +1066,9 @@ public class Safe implements Closeable
 
 		final RandomAccessFile raf = new RandomAccessFile(file, "rw");
 
+		final byte [] buffer = new byte[bufferSize];
+		final byte [] bufferDecrypted = new byte[bufferSize];
+
 		long total, position, previousPosition;
 
 		cipher.init(Cipher.ENCRYPT_MODE, keySpec, getSecureRandom());
@@ -1248,7 +1080,7 @@ public class Safe implements Closeable
 		// no IV in header
 		raf.writeLong(0);
 		final String header = GSON.toJson(publicHeader);
-		total = write(new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8)), raf, bufferSize, TaskProbe.DULL_PROBE);
+		total = write(new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8)), raf, buffer, TaskProbe.DULL_PROBE);
 		raf.writeLong(0);// no data in header block
 
 		previousPosition = raf.getFilePointer();
@@ -1263,7 +1095,7 @@ public class Safe implements Closeable
 		final String privatePropsJson = GSON.toJson(privateProperties == null ? new HashMap<>() : privateProperties);
 		previousPosition = raf.getFilePointer();
 		raf.writeLong(0L);
-		total = encrypt(new ByteArrayInputStream(privatePropsJson.getBytes(StandardCharsets.UTF_8)), cipher, raf, bufferSize, TaskProbe.DULL_PROBE);
+		total = encrypt(new ByteArrayInputStream(privatePropsJson.getBytes(StandardCharsets.UTF_8)), cipher, raf, buffer, bufferDecrypted, TaskProbe.DULL_PROBE);
 		raf.writeLong(0);// no data in properties block
 
 		raf.seek(previousPosition);
@@ -1277,7 +1109,6 @@ public class Safe implements Closeable
 		raf.close();
 
 		return new Safe(file, keySpec, bufferSize);
-
 	}
 
 }
