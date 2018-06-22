@@ -51,7 +51,7 @@ public class Hash implements Callable<Void>
 		
 		final Logger log = Environment.getLogger();
 
-		try (final Safe safe = Utils.open(this.safeFile, this.password.toCharArray(), this.bufferSize, log))
+		try (final Safe safe = Safe.open(this.safeFile, this.password.toCharArray(), this.bufferSize, log))
 		{
 			System.gc();// Somehow, it looks like the GC is having trouble detecting large heap when using ByteBuffer. So we just call it before and after hash computation
 			final byte [] hash = safe.computeHash(null);

@@ -27,17 +27,25 @@ public class Configuration extends Properties
 	private static final String AUTOSAVE_KEY = "gui.autosave";
 	private static final String PREVIEW_KEY = "gui.preview";
 	private static final String AUTOHASH_CHECK_KEY = "gui.autohashcheck";
-	
+
 	private static final String EXTRACT_DIRECTORY_KEY = "extract.directory";
 
 	public void addSafeFilePath(final String path)
 	{
 
+		final List<String> paths = new ArrayList<>();
 		final StringBuilder sb = new StringBuilder();
 		sb.append(path);
+		paths.add(path.toUpperCase());
 
 		for (final String p : getSafeFilePaths())
+		{
+			if (paths.contains(p.toUpperCase()))
+				continue;
+
 			sb.append(";" + p);
+			paths.add(p.toUpperCase());
+		}
 
 		setProperty(SAFE_FILE_LIST_KEY, sb.toString());
 	}
@@ -111,13 +119,12 @@ public class Configuration extends Properties
 
 		return Boolean.parseBoolean(value);
 	}
-	
-	
-	public void setAutoHashCheck(final boolean autoHashCheck) 
+
+	public void setAutoHashCheck(final boolean autoHashCheck)
 	{
 		setProperty(AUTOHASH_CHECK_KEY, Boolean.toString(autoHashCheck));
 	}
-	
+
 	public boolean getAutoHashCheck()
 	{
 		final String value = getProperty(AUTOHASH_CHECK_KEY);

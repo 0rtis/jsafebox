@@ -33,6 +33,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -95,8 +96,10 @@ import org.ortis.jsafebox.gui.viewers.TextViewer;
 public class SafeExplorer implements WindowListener, ActionListener
 {
 	public final static String CONFIG_FILE = "jsafebox.gui.properties";
-
 	private final static String TITLE = "JSafebox";
+	private final static long TEXT_DISPLAY_MAX_LENGTH = 1_000_000;
+	public static final DecimalFormat MEMORY_FORMAT = new DecimalFormat("###,###");
+
 	private final Configuration configuration;
 
 	private final List<JFrame> frames = new ArrayList<>();
@@ -189,33 +192,25 @@ public class SafeExplorer implements WindowListener, ActionListener
 						// preview
 						final Block block = (Block) file;
 
+						final List<String> displayed = new ArrayList<>();
+
+						propertyModel.addRow(new Object[] { Block.NAME_LABEL, block.getProperties().get(Block.NAME_LABEL) });
+						propertyModel.addRow(new Object[] { Block.PATH_LABEL, block.getProperties().get(Block.PATH_LABEL) });
+						propertyModel.addRow(new Object[] { "size", block.getLength() > 1000 ? MEMORY_FORMAT.format(block.getLength() / 1000) + " Kb" : block.getLength() + " bytes" });
+
+						for (int i = 0; i < propertyModel.getRowCount(); i++)
+							displayed.add(propertyModel.getValueAt(i, 0).toString());
+
 						for (final Map.Entry<String, String> metadata : block.getProperties().entrySet())
-							propertyModel.addRow(new Object[] { metadata.getKey(), metadata.getValue() });
+							if (!displayed.contains(metadata.getKey()))
+								propertyModel.addRow(new Object[] { metadata.getKey(), metadata.getValue() });
 
 						final String mime = block.getProperties().get("content-type");
 						if (showPreview.isSelected())
 							if (mime != null)
 							{
-								if (mime.startsWith("text"))
+								if (mime.startsWith("image"))
 								{
-
-									try
-									{
-										final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-										safe.extract(block, baos);
-										final String text = new String(baos.toByteArray());// use local charset
-										final TextPreview textPreview = new TextPreview(text);
-
-										previewPanel.add(textPreview, BorderLayout.CENTER);
-									} catch (final Exception e)
-									{
-										previewPanel.removeAll();
-										previewPanel.add(new ErrorPreview(e), BorderLayout.CENTER);
-									}
-
-								} else if (mime.startsWith("image"))
-								{
-
 									try
 									{
 
@@ -224,6 +219,22 @@ public class SafeExplorer implements WindowListener, ActionListener
 										final ImagePreview imagePreview = new ImagePreview(ImageIO.read(new ByteArrayInputStream(baos.toByteArray())));
 
 										previewPanel.add(imagePreview, BorderLayout.CENTER);
+									} catch (final Exception e)
+									{
+										previewPanel.removeAll();
+										previewPanel.add(new ErrorPreview(e), BorderLayout.CENTER);
+									}
+
+								} else if (mime.startsWith("text"))
+								{
+									try
+									{
+										final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+										safe.extract(block, baos);
+										final String text = new String(baos.toByteArray());// use local charset
+										final TextPreview textPreview = new TextPreview(text);
+
+										previewPanel.add(textPreview, BorderLayout.CENTER);
 									} catch (final Exception e)
 									{
 										previewPanel.removeAll();
@@ -299,15 +310,14 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 			final String mime = block.getProperties().get("content-type");
 			if (mime != null)
-				if (mime.startsWith("text"))
+
+				if (mime.startsWith("image"))
 				{
+
 					try
 					{
-						final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-						safe.extract(block, baos);
-						final String text = new String(baos.toByteArray());// use local charset
-						final TextViewer viewer = new TextViewer(text);
-						viewer.setTitle(explorerFrame.getTitle() + " - " + block.getPath());
+
+						final ImageViewer viewer = new ImageViewer(safe, block, explorerFrame.getTitle() + " - ");
 						viewer.addWindowListener(SafeExplorer.this);
 						viewer.setVisible(true);
 
@@ -316,13 +326,15 @@ public class SafeExplorer implements WindowListener, ActionListener
 						new ErrorDialog(explorerFrame, "Error while opening text viewer", exception).setVisible(true);
 					}
 
-				} else if (mime.startsWith("image"))
+				} else if (mime.startsWith("text") || block.getDataLength() < TEXT_DISPLAY_MAX_LENGTH)// Display as text if mime text or less than TEXT_DISPLAY_MAX_LENGTH
 				{
-
 					try
 					{
-
-						final ImageViewer viewer = new ImageViewer(safe, block, explorerFrame.getTitle() + " - ");
+						final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						safe.extract(block, baos);
+						final String text = new String(baos.toByteArray());// Use local Charset
+						final TextViewer viewer = new TextViewer(text);
+						viewer.setTitle(explorerFrame.getTitle() + " - " + block.getPath());
 						viewer.addWindowListener(SafeExplorer.this);
 						viewer.setVisible(true);
 
@@ -705,7 +717,8 @@ public class SafeExplorer implements WindowListener, ActionListener
 							this.explorerFrame.dispatchEvent(new WindowEvent(this.explorerFrame, WindowEvent.WINDOW_CLOSING));
 
 					} else
-						JOptionPane.showMessageDialog(this.explorerFrame, "<html><div>Integrity hash</div><br/><div><b>" + expectedHash + "</b><div><br/><div>sucessfully check !<div>", "Integrity check sucessful", JOptionPane.INFORMATION_MESSAGE);
+						JOptionPane.showMessageDialog(this.explorerFrame, "<html><div>Integrity hash</div><br/><div><b>" + expectedHash + "</b><div><br/><div>sucessfully check !<div>",
+								"Integrity check sucessful", JOptionPane.INFORMATION_MESSAGE);
 
 			} catch (final Exception e)
 			{

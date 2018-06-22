@@ -69,7 +69,7 @@ public class Add implements Callable<Void>
 
 		final Logger log = Environment.getLogger();
 
-		try (final Safe safe = Utils.open(this.safeFile, this.password.toCharArray(), this.bufferSize, log))
+		try (final Safe safe = Safe.open(this.safeFile, this.password.toCharArray(), this.bufferSize, log))
 		{
 
 			final String destination = this.paths[this.paths.length - 1];

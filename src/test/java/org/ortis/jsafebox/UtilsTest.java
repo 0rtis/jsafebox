@@ -111,14 +111,14 @@ public class UtilsTest
 
 		try
 		{
-			Utils.open(safeFile.getAbsolutePath() + "404", password.toCharArray(), 1024, null);
+			Safe.open(safeFile.getAbsolutePath() + "404", password.toCharArray(), 1024, null);
 			fail("Opening non existant file should not be allowed");
 		} catch (final Exception e)
 		{
 
 		}
 
-		try (final Safe safe = Utils.open(safeFile.getAbsolutePath(), password.toCharArray(), 1024, null))
+		try (final Safe safe = Safe.open(safeFile.getAbsolutePath(), password.toCharArray(), 1024, null))
 		{
 			assertNotNull(safe);
 		}

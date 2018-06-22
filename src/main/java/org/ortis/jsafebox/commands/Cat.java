@@ -56,7 +56,7 @@ public class Cat implements Callable<Void>
 
 		final Logger log = Environment.getLogger();
 
-		try (final Safe safe = Utils.open(this.safeFile, this.password.toCharArray(), this.bufferSize, log))
+		try (final Safe safe = Safe.open(this.safeFile, this.password.toCharArray(), this.bufferSize, log))
 		{
 
 			final Set<SafeFile> matches = new LinkedHashSet<>();

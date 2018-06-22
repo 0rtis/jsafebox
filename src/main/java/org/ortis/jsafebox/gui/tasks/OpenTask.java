@@ -16,7 +16,6 @@ import java.io.File;
 import javax.swing.SwingWorker;
 
 import org.ortis.jsafebox.Safe;
-import org.ortis.jsafebox.Utils;
 import org.ortis.jsafebox.gui.LoginFrame;
 import org.ortis.jsafebox.gui.SafeExplorer;
 import org.ortis.jsafebox.task.MultipartTask;
@@ -28,8 +27,8 @@ public class OpenTask extends MultipartTask implements GuiTask
 	private char [] password;
 	private final LoginFrame loginFrame;
 
-	
-	private  SafeExplorer safeExplorer;
+	private SafeExplorer safeExplorer;
+
 	public OpenTask(final File safe, final char [] password, final LoginFrame loginFrame)
 	{
 		this.safe = safe;
@@ -55,7 +54,7 @@ public class OpenTask extends MultipartTask implements GuiTask
 				try
 				{
 					final int buffserSize = 65536;
-					final Safe safe = Utils.open(OpenTask.this.safe.getAbsolutePath(), password, buffserSize, null);
+					final Safe safe = Safe.open(OpenTask.this.safe.getAbsolutePath(), password, buffserSize, null);
 					return safe;
 
 				} catch (final Exception e)
@@ -98,7 +97,7 @@ public class OpenTask extends MultipartTask implements GuiTask
 		}.execute();
 
 	}
-	
+
 	public SafeExplorer getSafeExplorer()
 	{
 		return safeExplorer;

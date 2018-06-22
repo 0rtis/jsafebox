@@ -29,13 +29,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
-
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Utility class
@@ -60,59 +54,13 @@ public class Utils
 		return bytes;
 	}
 
-	/**
-	 * Open a {@link Safe}
-	 * 
-	 * @param safeFilePath:
-	 *            system path to the safe file
-	 * @param password:
-	 *            the encryption password
-	 * @param bufferSize:size
-	 *            of the <code>byte</code> buffer to be used in IO operation
-	 * @param log
-	 * @return
-	 * @throws Exception
-	 */
-	public static Safe open(final String safeFilePath, final char [] password, final int bufferSize, final Logger log) throws Exception
-	{
-		final File file = new File(safeFilePath);
-
-		if (!file.exists())
-			throw new IOException("Safe file " + file + " doest not exist");
-
-		final Map<String, String> header = Safe.readHeader(file, bufferSize);
-
-		final String encyption = header.get(Safe.ENCRYPTION_LABEL);
-		if (encyption == null)
-			throw new Exception("Could not read property '" + Safe.ENCRYPTION_LABEL + "' from header");
-
-		if (log != null)
-			log.fine("Encryption type " + encyption);
-
-		if (!header.containsKey(Safe.KEY_ALGO_LABEL))
-			throw new Exception("Could not read property '" + Safe.KEY_ALGO_LABEL + "' from header");
-
-		if (log != null)
-			log.fine("Key algorithm " + header.get(Safe.KEY_ALGO_LABEL));
-
-		final byte [] salt = (byte []) Safe.GSON.fromJson(header.get(Safe.PBKDF2_SALT_LABEL), Safe.BYTE_ARRAY_TYPE);
-
-		PBEKeySpec spec = new PBEKeySpec(password, salt, Safe.PBKDF2_ITERATION, 128);
-		SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-		final byte [] key = skf.generateSecret(spec).getEncoded();
-
-		final SecretKeySpec keySpec = new SecretKeySpec(key, header.get(Safe.KEY_ALGO_LABEL));
-
-		return new Safe(file, keySpec, bufferSize);
-	}
-
 	public static List<java.io.File> parseSystemPath(String query, final List<java.io.File> destination) throws IOException
 	{
 		final String [] tokens = query.split(SYSTEM_PATH_DELIMITER_REGEX);
 
 		Path baseDirectory = null;
 
-		if (tokens[0].equals(".") || tokens[0].equals(".."))// relative path
+		if (tokens[0].equals(".") || tokens[0].equals(".."))// Relative path
 		{
 			baseDirectory = new File(tokens[0]).toPath();
 
@@ -125,7 +73,7 @@ public class Utils
 
 			query = "**" + File.separator + sb.toString();
 
-		} else // absolute path
+		} else // Absolute path
 		{
 
 			final String comparableToken = tokens[0].toUpperCase();
@@ -163,7 +111,7 @@ public class Utils
 				path = Paths.get(path.toString(), tokens[i]);
 			} catch (final Exception e)
 			{
-				// here, we have reach a special character and the start point for the search is
+				// Here, we have reach a special character and the start point for the search is
 				// in path
 			}
 		}
@@ -232,12 +180,10 @@ public class Utils
 		switch (extenstion)
 		{
 			case "TXT":
-
 				/**
 				 * Log
 				 */
 			case "LOG":
-
 				/**
 				 * Source Code
 				 */
@@ -249,13 +195,20 @@ public class Utils
 			case "CPP":
 				// Python
 			case "PY":
-
 				// Javascript
 			case "JS":
 				// .bat
 			case "BAT":
 				// Bash
 			case "SH":
+				/**
+				 * Conf
+				 */
+				// Yalm
+			case "YML":
+			case "YAML":
+				// Mark Down
+			case "MD":
 				return "text/plain";
 
 			case "CSV":

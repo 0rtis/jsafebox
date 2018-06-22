@@ -17,8 +17,9 @@ import javax.swing.JLabel;
 
 public class StatusUpdater implements Runnable
 {
+	
 	private static final DecimalFormat RATIO_FORMAT = new DecimalFormat("0.00");
-	private static final DecimalFormat MEMORY_FORMAT = new DecimalFormat("###,###");
+	
 	private final JLabel label;
 
 	private final Runtime runtime;
@@ -62,7 +63,7 @@ public class StatusUpdater implements Runnable
 		final long total = free + used;
 		final double ratio = 100 * ((double) used) / total;
 
-		this.label.setText("  Memory:  " + MEMORY_FORMAT.format(used) + " Kb used  " + MEMORY_FORMAT.format(free) + " Kb free  " + MEMORY_FORMAT.format(max) + " Kb available - "
+		this.label.setText("  Memory:  " + SafeExplorer.MEMORY_FORMAT.format(used) + " Kb used  " + SafeExplorer.MEMORY_FORMAT.format(free) + " Kb free  " + SafeExplorer.MEMORY_FORMAT.format(max) + " Kb available - "
 				+ RATIO_FORMAT.format(ratio) + " %");
 		this.label.setToolTipText(this.label.getText());
 

@@ -455,6 +455,8 @@ public class LoginFrame implements ActionListener
 									}
 
 								}
+							
+							this.configuration.addSafeFilePath(safeFile.getAbsolutePath());
 
 						}
 					}
