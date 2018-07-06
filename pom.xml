@@ -59,10 +59,10 @@
   </properties>
 
   <dependencies>
- 	<dependency>
-  		<groupId>info.picocli</groupId>
-  		<artifactId>picocli</artifactId>
-  		<version>3.0.0-beta-2</version>
+	<dependency>
+		<groupId>info.picocli</groupId>
+		<artifactId>picocli</artifactId>
+		<version>3.0.2</version>
 	</dependency>
 	
 	<dependency>

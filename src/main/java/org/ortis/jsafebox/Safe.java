@@ -56,7 +56,7 @@ import com.google.gson.reflect.TypeToken;
  */
 public class Safe implements Closeable
 {
-	public static final String VERSION = "0.2 beta";
+	public static final String VERSION = "0.5 beta";
 
 	public static final Gson GSON = new Gson();
 	private static final Type MAP_STRING_STRING_TYPE = new TypeToken<Map<String, String>>()
@@ -146,7 +146,7 @@ public class Safe implements Closeable
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream(buffer.length);
 
 		// Read header
-		SafeIO.write(this.original, this.original.readLong(), baos, buffer, probe);
+		SafeIO.copy(this.original, this.original.readLong(), baos, buffer, probe);
 		String json = new String(baos.toByteArray(), StandardCharsets.UTF_8);
 		publicProps.putAll(GSON.fromJson(json, MAP_STRING_STRING_TYPE));
 		this.original.readLong();// skip data length 0
@@ -509,7 +509,7 @@ public class Safe implements Closeable
 				long previousPosition = destination.getFilePointer();
 
 				destination.writeLong(0);
-				long total = SafeIO.write(new ByteArrayInputStream(json.getBytes()), destination, buffer, probe);
+				long total = SafeIO.copy(new ByteArrayInputStream(json.getBytes()), destination, buffer, probe);
 				destination.writeLong(0);// no data in header
 				long position = destination.getFilePointer();
 				destination.seek(previousPosition);
@@ -551,7 +551,7 @@ public class Safe implements Closeable
 
 					probe.fireMessage("Writing block " + block.getPath());
 					this.original.seek(block.getOffset());
-					SafeIO.write(this.original, block.getLength(), destination, buffer, probe);
+					SafeIO.copy(this.original, block.getLength(), destination, buffer, probe);
 					completed++;
 					progress = completed / steps;
 					probe.fireProgress(progress);
@@ -569,7 +569,7 @@ public class Safe implements Closeable
 					probe.fireMessage("Writing block " + block.getPath());
 					temp.seek(block.getOffset());
 
-					SafeIO.write(temp, block.getLength(), destination, buffer, probe);
+					SafeIO.copy(temp, block.getLength(), destination, buffer, probe);
 					completed++;
 					progress = completed / steps;
 					probe.fireProgress(progress);
@@ -853,7 +853,7 @@ public class Safe implements Closeable
 
 			// header
 			baos.reset();
-			SafeIO.write(safeFile, length, baos, buffer, probe);
+			SafeIO.copy(safeFile, length, baos, buffer, probe);
 			byteBuffer.put(baos.toByteArray());
 			byteBuffer.putLong(safeFile.readLong());// header's data length 0
 
@@ -1022,7 +1022,7 @@ public class Safe implements Closeable
 		// no IV in header
 		raf.writeLong(0);
 		final String header = GSON.toJson(publicHeader);
-		total = SafeIO.write(new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8)), raf, buffer, TaskProbe.DULL_PROBE);
+		total = SafeIO.copy(new ByteArrayInputStream(header.getBytes(StandardCharsets.UTF_8)), raf, buffer, TaskProbe.DULL_PROBE);
 		raf.writeLong(0);// no data in header block
 
 		previousPosition = raf.getFilePointer();

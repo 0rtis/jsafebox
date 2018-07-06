@@ -64,7 +64,7 @@ public abstract class SafeIO
 		destination.write(bufferDecrypted, 0, read);
 	}
 
-	public static long write(final InputStream data, final RandomAccessFile destination, final byte [] buffer, final TaskProbe probe) throws Exception
+	public static long copy(final InputStream data, final RandomAccessFile destination, final byte [] buffer, final TaskProbe probe) throws Exception
 	{
 		long total = 0;
 		int read;
@@ -79,7 +79,7 @@ public abstract class SafeIO
 		return total;
 	}
 
-	public static void write(final RandomAccessFile source, final long length, final OutputStream destination, final byte [] buffer, final TaskProbe probe) throws Exception
+	public static void copy(final RandomAccessFile source, final long length, final OutputStream destination, final byte [] buffer, final TaskProbe probe) throws Exception
 	{
 		long remaining = length;
 		int read;
@@ -98,7 +98,7 @@ public abstract class SafeIO
 		}
 	}
 
-	public static void write(final RandomAccessFile source, final long length, final RandomAccessFile destination, final byte [] buffer, final TaskProbe probe) throws Exception
+	public static void copy(final RandomAccessFile source, final long length, final RandomAccessFile destination, final byte [] buffer, final TaskProbe probe) throws Exception
 	{
 		long remaining = length;
 		int read;
