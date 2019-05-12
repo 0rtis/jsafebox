@@ -9,30 +9,37 @@
  * License for the specific language governing permissions and limitations under the License.
  ******************************************************************************/
 
-package org.ortis.jsafebox.commands;
+package org.ortis.jsafebox.gui.old.previews;
 
-import java.util.concurrent.Callable;
+import java.awt.BorderLayout;
 
-import org.ortis.jsafebox.Safe;
-import org.ortis.jsafebox.gui.old.LoginFrame;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
-import picocli.CommandLine.Command;
-
-/**
- * Start the GUI
- * 
- * @author Ortis <br>
- *         2018 May 08 8:35:11 PM <br>
- */
-@Command(description = "Start the GUI", name = "gui", mixinStandardHelpOptions = true, version = Safe.VERSION, showDefaultValues = true)
-public class GUI implements Callable<Void>
+public class TextPreview extends JPanel
 {
 
-	@Override
-	public Void call() throws Exception
-	{
-		LoginFrame.main(new String[0]);
-		return null;
-	}
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private JTextArea editArea;
 
+	public TextPreview(final String text)
+	{
+
+		super(new BorderLayout());
+
+		editArea = new JTextArea();
+		editArea.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+		editArea.setEditable(false);
+		editArea.setText(text);
+
+		JScrollPane scrollingText = new JScrollPane(editArea);
+
+		add(scrollingText, BorderLayout.CENTER);
+
+	}
 }
