@@ -13,8 +13,10 @@ package org.ortis.jsafebox.commands;
 
 import java.util.concurrent.Callable;
 
+import javax.swing.UIManager;
+
 import org.ortis.jsafebox.Safe;
-import org.ortis.jsafebox.gui.old.LoginFrame;
+import org.ortis.jsafebox.gui.LoginFrame;
 
 import picocli.CommandLine.Command;
 
@@ -31,7 +33,16 @@ public class GUI implements Callable<Void>
 	@Override
 	public Void call() throws Exception
 	{
-		LoginFrame.main(new String[0]);
+		// LoginFrame.main(new String[0]);
+
+		try
+		{
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (final Exception e)
+		{
+		}
+
+		new LoginFrame().setVisible(true);
 		return null;
 	}
 
