@@ -1,11 +1,14 @@
-bin
-*.safe
-target
-.classpath
-.project
-.recommenders
-.settings
+/.classpath
+/.project
+/.recommenders
+/.settings
 
 /.idea
+/jsafebox.iml
 
-jsafebox.gui.properties
+/bin
+/target
+
+
+/jsafebox.gui.properties
+/*.jsb
