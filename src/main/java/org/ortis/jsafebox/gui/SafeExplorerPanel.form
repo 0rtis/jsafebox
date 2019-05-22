@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="org.ortis.jsafebox.gui.SafeExplorerPanel">
+  <grid id="27dc6" binding="panel1" default-binding="true" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="1012" height="604"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <splitpane id="317a0">
+        <constraints border-constraint="Center"/>
+        <properties>
+          <oneTouchExpandable value="true"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <splitpane id="cd4e0">
+            <constraints>
+              <splitpane position="right"/>
+            </constraints>
+            <properties>
+              <oneTouchExpandable value="true"/>
+              <orientation value="0"/>
+            </properties>
+            <border type="none"/>
+            <children/>
+          </splitpane>
+        </children>
+      </splitpane>
+    </children>
+  </grid>
+</form>

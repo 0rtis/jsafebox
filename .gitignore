@@ -5,4 +5,7 @@ target
 .project
 .recommenders
 .settings
+
+/.idea
+
 jsafebox.gui.properties
