@@ -173,11 +173,6 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener
 		pack();
 	}// </editor-fold>//GEN-END:initComponents
 
-	private void walletPathComboBoxActionPerformed(java.awt.event.ActionEvent evt)
-	{//GEN-FIRST:event_walletPathComboBoxActionPerformed
-		// TODO add your handling code here:
-	}//GEN-LAST:event_walletPathComboBoxActionPerformed
-	// End of variables declaration//GEN-END:variables
 
 	@Override
 	public void mouseClicked(final MouseEvent mouseEvent)
