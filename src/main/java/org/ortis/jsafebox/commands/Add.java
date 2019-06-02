@@ -44,7 +44,6 @@ import picocli.CommandLine.Parameters;
 @Command(description = "Add file", name = "add", mixinStandardHelpOptions = true, version = Safe.VERSION, showDefaultValues = true)
 public class Add implements Callable<Void>
 {
-
 	@Option(names = { "-pw", "-pwd", "--password" }, required = true, description = "Password")
 	private String password;
 

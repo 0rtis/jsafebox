@@ -72,7 +72,7 @@ public class SafeFileTreeCellRenderer extends DefaultTreeCellRenderer
 			} else
 				label.setText("Safe");
 
-			label.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-16.png"))));
+			label.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/frame-icons/icons8-safe-16.png"))));
 		} else
 		{
 			SafeFile safeFile = node.getSafeFile();

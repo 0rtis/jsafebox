@@ -32,7 +32,6 @@ public abstract class Environment
 	private final static Object logSync = new Object();
 	static
 	{
-
 		final List<Character> chars = new ArrayList<>();
 		chars.add('\\');
 		chars.add('/');
@@ -72,7 +71,6 @@ public abstract class Environment
 	{
 		synchronized (logSync)
 		{
-
 			return log;
 		}
 	}

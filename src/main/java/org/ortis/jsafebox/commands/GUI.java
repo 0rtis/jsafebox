@@ -11,12 +11,14 @@
 
 package org.ortis.jsafebox.commands;
 
+import java.nio.file.Paths;
 import java.util.concurrent.Callable;
 
 import javax.swing.UIManager;
 
 import org.ortis.jsafebox.Safe;
 
+import org.ortis.jsafebox.Settings;
 import org.ortis.jsafebox.gui.old.LoginFrame;
 import picocli.CommandLine.Command;
 
@@ -35,6 +37,7 @@ public class GUI implements Callable<Void>
 	{
 		// LoginFrame.main(new String[0]);
 
+		Settings.load();
 		try
 		{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -44,6 +47,7 @@ public class GUI implements Callable<Void>
 
 		new org.ortis.jsafebox.gui.LoginFrame().setVisible(true);
 		//new LoginFrame().show();
+		Thread.sleep(1000000000);
 		return null;
 	}
 

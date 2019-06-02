@@ -1,15 +1,11 @@
-/*
- *  Copyright (c) 2019 by Adequate Systems, LLC. All Rights Reserved.
- *
- *  See LICENSE.PDF https://github.com/mochimodev/mochimo/blob/master/LICENSE.PDF
- *
- *  **** NO WARRANTY ****
- *
- */
+
 package org.ortis.jsafebox.gui.tasks;
+
+import sun.rmi.log.LogHandler;
 
 import java.util.Collection;
 import java.util.function.Consumer;
+import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
@@ -28,7 +24,6 @@ public abstract class AbstractGUITask implements GUITask, Runnable
 	private Thread thread = null;
 
 
-	private final LogHandler logHandler = new LogHandler();
 	private final Object lock = new Object();
 
 	private Exception exception;
@@ -46,9 +41,6 @@ public abstract class AbstractGUITask implements GUITask, Runnable
 	{
 		try
 		{
-			// attach log hadler
-			this.log.addHandler(this.logHandler);
-
 			task();
 		} catch (final InterruptedException e)
 		{
@@ -60,7 +52,7 @@ public abstract class AbstractGUITask implements GUITask, Runnable
 			setException(e);
 		} finally
 		{
-			this.log.removeHandler(this.logHandler);
+
 		}
 
 	}
@@ -91,11 +83,9 @@ public abstract class AbstractGUITask implements GUITask, Runnable
 			if (this.thread != null)
 				throw new IllegalStateException("Task has already been started");
 
-			this.logHandler.addListener(logListener);
 			this.thread = new Thread(this);
 			this.thread.setName("guit task");
 			this.thread.start();
-
 		}
 	}
 
@@ -128,11 +118,5 @@ public abstract class AbstractGUITask implements GUITask, Runnable
 		{
 			this.exception = exception;
 		}
-	}
-
-	@Override
-	public <D extends Collection<LogRecord>> D getLogs(final D destinations)
-	{
-		return this.logHandler.getLogs(destinations);
 	}
 }

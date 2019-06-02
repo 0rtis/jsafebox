@@ -181,7 +181,7 @@ public class LoginFrame implements ActionListener
 
 		JLabel lblNewLabel_1 = new JLabel("JSafebox");
 		lblNewLabel_1.setFont(new Font("Segoe UI", Font.PLAIN, 17));
-		lblNewLabel_1.setIcon(new ImageIcon(LoginFrame.class.getResource("/img/icons8-safe-64.png")));
+		lblNewLabel_1.setIcon(new ImageIcon(LoginFrame.class.getResource("/img/frame-icons/icons8-safe-64.png")));
 
 		newButton = new JButton("New");
 		newButton.addActionListener(this);
@@ -207,10 +207,10 @@ public class LoginFrame implements ActionListener
 		main.setLayout(gl_main);
 
 		final List<Image> icons = new ArrayList<>();
-		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-16.png")));
-		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-32.png")));
-		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-64.png")));
-		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/icons8-safe-100.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/frame-icons/icons8-safe-16.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/frame-icons/icons8-safe-32.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/frame-icons/icons8-safe-64.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(SafeExplorer.class.getResource("/img/frame-icons/icons8-safe-100.png")));
 		frame.setIconImages(icons);
 
 		frame.setSize(Toolkit.getDefaultToolkit().getScreenSize().width * 1 / 4, Toolkit.getDefaultToolkit().getScreenSize().height * 1 / 5);
