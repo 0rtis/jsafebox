@@ -45,7 +45,7 @@ public class GUI implements Callable<Void>
 		{
 		}
 
-		new org.ortis.jsafebox.gui.LoginFrame().setVisible(true);
+		new org.ortis.jsafebox.gui.LoginFramefuckedup().setVisible(true);
 		//new LoginFrame().show();
 		Thread.sleep(1000000000);
 		return null;
