@@ -18,6 +18,7 @@ import java.awt.event.MouseListener;
 public class LoginFrame extends javax.swing.JFrame implements MouseListener
 {
 
+
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JLabel browseLabel;
 	private javax.swing.JPasswordField jPasswordField1;
@@ -25,6 +26,9 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener
 	private javax.swing.JLabel newLabel;
 	private javax.swing.JLabel openLabel;
 	private javax.swing.JComboBox<String> walletPathComboBox;
+	// End of variables declaration//GEN-END:variables
+
+
 	/**
 	 * Creates new form LoginFrame
 	 */
@@ -124,13 +128,6 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener
 		walletPathComboBox.setEditable(true);
 		walletPathComboBox.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
 		walletPathComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{"Item 1", "Item 2", "Item 3", "Item 4"}));
-		walletPathComboBox.addActionListener(new java.awt.event.ActionListener()
-		{
-			public void actionPerformed(java.awt.event.ActionEvent evt)
-			{
-				walletPathComboBoxActionPerformed(evt);
-			}
-		});
 
 		browseLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/browse-folder-32.png"))); // NOI18N
 
