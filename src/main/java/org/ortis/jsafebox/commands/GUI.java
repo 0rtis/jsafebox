@@ -42,8 +42,8 @@ public class GUI implements Callable<Void>
 		{
 		}
 
-		//new LoginFrame().setVisible(true);
-		new LoginFrame().show();
+		new org.ortis.jsafebox.gui.LoginFrame().setVisible(true);
+		//new LoginFrame().show();
 		return null;
 	}
 
