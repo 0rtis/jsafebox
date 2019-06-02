@@ -27,29 +27,29 @@ public class MetadataPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
+        mainPanel = new javax.swing.JPanel();
+        txtViewLabel = new javax.swing.JLabel();
+        binaryViewLabel = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        metadataTable = new javax.swing.JTable();
 
         setBorder(null);
         setPreferredSize(new java.awt.Dimension(400, 300));
         setLayout(new java.awt.BorderLayout());
 
-        jPanel1.setBackground(new java.awt.Color(40, 52, 240));
-        jPanel1.setBorder(null);
+        mainPanel.setBackground(new java.awt.Color(40, 52, 240));
+        mainPanel.setBorder(null);
 
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/txt-32.png"))); // NOI18N
-        jLabel2.setToolTipText("View as text");
+        txtViewLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/txt-32.png"))); // NOI18N
+        txtViewLabel.setToolTipText("View as text");
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/binary-32.png"))); // NOI18N
-        jLabel1.setToolTipText("View as hexadecimal");
+        binaryViewLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/binary-32.png"))); // NOI18N
+        binaryViewLabel.setToolTipText("View as hexadecimal");
 
-        jTable1.setBackground(new java.awt.Color(22, 28, 38));
-        jTable1.setBorder(null);
-        jTable1.setForeground(new java.awt.Color(243, 241, 241));
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        metadataTable.setBackground(new java.awt.Color(22, 28, 38));
+        metadataTable.setBorder(null);
+        metadataTable.setForeground(new java.awt.Color(243, 241, 241));
+        metadataTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {"Name", "data.txt"},
                 {"Type", "text/text"},
@@ -61,45 +61,45 @@ public class MetadataPanel extends javax.swing.JPanel {
                 "Title 1", "Title 2"
             }
         ));
-        jTable1.setGridColor(new java.awt.Color(22, 28, 38));
-        jScrollPane1.setViewportView(jTable1);
+        metadataTable.setGridColor(new java.awt.Color(22, 28, 38));
+        jScrollPane1.setViewportView(metadataTable);
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+        javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
+        mainPanel.setLayout(mainPanelLayout);
+        mainPanelLayout.setHorizontalGroup(
+            mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
                 .addContainerGap(312, Short.MAX_VALUE)
-                .addComponent(jLabel2)
+                .addComponent(txtViewLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel1)
+                .addComponent(binaryViewLabel)
                 .addContainerGap())
-            .addGroup(jPanel1Layout.createSequentialGroup()
+            .addGroup(mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addGap(13, 13, 13))
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        mainPanelLayout.setVerticalGroup(
+            mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtViewLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(binaryViewLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 232, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
-        add(jPanel1, java.awt.BorderLayout.CENTER);
+        add(mainPanel, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JPanel jPanel1;
+    private javax.swing.JLabel binaryViewLabel;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JPanel mainPanel;
+    private javax.swing.JTable metadataTable;
+    private javax.swing.JLabel txtViewLabel;
     // End of variables declaration//GEN-END:variables
 }
