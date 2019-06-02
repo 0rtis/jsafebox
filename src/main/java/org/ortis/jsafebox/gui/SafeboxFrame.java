@@ -27,14 +27,15 @@ public class SafeboxFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        jPanel2 = new javax.swing.JPanel();
+        explorerPanel = new javax.swing.JPanel();
         jSplitPane1 = new javax.swing.JSplitPane();
         fileTreePanel = new javax.swing.JPanel();
         rightPanel = new javax.swing.JPanel();
         jSplitPane2 = new javax.swing.JSplitPane();
         topRightPanel = new javax.swing.JPanel();
         belowRightPanel = new javax.swing.JPanel();
+        bottomPanel = new javax.swing.JPanel();
+        statusPanel = new javax.swing.JPanel();
         jMenuBar1 = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         saveMenuItem = new javax.swing.JMenuItem();
@@ -50,22 +51,13 @@ public class SafeboxFrame extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 20, Short.MAX_VALUE)
-        );
+        explorerPanel.setBackground(new java.awt.Color(255, 255, 255));
 
         jSplitPane1.setDividerLocation(150);
         jSplitPane1.setOneTouchExpandable(true);
 
+        fileTreePanel.setBackground(new java.awt.Color(28, 29, 103));
+        fileTreePanel.setBorder(null);
         fileTreePanel.setMinimumSize(new java.awt.Dimension(100, 0));
         fileTreePanel.setPreferredSize(new java.awt.Dimension(100, 567));
 
@@ -77,7 +69,7 @@ public class SafeboxFrame extends javax.swing.JFrame {
         );
         fileTreePanelLayout.setVerticalGroup(
             fileTreePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 546, Short.MAX_VALUE)
+            .addGap(0, 572, Short.MAX_VALUE)
         );
 
         jSplitPane1.setLeftComponent(fileTreePanel);
@@ -86,28 +78,34 @@ public class SafeboxFrame extends javax.swing.JFrame {
         jSplitPane2.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
         jSplitPane2.setOneTouchExpandable(true);
 
+        topRightPanel.setBackground(new java.awt.Color(177, 157, 24));
+        topRightPanel.setBorder(null);
+
         javax.swing.GroupLayout topRightPanelLayout = new javax.swing.GroupLayout(topRightPanel);
         topRightPanel.setLayout(topRightPanelLayout);
         topRightPanelLayout.setHorizontalGroup(
             topRightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 923, Short.MAX_VALUE)
+            .addGap(0, 975, Short.MAX_VALUE)
         );
         topRightPanelLayout.setVerticalGroup(
             topRightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 349, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
 
         jSplitPane2.setTopComponent(topRightPanel);
+
+        belowRightPanel.setBackground(new java.awt.Color(151, 246, 151));
+        belowRightPanel.setBorder(null);
 
         javax.swing.GroupLayout belowRightPanelLayout = new javax.swing.GroupLayout(belowRightPanel);
         belowRightPanel.setLayout(belowRightPanelLayout);
         belowRightPanelLayout.setHorizontalGroup(
             belowRightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 923, Short.MAX_VALUE)
+            .addGap(0, 975, Short.MAX_VALUE)
         );
         belowRightPanelLayout.setVerticalGroup(
             belowRightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 190, Short.MAX_VALUE)
+            .addGap(0, 566, Short.MAX_VALUE)
         );
 
         jSplitPane2.setRightComponent(belowRightPanel);
@@ -120,28 +118,56 @@ public class SafeboxFrame extends javax.swing.JFrame {
         );
         rightPanelLayout.setVerticalGroup(
             rightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane2)
+            .addComponent(jSplitPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 572, Short.MAX_VALUE)
         );
 
         jSplitPane1.setRightComponent(rightPanel);
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        javax.swing.GroupLayout explorerPanelLayout = new javax.swing.GroupLayout(explorerPanel);
+        explorerPanel.setLayout(explorerPanelLayout);
+        explorerPanelLayout.setHorizontalGroup(
+            explorerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.TRAILING)
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 548, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+        explorerPanelLayout.setVerticalGroup(
+            explorerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 572, Short.MAX_VALUE)
         );
 
-        getContentPane().add(jPanel1, java.awt.BorderLayout.CENTER);
+        getContentPane().add(explorerPanel, java.awt.BorderLayout.CENTER);
+
+        bottomPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 5));
+        bottomPanel.setPreferredSize(new java.awt.Dimension(1081, 35));
+
+        statusPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+
+        javax.swing.GroupLayout statusPanelLayout = new javax.swing.GroupLayout(statusPanel);
+        statusPanel.setLayout(statusPanelLayout);
+        statusPanelLayout.setHorizontalGroup(
+            statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1067, Short.MAX_VALUE)
+        );
+        statusPanelLayout.setVerticalGroup(
+            statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 21, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout bottomPanelLayout = new javax.swing.GroupLayout(bottomPanel);
+        bottomPanel.setLayout(bottomPanelLayout);
+        bottomPanelLayout.setHorizontalGroup(
+            bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1071, Short.MAX_VALUE)
+            .addGroup(bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(statusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        bottomPanelLayout.setVerticalGroup(
+            bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 25, Short.MAX_VALUE)
+            .addGroup(bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(statusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        getContentPane().add(bottomPanel, java.awt.BorderLayout.SOUTH);
 
         fileMenu.setText("File");
 
@@ -229,20 +255,21 @@ public class SafeboxFrame extends javax.swing.JFrame {
     private javax.swing.JCheckBoxMenuItem autoHashCheckBoxMenuItem;
     private javax.swing.JCheckBoxMenuItem autoSaveCheckBoxMenuItem;
     private javax.swing.JPanel belowRightPanel;
+    private javax.swing.JPanel bottomPanel;
+    private javax.swing.JPanel explorerPanel;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JPanel fileTreePanel;
     private javax.swing.JMenuItem hashMenuItem;
     private javax.swing.JMenu helpMenu;
     private javax.swing.JMenuItem helpMenuItem;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JSplitPane jSplitPane2;
     private javax.swing.JPanel rightPanel;
     private javax.swing.JMenuItem saveMenuItem;
     private javax.swing.JMenu securityMenu;
     private javax.swing.JCheckBoxMenuItem showPreviewCheckBoxMenuItem;
+    private javax.swing.JPanel statusPanel;
     private javax.swing.JPanel topRightPanel;
     // End of variables declaration//GEN-END:variables
 }
