@@ -19,7 +19,7 @@ import org.ortis.jsafebox.gui.old.SafeExplorer;
  *
  * @author Ortis
  */
-public class LoginFrame extends javax.swing.JFrame implements MouseListener
+public class LoginFrame extends javax.swing.JFrame
 {
 
 	/**

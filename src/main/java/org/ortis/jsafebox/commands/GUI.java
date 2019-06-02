@@ -16,8 +16,8 @@ import java.util.concurrent.Callable;
 import javax.swing.UIManager;
 
 import org.ortis.jsafebox.Safe;
-import org.ortis.jsafebox.gui.LoginFrame;
 
+import org.ortis.jsafebox.gui.old.LoginFrame;
 import picocli.CommandLine.Command;
 
 /**
@@ -42,7 +42,8 @@ public class GUI implements Callable<Void>
 		{
 		}
 
-		new LoginFrame().setVisible(true);
+		//new LoginFrame().setVisible(true);
+		new LoginFrame().show();
 		return null;
 	}
 
