@@ -34,8 +34,6 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
 	public LoginFrame()
 	{
 		initComponents();
-['<Shift><Super>Tab', '<Shift><Alt>Tab']
-		['<Shift><Alt>Tab']
 		final List<Image> icons = new ArrayList<>();
 		final Settings settings = Settings.getSettings();
 
