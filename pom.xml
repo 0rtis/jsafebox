@@ -25,8 +25,8 @@
 		                <archive>
 		                <manifest>
 		                    <mainClass>
-		                        org.ortis.jsafebox.commands.Bootstrap
-		                    </mainClass>
+                                io.ortis.jsafebox.commands.Bootstrap
+                            </mainClass>
 		                </manifest>
 		                </archive>
 		                <descriptorRefs>
