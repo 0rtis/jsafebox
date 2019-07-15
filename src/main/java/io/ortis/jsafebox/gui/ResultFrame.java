@@ -1,14 +1,18 @@
 /*
- *  Copyright (c) 2019 by Adequate Systems, LLC. All Rights Reserved.
+ *  Copyright 2019 Ortis (ortis@ortis.io)
  *
- *  See LICENSE.PDF https://github.com/mochimodev/mochimo/blob/master/LICENSE.PDF
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  **** NO WARRANTY ****
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- */
-
-/*
- * To change this license header, choose License Headers in Project Properties. To change this template file, choose Tools | Templates and open the template in the editor.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  */
 
 package io.ortis.jsafebox.gui;
@@ -43,6 +47,8 @@ public class ResultFrame extends JDialog implements WindowListener, KeyListener
 	private JPanel logPanel;
 	private JPanel mainPanel;
 	private JLabel resultLabel;
+	// End of variables declaration//GEN-END:variables
+
 	/**
 	 * Creates new form ResultFrame
 	 */
@@ -54,16 +60,14 @@ public class ResultFrame extends JDialog implements WindowListener, KeyListener
 
 		initComponents();
 		final Settings settings = GUI.getSettings();
-		mainPanel.setBackground(settings.getColorTheme().getBackgroundColor());
-		jPanel1.setBackground(settings.getColorTheme().getLeftPanelBackgroundColor());
+		mainPanel.setBackground(settings.getUITheme().getBackgroundColor());
+		jPanel1.setBackground(settings.getUITheme().getLeftPanelBackgroundColor());
 		this.jTextArea1.setEditable(false);
 
 		final Exception exception = this.task == null ? null : this.task.getException();
 		if(this.task == null)
 		{
-			headerLabel.setText("HEADER");
 			loadingIconLabel.setIcon(new ImageIcon(settings.getSuccessIcon()));
-			resultLabel.setText("Result message - a lonnnnnnnnnnnng one - longgggggggggger");
 			mainPanel.remove(logPanel);
 		}
 		else if(exception == null)
@@ -75,12 +79,6 @@ public class ResultFrame extends JDialog implements WindowListener, KeyListener
 			loadingIconLabel.setIcon(new ImageIcon(settings.getSuccessIcon()));
 			resultLabel.setText(this.task.getSuccessMessage());
 
-			/*
-			resultLabel.setText("<html>Name sucessfully changed !<br>Name sucessfully changed !<br>Name sucessfully changed !<br>Name sucessfully changed !<br>Name sucessfully changed !<br>Name sucessfully changed !</html>");
-			resultLabel.setBackground(Color.orange);
-			resultLabel.setOpaque(true);
-			mainPanel.setBackground(Color.CYAN);
-			*/
 
 			mainPanel.remove(logPanel);
 			this.setSize(getWidth(), jPanel1.getHeight() + resultLabel.getHeight() + 40);
@@ -101,7 +99,6 @@ public class ResultFrame extends JDialog implements WindowListener, KeyListener
 
 					SwingUtilities.invokeLater(new Runnable()
 					{
-
 						@Override
 						public void run()
 						{
@@ -148,7 +145,6 @@ public class ResultFrame extends JDialog implements WindowListener, KeyListener
 		jTextArea1.addKeyListener(this);
 		addKeyListener(this);
 
-		// pack();
 		if(parent != null)
 		{
 			setLocationRelativeTo(parent);
@@ -242,9 +238,7 @@ public class ResultFrame extends JDialog implements WindowListener, KeyListener
 	public void windowOpened(WindowEvent e)
 	{
 		jTextArea1.setCaretPosition(0);
-		// jScrollPane1.getVerticalScrollBar().setValue(jScrollPane1.getVerticalScrollBar().getMaximum());
 	}
-	// End of variables declaration//GEN-END:variables
 
 	@Override
 	public void windowClosing(WindowEvent e)

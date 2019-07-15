@@ -1,13 +1,19 @@
-/*******************************************************************************
- * Copyright 2018 Ortis (cao.ortis.org@gmail.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under the License.
- ******************************************************************************/
+/*
+ *  Copyright 2019 Ortis (ortis@ortis.io)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
 package io.ortis.jsafebox;
 
@@ -40,7 +46,7 @@ public abstract class SafeFiles
 
 		final String [] tokens = path.split(Folder.REGEX_DELIMITER);
 
-		final String [] comparableTokens = path.toUpperCase(Environment.getLocale()).split(Folder.REGEX_DELIMITER);
+		final String [] comparableTokens = Environment.comparableString(path).split(Folder.REGEX_DELIMITER);
 
 		if (comparableTokens[0].trim().equals(Folder.ROOT_NAME))
 			return root.get(tokens, 1, tokens.length);
@@ -61,7 +67,7 @@ public abstract class SafeFiles
 	}
 
 	/**
-	 * Search all match of a path. To be used in case the path contains {@link Utils#WILDCARD}
+	 * Search all match of a path. To be used in case the path contains wildcard
 	 * 
 	 * @param path
 	 * @param current
@@ -84,7 +90,7 @@ public abstract class SafeFiles
 
 			final String [] tokens = path.split(Folder.REGEX_DELIMITER);
 
-			final String [] comparableTokens = path.toUpperCase(Environment.getLocale()).split(Folder.REGEX_DELIMITER);
+			final String [] comparableTokens = Environment.comparableString(path).split(Folder.REGEX_DELIMITER);
 
 			if (comparableTokens[0].trim().equals(Folder.ROOT_NAME))
 				searchSafePath(root, comparableTokens, 1, destination);

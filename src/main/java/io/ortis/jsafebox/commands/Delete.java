@@ -1,13 +1,19 @@
-/*******************************************************************************
- * Copyright 2018 Ortis (cao.ortis.org@gmail.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under the License.
- ******************************************************************************/
+/*
+ *  Copyright 2019 Ortis (ortis@ortis.io)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
 package io.ortis.jsafebox.commands;
 
@@ -18,12 +24,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.logging.Logger;
 
-import io.ortis.jsafebox.Environment;
-import io.ortis.jsafebox.Folder;
-import io.ortis.jsafebox.Safe;
-import io.ortis.jsafebox.SafeFile;
-import io.ortis.jsafebox.SafeFiles;
-import io.ortis.jsafebox.Utils;
+import io.ortis.jsafebox.*;
 import io.ortis.jsafebox.task.Task;
 import io.ortis.jsafebox.task.TaskListener;
 import io.ortis.jsafebox.task.TaskProbe;
@@ -39,7 +40,7 @@ import picocli.CommandLine.Parameters;
  * @author Ortis <br>
  *         2018 Apr 26 8:17:40 PM <br>
  */
-@Command(description = "Delete file", name = "rm", mixinStandardHelpOptions = true, version = Safe.VERSION, showDefaultValues = true)
+@Command(description = "Delete file", name = "rm", mixinStandardHelpOptions = true, version = Version.VERSION, showDefaultValues = true)
 public class Delete implements Callable<Void>
 {
 
@@ -168,7 +169,6 @@ public class Delete implements Callable<Void>
 				safe.delete(safeFile.getPath());
 			} else
 			{
-
 				final Folder folder = (Folder) safeFile;
 				final List<SafeFile> safeFiles = new ArrayList<>(folder.listFiles());
 				for (final SafeFile sf : safeFiles)

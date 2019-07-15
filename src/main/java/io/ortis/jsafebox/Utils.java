@@ -1,15 +1,23 @@
-/*******************************************************************************
- * Copyright 2018 Ortis (cao.ortis.org@gmail.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under the License.
- ******************************************************************************/
+/*
+ *  Copyright 2019 Ortis (ortis@ortis.io)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
 package io.ortis.jsafebox;
+
+import io.ortis.jsafebox.gui.Settings;
 
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -76,7 +84,7 @@ public class Utils
 		} else // Absolute path
 		{
 
-			final String comparableToken = tokens[0].toUpperCase();
+			final String comparableToken = Environment.comparableString(tokens[0]);
 			for (final File root : File.listRoots())
 				if (root.getAbsolutePath().toUpperCase().equals(comparableToken))
 				{
@@ -176,6 +184,11 @@ public class Utils
 			extenstion = "";
 		else
 			extenstion = buffer[buffer.length - 1];
+
+
+		final Settings settings = Settings.getSettings();
+		if(settings !=null)
+			return settings.getMime(extenstion);
 
 		switch (extenstion)
 		{

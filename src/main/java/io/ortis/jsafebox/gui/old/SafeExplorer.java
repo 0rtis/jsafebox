@@ -1,80 +1,21 @@
-/*******************************************************************************
- * Copyright 2018 Ortis (cao.ortis.org@gmail.com)
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under the License.
- ******************************************************************************/
+/*
+ *  Copyright 2019 Ortis (ortis@ortis.io)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
 package io.ortis.jsafebox.gui.old;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Image;
-import java.awt.Insets;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTable;
-import javax.swing.JToolBar;
-import javax.swing.JTree;
-import javax.swing.KeyStroke;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
-import javax.swing.UIManager;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
-import javax.xml.bind.DatatypeConverter;
-
 
 import io.ortis.jsafebox.Block;
 import io.ortis.jsafebox.Folder;
@@ -85,22 +26,38 @@ import io.ortis.jsafebox.gui.old.previews.ImagePreview;
 import io.ortis.jsafebox.gui.old.previews.TextPreview;
 import io.ortis.jsafebox.gui.old.tasks.HashTask;
 import io.ortis.jsafebox.gui.old.tasks.SaveTask;
-import io.ortis.jsafebox.gui.old.tree.FileTransferHandler;
-import io.ortis.jsafebox.gui.old.tree.SafeFileNodePopupMenu;
-import io.ortis.jsafebox.gui.old.tree.SafeFileTreeCellRenderer;
-import io.ortis.jsafebox.gui.old.tree.SafeFileTreeNode;
-import io.ortis.jsafebox.gui.old.tree.SafeTreeCellEditor;
+import io.ortis.jsafebox.gui.old.tree.*;
 import io.ortis.jsafebox.gui.old.viewers.ImageViewer;
 import io.ortis.jsafebox.gui.old.viewers.TextViewer;
-import io.ortis.jsafebox.gui.old.tree.SafeTreeModel;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.tree.*;
+import javax.xml.bind.DatatypeConverter;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SafeExplorer implements WindowListener, ActionListener
 {
 	public final static String CONFIG_FILE = "jsafebox.gui.properties";
+	public static final DecimalFormat MEMORY_FORMAT = new DecimalFormat("###,###");
 	private final static String TITLE = "JSafebox";
 	private final static long TEXT_DISPLAY_MAX_LENGTH = 1_000_000;
-	public static final DecimalFormat MEMORY_FORMAT = new DecimalFormat("###,###");
-
 	private final Configuration configuration;
 
 	private final List<JFrame> frames = new ArrayList<>();
@@ -134,29 +91,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 	public SafeExplorer(final Configuration configuration)
 	{
 		this.configuration = configuration;
-
 		initialize();
-	}
-
-	public void setSafe(final Safe safe)
-	{
-		this.modificationPending.set(false);
-		this.safe = safe;
-
-		final SafeTreeModel model = new SafeTreeModel(this);
-		SafeFileTreeNode node = new SafeFileTreeNode(safe.getRootFolder());
-		model.getRootMode().add(node);
-		for (final SafeFile safeFile : safe.getRootFolder().listFiles())
-			node.add(new SafeFileTreeNode(safeFile));
-
-		tree.setModel(model);
-		model.reload();
-		tree.expandRow(0);
-		tree.repaint();
-
-		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-
-		this.explorerFrame.setTitle(TITLE + " - " + safe.getFile().getAbsolutePath());
 	}
 
 	private void loadNode(final SafeFileTreeNode node)
@@ -180,37 +115,39 @@ public class SafeExplorer implements WindowListener, ActionListener
 					propertyModel.fireTableDataChanged();
 
 					SafeFile file = (SafeFile) node.getUserObject();
-					if (file.isFolder())
+					if(file.isFolder())
 					{
 						// node.removeAllChildren();
 						final Folder folder = (Folder) file;
-						if (node.isLeaf())// if not children
-							for (SafeFile sf : folder.listFiles())
+						if(node.isLeaf())// if not children
+							for(SafeFile sf : folder.listFiles())
 								publish(sf);
 
-					} else
+					}
+					else
 					{
 						// preview
 						final Block block = (Block) file;
 
 						final List<String> displayed = new ArrayList<>();
 
-						propertyModel.addRow(new Object[] { Block.NAME_LABEL, block.getProperties().get(Block.NAME_LABEL) });
-						propertyModel.addRow(new Object[] { Block.PATH_LABEL, block.getProperties().get(Block.PATH_LABEL) });
-						propertyModel.addRow(new Object[] { "size", block.getLength() > 1000 ? MEMORY_FORMAT.format(block.getLength() / 1000) + " Kb" : block.getLength() + " bytes" });
+						propertyModel.addRow(new Object[]{Block.NAME_LABEL, block.getProperties().get(Block.NAME_LABEL)});
+						propertyModel.addRow(new Object[]{Block.PATH_LABEL, block.getProperties().get(Block.PATH_LABEL)});
+						propertyModel.addRow(new Object[]{"size", block.getLength() > 1000 ? MEMORY_FORMAT.format(
+								block.getLength() / 1000) + " Kb" : block.getLength() + " bytes"});
 
-						for (int i = 0; i < propertyModel.getRowCount(); i++)
+						for(int i = 0; i < propertyModel.getRowCount(); i++)
 							displayed.add(propertyModel.getValueAt(i, 0).toString());
 
-						for (final Map.Entry<String, String> metadata : block.getProperties().entrySet())
-							if (!displayed.contains(metadata.getKey()))
-								propertyModel.addRow(new Object[] { metadata.getKey(), metadata.getValue() });
+						for(final Map.Entry<String, String> metadata : block.getProperties().entrySet())
+							if(!displayed.contains(metadata.getKey()))
+								propertyModel.addRow(new Object[]{metadata.getKey(), metadata.getValue()});
 
-						final String mime = block.getProperties().get("content-type");
-						if (showPreview.isSelected())
-							if (mime != null)
+						final String mime = block.getProperties().get(Block.MIME_LABEL);
+						if(showPreview.isSelected())
+							if(mime != null)
 							{
-								if (mime.startsWith("image"))
+								if(mime.startsWith("image"))
 								{
 									try
 									{
@@ -220,13 +157,14 @@ public class SafeExplorer implements WindowListener, ActionListener
 										final ImagePreview imagePreview = new ImagePreview(ImageIO.read(new ByteArrayInputStream(baos.toByteArray())));
 
 										previewPanel.add(imagePreview, BorderLayout.CENTER);
-									} catch (final Exception e)
+									} catch(final Exception e)
 									{
 										previewPanel.removeAll();
 										previewPanel.add(new ErrorPreview(e), BorderLayout.CENTER);
 									}
 
-								} else if (mime.startsWith("text"))
+								}
+								else if(mime.startsWith("text"))
 								{
 									try
 									{
@@ -236,19 +174,20 @@ public class SafeExplorer implements WindowListener, ActionListener
 										final TextPreview textPreview = new TextPreview(text);
 
 										previewPanel.add(textPreview, BorderLayout.CENTER);
-									} catch (final Exception e)
+									} catch(final Exception e)
 									{
 										previewPanel.removeAll();
 										previewPanel.add(new ErrorPreview(e), BorderLayout.CENTER);
 									}
 
-								} else
+								}
+								else
 								{
 
 									final String img;
-									if (mime.startsWith("video"))
+									if(mime.startsWith("video"))
 										img = "/img/icons8-video-file-100.png";
-									else if (mime.startsWith("audio"))
+									else if(mime.startsWith("audio"))
 										img = "/img/icons8-audio-file-100.png";
 									else
 										img = "/img/icons8-document-100.png";
@@ -259,20 +198,18 @@ public class SafeExplorer implements WindowListener, ActionListener
 										final ImagePreview imagePreview = new ImagePreview(ImageIO.read(SafeExplorer.class.getResourceAsStream(img)));
 
 										previewPanel.add(imagePreview, BorderLayout.CENTER);
-									} catch (final Exception e)
+									} catch(final Exception e)
 									{
 										previewPanel.removeAll();
 										previewPanel.add(new ErrorPreview(e), BorderLayout.CENTER);
 									}
-
 								}
 							}
-
 					}
 
 					return null;
 
-				} catch (final Exception e)
+				} catch(final Exception e)
 				{
 					e.printStackTrace();
 					return null;
@@ -282,15 +219,13 @@ public class SafeExplorer implements WindowListener, ActionListener
 			@Override
 			protected void process(List<SafeFile> chunks)
 			{
-				for (final SafeFile sf : chunks)
+				for(final SafeFile sf : chunks)
 					node.add(new SafeFileTreeNode(sf));
-
 			}
 
 			@Override
 			protected void done()
 			{
-
 				progressBar.setVisible(false);
 				progressBar.setIndeterminate(false);
 				tree.repaint();
@@ -305,29 +240,26 @@ public class SafeExplorer implements WindowListener, ActionListener
 	private void openNode(final SafeFileTreeNode node)
 	{
 		SafeFile file = (SafeFile) node.getUserObject();
-		if (file.isBlock())
+		if(file.isBlock())
 		{
 			final Block block = (Block) file;
 
-			final String mime = block.getProperties().get("content-type");
-			if (mime != null)
-
-				if (mime.startsWith("image"))
+			final String mime = block.getProperties().get(Block.MIME_LABEL);
+			if(mime != null)
+				if(mime.startsWith("image"))
 				{
-
 					try
 					{
-
 						final ImageViewer viewer = new ImageViewer(safe, block, explorerFrame.getTitle() + " - ");
 						viewer.addWindowListener(SafeExplorer.this);
 						viewer.setVisible(true);
 
-					} catch (final Exception exception)
+					} catch(final Exception exception)
 					{
 						new ErrorDialog(explorerFrame, "Error while opening text viewer", exception).setVisible(true);
 					}
-
-				} else if (mime.startsWith("text") || block.getDataLength() < TEXT_DISPLAY_MAX_LENGTH)// Display as text if mime text or less than TEXT_DISPLAY_MAX_LENGTH
+				}
+				else if(mime.startsWith("text") || block.getDataLength() < TEXT_DISPLAY_MAX_LENGTH)// Display as text if mime text or less than TEXT_DISPLAY_MAX_LENGTH
 				{
 					try
 					{
@@ -339,7 +271,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 						viewer.addWindowListener(SafeExplorer.this);
 						viewer.setVisible(true);
 
-					} catch (final Exception exception)
+					} catch(final Exception exception)
 					{
 						new ErrorDialog(explorerFrame, "Error while opening text viewer", exception).setVisible(true);
 					}
@@ -367,7 +299,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 		try
 		{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (final Exception e)
+		} catch(final Exception e)
 		{
 		}
 
@@ -392,7 +324,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 			public void valueChanged(TreeSelectionEvent tse)
 			{
 				DefaultMutableTreeNode node = (DefaultMutableTreeNode) tse.getPath().getLastPathComponent();
-				if (node.getParent() != null)
+				if(node.getParent() != null)
 				{
 					loadNode((SafeFileTreeNode) node);
 				}
@@ -416,19 +348,20 @@ public class SafeExplorer implements WindowListener, ActionListener
 			{
 				final int selRow = tree.getRowForLocation(e.getX(), e.getY());
 				final TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
-				if (selRow != -1)
+				if(selRow != -1)
 				{
 
 					DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
 
-					if (node.getParent() != null)
+					if(node.getParent() != null)
 					{
 						final SafeFileTreeNode sfNode = (SafeFileTreeNode) node;
 
-						if (e.getClickCount() == 2)
+						if(e.getClickCount() == 2)
 						{
 							openNode(sfNode);
-						} else if (SwingUtilities.isRightMouseButton(e))
+						}
+						else if(SwingUtilities.isRightMouseButton(e))
 						{
 							tree.setSelectionRow(selRow);
 							final SafeFileNodePopupMenu menu = new SafeFileNodePopupMenu(tree, sfNode);
@@ -446,11 +379,11 @@ public class SafeExplorer implements WindowListener, ActionListener
 			@Override
 			public void keyTyped(final KeyEvent e)
 			{
-				if (e.getKeyChar() == '\n')
+				if(e.getKeyChar() == '\n')
 				{
 
 					final DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-					if (node.getParent() != null)
+					if(node.getParent() != null)
 					{
 						final SafeFileTreeNode sfNode = (SafeFileTreeNode) node;
 						openNode(sfNode);
@@ -490,10 +423,10 @@ public class SafeExplorer implements WindowListener, ActionListener
 		infoPanel.setLayout(new BorderLayout(0, 0));
 		infoPanel.setPreferredSize(new Dimension(450, 200));
 
-		final DefaultTableModel tableModel = new DefaultTableModel(new Object[0][0], new String[] { "Property", "Value" })
+		final DefaultTableModel tableModel = new DefaultTableModel(new Object[0][0], new String[]{"Property", "Value"})
 		{
 			/**
-			 * 
+			 *
 			 */
 			private static final long serialVersionUID = 1L;
 
@@ -641,7 +574,6 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 	public void notifyModificationPending()
 	{
-
 		modificationPending.set(true);
 		((DefaultTreeModel) tree.getModel()).reload();
 		tree.expandRow(0);
@@ -656,42 +588,45 @@ public class SafeExplorer implements WindowListener, ActionListener
 	public void actionPerformed(final ActionEvent event)
 	{
 
-		if (event.getActionCommand().equals("Save"))
+		if(event.getActionCommand().equals("Save"))
 		{
 			final ProgressDialog pd = new ProgressDialog(this.explorerFrame);
 			pd.setTitle("Saving safe...");
 			final SaveTask saveTask = new SaveTask(SafeExplorer.this);
 			pd.monitor(saveTask, "Saving safe...");
 
-		} else if (event.getActionCommand().equals(this.autoSave.getActionCommand()))
+		}
+		else if(event.getActionCommand().equals(this.autoSave.getActionCommand()))
 			this.configuration.setAutoSave(this.autoSave.isSelected());
-		else if (event.getActionCommand().equals(this.showPreview.getActionCommand()))
+		else if(event.getActionCommand().equals(this.showPreview.getActionCommand()))
 			this.configuration.setPreview(this.showPreview.isSelected());
-		else if (event.getActionCommand().equals(this.autoHashCheck.getActionCommand()))
+		else if(event.getActionCommand().equals(this.autoHashCheck.getActionCommand()))
 			this.configuration.setAutoHashCheck(this.autoHashCheck.isSelected());
-		else if (event.getActionCommand().equals(this.helpFrameMenuItem.getActionCommand()))
+		else if(event.getActionCommand().equals(this.helpFrameMenuItem.getActionCommand()))
 		{
 			try
 			{
 				final HelpFrame helpFrame = new HelpFrame(this);
 				helpFrame.setVisible(true);
-			} catch (final Exception e)
+			} catch(final Exception e)
 			{
 				new ErrorDialog(this.explorerFrame, "Error while opening help frame", e).setVisible(true);
 			}
 
-		} else if (event.getActionCommand().equals(this.aboutMenuItem.getActionCommand()))
+		}
+		else if(event.getActionCommand().equals(this.aboutMenuItem.getActionCommand()))
 		{
 			try
 			{
 				final AboutFrame aboutFrame = new AboutFrame(this);
 				aboutFrame.setVisible(true);
-			} catch (final Exception e)
+			} catch(final Exception e)
 			{
 				new ErrorDialog(this.explorerFrame, "Error while opening about frame", e).setVisible(true);
 			}
 
-		} else if (event.getActionCommand().equals(this.checkHashMenuItem.getActionCommand()))
+		}
+		else if(event.getActionCommand().equals(this.checkHashMenuItem.getActionCommand()))
 		{
 			try
 			{
@@ -703,25 +638,25 @@ public class SafeExplorer implements WindowListener, ActionListener
 				hashCheckDialog.monitor(hashTask, "Computing hash...");
 
 				final String expectedHash = DatatypeConverter.printHexBinary(this.safe.getHash());
-				if (hashTask.getHash() != null)
-					if (!hashTask.getHash().equals(expectedHash))
+				if(hashTask.getHash() != null)
+					if(!hashTask.getHash().equals(expectedHash))
 					{
 
-						Object [] options = { "Yes (NOT RECOMMENDED)", "No" };
+						Object[] options = {"Yes (NOT RECOMMENDED)", "No"};
 						final int selectedOptionId = JOptionPane.showOptionDialog(this.explorerFrame,
-								"<html><div><b>CARREFULLY READ THIS MESSAGE !!!!!!!!!</b></div><br><div>The hash of the safe is </div><div><b>" + hashTask.getHash()
-										+ "</b></div><div>but was expected to be</div><div><b>" + expectedHash
-										+ "</b></div><br/><div>The content of the file might have been altered. It is strongly advised to revert to a backup file</div><br/><div>Do you want to continue with the current file ?</div><html>",
+								"<html><div><b>CARREFULLY READ THIS MESSAGE !!!!!!!!!</b></div><br><div>The hash of the safe is </div><div><b>" + hashTask.getHash() + "</b></div><div>but was expected to be</div><div><b>" + expectedHash + "</b></div><br/><div>The content of the file might have been altered. It is strongly advised to revert to a backup file</div><br/><div>Do you want to continue with the current file ?</div><html>",
 								"Integrity check failed", JOptionPane.WARNING_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, options, options[1]);
 
-						if (selectedOptionId != 0)
+						if(selectedOptionId != 0)
 							this.explorerFrame.dispatchEvent(new WindowEvent(this.explorerFrame, WindowEvent.WINDOW_CLOSING));
 
-					} else
-						JOptionPane.showMessageDialog(this.explorerFrame, "<html><div>Integrity hash</div><br/><div><b>" + expectedHash + "</b><div><br/><div>sucessfully check !<div>",
+					}
+					else
+						JOptionPane.showMessageDialog(this.explorerFrame,
+								"<html><div>Integrity hash</div><br/><div><b>" + expectedHash + "</b><div><br/><div>sucessfully check !<div>",
 								"Integrity check sucessful", JOptionPane.INFORMATION_MESSAGE);
 
-			} catch (final Exception e)
+			} catch(final Exception e)
 			{
 				new ErrorDialog(this.explorerFrame, "Error while check integrity hash", e).setVisible(true);
 			}
@@ -742,12 +677,12 @@ public class SafeExplorer implements WindowListener, ActionListener
 	public void windowClosing(final WindowEvent event)
 	{
 
-		if (event.getSource() == this.explorerFrame)
+		if(event.getSource() == this.explorerFrame)
 		{
-			if (this.safe != null)
+			if(this.safe != null)
 			{
 
-				if (modificationPending.get())
+				if(modificationPending.get())
 				{
 
 					final JOptionPane optionPane = new JOptionPane("Exit without saving ?", JOptionPane.WARNING_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
@@ -756,7 +691,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 					{
 						public void keyPressed(KeyEvent ke)
 						{ // handler
-							if (ke.getKeyCode() == KeyEvent.VK_ESCAPE)
+							if(ke.getKeyCode() == KeyEvent.VK_ESCAPE)
 								dialog.dispose();
 						}
 					});
@@ -765,7 +700,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 
 					final Integer action = (Integer) optionPane.getValue();
 
-					if (action == null || action != JOptionPane.YES_OPTION)
+					if(action == null || action != JOptionPane.YES_OPTION)
 						return;
 
 				}
@@ -783,7 +718,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 		try
 		{
 			this.configuration.store(new FileOutputStream(CONFIG_FILE), "Safe Explorer settings");
-		} catch (final IOException e)
+		} catch(final IOException e)
 		{
 			e.printStackTrace();
 		}
@@ -791,14 +726,14 @@ public class SafeExplorer implements WindowListener, ActionListener
 		final JFrame frame = (JFrame) event.getSource();
 		frames.remove(frame);
 
-		if (frames.size() == 0)
+		if(frames.size() == 0)
 		{
 
 			statusLabel.setText("Closing safe...");
 			try
 			{
 				this.safe.close();
-			} catch (final Exception e)
+			} catch(final Exception e)
 			{
 				new ErrorDialog(this.explorerFrame, "Error while closing safe", e).setVisible(true);
 
@@ -833,6 +768,27 @@ public class SafeExplorer implements WindowListener, ActionListener
 	public Safe getSafe()
 	{
 		return safe;
+	}
+
+	public void setSafe(final Safe safe)
+	{
+		this.modificationPending.set(false);
+		this.safe = safe;
+
+		final SafeTreeModel model = new SafeTreeModel(this);
+		SafeFileTreeNode node = new SafeFileTreeNode(safe.getRootFolder());
+		model.getRootMode().add(node);
+		for(final SafeFile safeFile : safe.getRootFolder().listFiles())
+			node.add(new SafeFileTreeNode(safeFile));
+
+		tree.setModel(model);
+		model.reload();
+		tree.expandRow(0);
+		tree.repaint();
+
+		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+		this.explorerFrame.setTitle(TITLE + " - " + safe.getFile().getAbsolutePath());
 	}
 
 	public JFrame getExplorerFrame()

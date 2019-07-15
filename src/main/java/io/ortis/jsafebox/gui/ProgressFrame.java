@@ -1,13 +1,18 @@
 /*
- *  Copyright (c) 2019 by Adequate Systems, LLC. All Rights Reserved.
+ *  Copyright 2019 Ortis (ortis@ortis.io)
  *
- *  See LICENSE.PDF https://github.com/mochimodev/mochimo/blob/master/LICENSE.PDF
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  **** NO WARRANTY ****
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- */
-/*
- * To change this license header, choose License Headers in Project Properties. To change this template file, choose Tools | Templates and open the template in the editor.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  */
 
 package io.ortis.jsafebox.gui;
@@ -55,10 +60,10 @@ public class ProgressFrame extends javax.swing.JDialog implements WindowListener
 
 		final Settings settings = Settings.getSettings();
 
-		mainPanel.setBackground(settings.getColorTheme().getBackgroundColor());
-		jPanel2.setBackground(settings.getColorTheme().getLeftPanelBackgroundColor());
-		jTextArea1.setBackground(settings.getColorTheme().getBackgroundColor());
-		setBackground(settings.getColorTheme().getBackgroundColor());
+		mainPanel.setBackground(settings.getUITheme().getBackgroundColor());
+		jPanel2.setBackground(settings.getUITheme().getLeftPanelBackgroundColor());
+		jTextArea1.setBackground(settings.getUITheme().getBackgroundColor());
+		setBackground(settings.getUITheme().getBackgroundColor());
 
 		settings.applyHeaderLabelStyle(this.jLabel2);
 
@@ -78,15 +83,15 @@ public class ProgressFrame extends javax.swing.JDialog implements WindowListener
 
 		final Settings settings = Settings.getSettings();
 
-		mainPanel.setBackground(settings.getColorTheme().getBackgroundColor());
+		mainPanel.setBackground(settings.getUITheme().getBackgroundColor());
 
 		jPanel2.setFont(settings.getFontTheme().getHeaderFont());
-		jPanel2.setBackground(settings.getColorTheme().getLeftPanelBackgroundColor());
+		jPanel2.setBackground(settings.getUITheme().getLeftPanelBackgroundColor());
 
 		jTextArea1.setFont(settings.getFontTheme().getFieldFont());
-		jTextArea1.setBackground(settings.getColorTheme().getBackgroundColor());
+		jTextArea1.setBackground(settings.getUITheme().getBackgroundColor());
 
-		setBackground(settings.getColorTheme().getBackgroundColor());
+		setBackground(settings.getUITheme().getBackgroundColor());
 
 		addWindowListener(this);
 		setLocationRelativeTo(parent);
