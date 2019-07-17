@@ -144,12 +144,12 @@ public class CommandTest
 				safeFolderPath };
 		Bootstrap.main(args);
 
-		// add folder
+		// add whole file system folder
 		args = new String[] { "add", "--password", "mypassword", safeFile.getAbsolutePath(), "-m", "-pp", "filePropertyKey", "filePropertyValue", systemFile.getParentFile().getAbsolutePath(),
 				safeFolderPath };
 		Bootstrap.main(args);
 
-		// add file
+		// add a single file system file
 		args = new String[] { "add", "--password", "mypassword", safeFile.getAbsolutePath(), "-m", "-pp", "filePropertyKey", "filePropertyValue", systemFile.getAbsolutePath(), safeFolderPath };
 		Bootstrap.main(args);
 

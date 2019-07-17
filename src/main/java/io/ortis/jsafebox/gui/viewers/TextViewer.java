@@ -16,15 +16,24 @@
  */
 package io.ortis.jsafebox.gui.viewers;
 
-import io.ortis.jsafebox.gui.Settings;
-import io.ortis.jsafebox.gui.old.SafeExplorer;
+import io.ortis.jsafebox.Block;
+import io.ortis.jsafebox.Folder;
+import io.ortis.jsafebox.Safe;
+import io.ortis.jsafebox.gui.*;
+import io.ortis.jsafebox.gui.tasks.AddStreamTask;
+import io.ortis.jsafebox.gui.tasks.DeleteTask;
+import io.ortis.jsafebox.gui.tasks.ExceptionTask;
+import io.ortis.jsafebox.gui.tasks.SaveTask;
+import io.ortis.jsafebox.gui.tree.SafeFileTreeNode;
+import io.ortis.jsafebox.gui.tree.SafeTreeModel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  * @author Ortis
@@ -33,21 +42,41 @@ public class TextViewer extends JFrame implements ActionListener
 {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
+
+	private final JTree tree;
+	private final SafeboxFrame safeboxFrame;
+
+	private SafeFileTreeNode node;
 	private JTextArea textArea;
 	private JRadioButtonMenuItem wordWrapMenuItem;
+
+	private JMenuItem saveMenuItem;
+	private JRadioButtonMenuItem editableMenuItem;
 
 	/**
 	 * Create the application.
 	 */
-	public TextViewer(final String text)
+	public TextViewer(final JTree tree, final SafeFileTreeNode node) throws Exception
 	{
+		this.tree = tree;
+		this.safeboxFrame = ((SafeTreeModel) tree.getModel()).getSafeboxFrame();
+		this.node = node;
 
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		initialize();
-		this.textArea.setText(text);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+
+		try(final ByteArrayOutputStream baos = new ByteArrayOutputStream())
+		{
+			this.safeboxFrame.getSafe().extract((Block) node.getSafeFile(), true, baos);
+			final String text = new String(baos.toByteArray());// Use local Charset
+			this.textArea.setText(text);
+		}
+
+
 		this.textArea.setCaretPosition(0);
 	}
 
@@ -61,7 +90,7 @@ public class TextViewer extends JFrame implements ActionListener
 		textArea = new JTextArea();
 		this.textArea.setEditable(false);
 
-		// textArea.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+		textArea.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
 		JScrollPane scrollPane = new JScrollPane(textArea);
 
@@ -72,28 +101,94 @@ public class TextViewer extends JFrame implements ActionListener
 		JMenuBar menuBar = new JMenuBar();
 		main.add(menuBar, BorderLayout.NORTH);
 
+		JMenu fileMenu = new JMenu("File");
+		menuBar.add(fileMenu);
+
+
+		saveMenuItem = new JMenuItem("Save");
+		saveMenuItem.setEnabled(false);
+		saveMenuItem.addActionListener(this);
+		fileMenu.add(saveMenuItem);
+
+		editableMenuItem = new JRadioButtonMenuItem("Editable");
+		editableMenuItem.setSelected(false);
+		editableMenuItem.addActionListener(this);
+		fileMenu.add(editableMenuItem);
+
+
 		JMenu mnNewMenu = new JMenu("View");
-
 		menuBar.add(mnNewMenu);
-
 		wordWrapMenuItem = new JRadioButtonMenuItem("Line wrap");
 		wordWrapMenuItem.addActionListener(this);
 		mnNewMenu.add(wordWrapMenuItem);
 
-		setIconImages(Settings.getSettings().getFrameIcons());
-		
+
+		setIconImages(Settings.getSettings().getTextFrameIcons());
+
 		setSize(Toolkit.getDefaultToolkit().getScreenSize().width / 2, Toolkit.getDefaultToolkit().getScreenSize().height * 2 / 3);
-		setLocation(Toolkit.getDefaultToolkit().getScreenSize().width / 2 - getSize().width / 2, Toolkit.getDefaultToolkit().getScreenSize().height / 2 - getSize().height / 2);
+		setLocation(Toolkit.getDefaultToolkit().getScreenSize().width / 2 - getSize().width / 2,
+				Toolkit.getDefaultToolkit().getScreenSize().height / 2 - getSize().height / 2);
 	}
 
 	@Override
 	public void actionPerformed(final ActionEvent event)
 	{
+		if(event.getSource() == saveMenuItem)
+		{
+			final Safe safe = this.safeboxFrame.getSafe();
+			final DeleteTask deleteTask = new DeleteTask(this.node.getSafeFile(), safe, GUI.getLogger());
+			final ProgressFrame progressFrame = new ProgressFrame(this.safeboxFrame);
+			progressFrame.execute(deleteTask);
 
-		if (event.getActionCommand().equals(wordWrapMenuItem.getActionCommand()))
+			if(deleteTask.getException() == null)
+			{
+				final String text = this.textArea.getText();
+
+				try(final ByteArrayInputStream bais = new ByteArrayInputStream(text.getBytes()))
+				{
+					final Folder destination = node.getSafeFile().getParent();
+					final AddStreamTask task = new AddStreamTask(bais, node.getSafeFile().getName(), destination, safe, GUI.getLogger());
+
+					progressFrame.execute(task);
+
+					if(task.getException() == null)
+					{
+
+						this.safeboxFrame.notifyModificationPending();
+
+						node.setSafeFile(task.getAdded());
+						node.setStatus(SafeFileTreeNode.Status.Updated);
+
+						if(Settings.getSettings().isAutoSave())
+						{
+							final SaveTask saveTask = new SaveTask(safe, GUI.getLogger());
+							progressFrame.execute(saveTask);
+
+							if(saveTask.getException() == null)
+								this.safeboxFrame.setSafe(saveTask.getNewSafe());
+						}
+
+						editableMenuItem.doClick();
+					}
+
+					toFront();
+
+				} catch(final IOException e)
+				{
+					new ResultFrame(this.safeboxFrame, new ExceptionTask(e, GUI.getLogger()));
+				}
+			}
+		}
+		else if(event.getSource() == editableMenuItem)
+		{
+			this.textArea.setEditable(editableMenuItem.isSelected());
+			this.saveMenuItem.setEnabled(this.textArea.isEditable());
+		}
+		else if(event.getSource() == wordWrapMenuItem)
 		{
 			this.textArea.setLineWrap(wordWrapMenuItem.isSelected());
 		}
+
 	}
 
 }

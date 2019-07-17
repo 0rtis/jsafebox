@@ -25,7 +25,7 @@ import picocli.CommandLine.Parameters;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.List;
+import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -120,9 +120,25 @@ public class Add implements Callable<Void>
 		return null;
 	}
 
-	public static <D extends  Collection<SafeFile>> D add(final File source, final Map<String, String> properties, final Safe safe, final Folder folder,
-			final D destination,
+
+	public static SafeFile add(final InputStream sourceInputStream, final String sourceName, final Map<String, String> properties, final Safe safe, final Folder folder,
 			TaskProbeAdapter adapter) throws CancellationException, Exception
+	{
+		final Map<String, String> props = properties == null ? new LinkedHashMap<>() : new LinkedHashMap<>(properties);
+
+		props.put(Block.PATH_LABEL, Utils.sanitize(folder.getPath() + Folder.DELIMITER + sourceName, Folder.DELIMITER, Environment.getSubstitute()));
+		props.put(Block.NAME_LABEL, Utils.sanitizeToken(sourceName, Environment.getSubstitute()));
+		props.put(Block.MIME_LABEL, Utils.getMIMEType(sourceName));
+
+		adapter.fireMessage("Encrypting " + sourceName + " to " + props.get(Block.PATH_LABEL));
+
+		final Block block = safe.add(props, sourceInputStream, adapter);
+
+		return block;
+	}
+
+	public static <D extends Collection<SafeFile>> D add(final File source, final Map<String, String> properties, final Safe safe, final Folder folder,
+			final D destination, TaskProbeAdapter adapter) throws CancellationException, Exception
 	{
 		if(adapter == null)
 			adapter = new TaskProbeAdapter();
@@ -150,7 +166,7 @@ public class Add implements Callable<Void>
 
 			}
 			else
-			{
+			{/*
 				final Map<String, String> props = properties == null ? new LinkedHashMap<>() : new LinkedHashMap<>(properties);
 
 				props.put(Block.PATH_LABEL, Utils.sanitize(folder.getPath() + Folder.DELIMITER + source.getName(), Folder.DELIMITER, Environment.getSubstitute()));
@@ -163,10 +179,18 @@ public class Add implements Callable<Void>
 				final FileInputStream fis = new FileInputStream(source);
 				final Block block = safe.add(props, fis, adapter);
 
-				if(destination !=null)
+				if(destination != null)
 					destination.add(block);
 
 				fis.close();
+				*/
+
+				try(final FileInputStream fis = new FileInputStream(source))
+				{
+					final SafeFile safeFile = add(fis, source.getName(), properties, safe, folder, adapter);
+					if(destination != null)
+						destination.add(safeFile);
+				}
 			}
 
 			return destination;

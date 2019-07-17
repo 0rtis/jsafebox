@@ -187,7 +187,7 @@ public class Extract implements Callable<Void>
 				final File file = new File(directory, safeFile.getName());
 				probe.fireMessage("Extracting block " + safeFile.getName() + " to " + file.getAbsolutePath());
 				final FileOutputStream fos = new FileOutputStream(file);
-				safe.extract(safeFile.getPath(), fos);
+				safe.extract(safeFile.getPath(),true, fos);
 				fos.close();
 			}
 		} catch (final CancellationException e)

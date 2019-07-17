@@ -40,7 +40,7 @@ public class SafeFileTreeCellRenderer extends DefaultTreeCellRenderer
 
 	private final static ImageIcon UNKNOWN_ICON =
 			new ImageIcon(Toolkit.getDefaultToolkit().getImage(SafeFileTreeCellRenderer.class.getResource("/img/binary-file-16.png")));
-	private final static ImageIcon TEXT_ICON = new ImageIcon(Toolkit.getDefaultToolkit().getImage(SafeFileTreeCellRenderer.class.getResource("/img/txt-16.png")));
+	private final static ImageIcon TEXT_ICON = new ImageIcon(Toolkit.getDefaultToolkit().getImage(SafeFileTreeCellRenderer.class.getResource("/img/txt-file-16.png")));
 	private final static ImageIcon IMAGE_ICON = new ImageIcon(Toolkit.getDefaultToolkit().getImage(SafeFileTreeCellRenderer.class.getResource("/img/image-file-16.png")));
 	private final static ImageIcon AUDIO_ICON = new ImageIcon(Toolkit.getDefaultToolkit().getImage(SafeFileTreeCellRenderer.class.getResource("/img/audio-file-16.png")));
 	private final static ImageIcon VIDEO_ICON = new ImageIcon(Toolkit.getDefaultToolkit().getImage(SafeFileTreeCellRenderer.class.getResource("/img/video-file-16.png")));
@@ -121,6 +121,11 @@ public class SafeFileTreeCellRenderer extends DefaultTreeCellRenderer
 					case Deleted:
 						label.setText("- " + safeFile.getName());
 						foregroundColor = Settings.getSettings().getUITheme().pendingDeleteColor();
+						break;
+
+					case Updated:
+						label.setText("* " + safeFile.getName());
+						foregroundColor = Color.BLUE;
 						break;
 
 					case Unchanged:

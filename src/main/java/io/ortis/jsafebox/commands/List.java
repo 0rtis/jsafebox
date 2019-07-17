@@ -38,7 +38,6 @@ import picocli.CommandLine.Parameters;
 @Command(description = "List content", name = "ls", mixinStandardHelpOptions = true, version = Version.VERSION, showDefaultValues = true)
 public class List implements Callable<Void>
 {
-	private final static DecimalFormat BYTE_FORMAT = new DecimalFormat("###,###");
 
 	@Option(names = { "-pw", "-pwd", "--password" }, required = true, description = "Password")
 	private String password;
@@ -83,7 +82,7 @@ public class List implements Callable<Void>
 				{
 					final Block block = (Block) sf;
 
-					sb.append(sf.getPath() + "\t" + BYTE_FORMAT.format(block.getDataLength()) + " bytes\n");
+					sb.append(sf.getPath() + "\t" + Utils.humanReadableByteCount(block.getDataLength()) + "\n");
 					size += block.getDataLength();
 					bCount++;
 				} else
@@ -94,7 +93,7 @@ public class List implements Callable<Void>
 						if (ssf.isBlock())
 						{
 							final Block block = (Block) ssf;
-							sb.append(ssf.getPath() + "\t" + BYTE_FORMAT.format(block.getDataLength()) + " bytes\n");
+							sb.append(ssf.getPath() + "\t" + Utils.humanReadableByteCount(block.getDataLength()) + "\n");
 							bCount++;
 							size += block.getDataLength();
 						} else
@@ -108,7 +107,7 @@ public class List implements Callable<Void>
 			sb.append("\n");
 
 			if (bCount > 0)
-				sb.append(bCount + " file(s) - Total " + BYTE_FORMAT.format(size) + " bytes");
+				sb.append(bCount + " file(s) - Total " + Utils.humanReadableByteCount(size) + "");
 
 			if (fCount > 0)
 			{

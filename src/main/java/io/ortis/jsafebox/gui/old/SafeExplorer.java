@@ -153,7 +153,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 									{
 
 										final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-										safe.extract(block, baos);
+										safe.extract(block,true, baos);
 										final ImagePreview imagePreview = new ImagePreview(ImageIO.read(new ByteArrayInputStream(baos.toByteArray())));
 
 										previewPanel.add(imagePreview, BorderLayout.CENTER);
@@ -169,7 +169,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 									try
 									{
 										final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-										safe.extract(block, baos);
+										safe.extract(block,true, baos);
 										final String text = new String(baos.toByteArray());// use local charset
 										final TextPreview textPreview = new TextPreview(text);
 
@@ -264,7 +264,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 					try
 					{
 						final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-						safe.extract(block, baos);
+						safe.extract(block,true, baos);
 						final String text = new String(baos.toByteArray());// Use local Charset
 						final TextViewer viewer = new TextViewer(text);
 						viewer.setTitle(explorerFrame.getTitle() + " - " + block.getPath());

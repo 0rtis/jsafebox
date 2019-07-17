@@ -43,7 +43,7 @@ public class SafeFileNodePopupMenu extends JPopupMenu implements ActionListener
 
 	private static final long serialVersionUID = 1L;
 	private final SafeboxFrame safeboxFrame;
-	private final Safe safe;
+
 	private final SafeFileTreeNode node;
 	private final SafeFile safeFile;
 	private final Folder folder;
@@ -51,7 +51,7 @@ public class SafeFileNodePopupMenu extends JPopupMenu implements ActionListener
 	public SafeFileNodePopupMenu(final JTree tree, final SafeFileTreeNode node)
 	{
 		this.safeboxFrame = ((SafeTreeModel) tree.getModel()).getSafeboxFrame();
-		this.safe = safeboxFrame.getSafe();
+
 		this.node = node;
 		this.safeFile = this.node.getSafeFile();
 		if(this.safeFile.isFolder())
@@ -91,7 +91,7 @@ public class SafeFileNodePopupMenu extends JPopupMenu implements ActionListener
 	@Override
 	public void actionPerformed(final ActionEvent event)
 	{
-
+		final Safe safe = this.safeboxFrame.getSafe();
 		switch(event.getActionCommand())
 		{
 			case DELETE:
@@ -104,7 +104,7 @@ public class SafeFileNodePopupMenu extends JPopupMenu implements ActionListener
 					if(optionFrame.getChoice() != Boolean.TRUE)
 						return;
 
-					final DeleteTask deleteTask = new DeleteTask(this.safeFile, this.safe, GUI.getLogger());
+					final DeleteTask deleteTask = new DeleteTask(this.safeFile, safe, GUI.getLogger());
 					final ProgressFrame progressFrame = new ProgressFrame(this.safeboxFrame);
 					progressFrame.execute(deleteTask);
 
@@ -115,7 +115,7 @@ public class SafeFileNodePopupMenu extends JPopupMenu implements ActionListener
 
 						if(Settings.getSettings().isAutoSave())
 						{
-							final SaveTask saveTask = new SaveTask(this.safe, GUI.getLogger());
+							final SaveTask saveTask = new SaveTask(safe, GUI.getLogger());
 							progressFrame.execute(saveTask);
 							if(saveTask.getException() == null)
 							{
@@ -148,7 +148,7 @@ public class SafeFileNodePopupMenu extends JPopupMenu implements ActionListener
 
 					if(destination != null)
 					{
-						final ExtractTask extractTask = new ExtractTask(this.safeFile, destination, this.safe, GUI.getLogger());
+						final ExtractTask extractTask = new ExtractTask(this.safeFile, destination, safe, GUI.getLogger());
 						final ProgressFrame progressFrame = new ProgressFrame(this.safeboxFrame);
 						progressFrame.execute(extractTask);
 

@@ -346,32 +346,45 @@ public class Safe implements Closeable
 	 * Extract data from the {@link Safe}
 	 *
 	 * @param block:        block to extract
+	 * @param tempBlock:    extract temp block if any
 	 * @param outputStream: destination of extracted block
 	 * @throws Exception
 	 */
-	public void extract(final Block block, final OutputStream outputStream) throws Exception
+	public void extract(final Block block, final boolean tempBlock, final OutputStream outputStream) throws Exception
 	{
-		extract(block.getPath(), outputStream);
+		extract(block.getPath(), tempBlock, outputStream);
 	}
 
 	/**
 	 * Extract data from the {@link Safe}
 	 *
 	 * @param path:         path of the block to extract
+	 * @param tempBlock:    extract temp block if any
 	 * @param outputStream: destination of extracted block
 	 * @throws Exception
 	 */
-	public synchronized void extract(String path, final OutputStream outputStream) throws Exception
+	public synchronized void extract(String path, final boolean tempBlock, final OutputStream outputStream) throws Exception
 	{
-		path = path.toUpperCase(Environment.getLocale());
+		path = Environment.comparableString(path);
 
 		Block block = this.roBlocks.get(path);
-
 		final RandomAccessFile raf;
+
 		if(block == null)
 		{
 			block = this.tempBlocks.get(path);
 			raf = this.temp;
+		}
+		else if(tempBlock)
+		{
+			final Block tmpBlock = this.tempBlocks.get(path);
+			if(tmpBlock == null)
+				raf = this.original;
+			else
+			{
+				block = tmpBlock;
+				raf = this.temp;
+			}
 		}
 		else
 			raf = this.original;
@@ -538,12 +551,6 @@ public class Safe implements Closeable
 				final RandomAccessFile temp = getTemp();
 				for(final Block block : this.tempBlocks.values())
 				{
-					if(this.deletedBlocks.containsKey(block.getComparablePath()))
-					{
-						probe.fireMessage("Skipping deleted block " + block.getPath());
-						continue;
-					}
-
 					probe.fireMessage("Writing block " + block.getPath());
 					temp.seek(block.getOffset());
 

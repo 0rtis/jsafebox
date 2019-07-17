@@ -26,10 +26,10 @@ public class SafeFileTreeNode extends DefaultMutableTreeNode
 
 	public enum Status
 	{
-		Unchanged, Added, Deleted
+		Unchanged, Added, Deleted, Updated
 	}
 
-	private final SafeFile safeFile;
+	private  SafeFile safeFile;
 	private final boolean root;
 	private boolean dropTarget;
 	private Status status = Status.Unchanged;
@@ -65,6 +65,12 @@ public class SafeFileTreeNode extends DefaultMutableTreeNode
 	public SafeFile getSafeFile()
 	{
 		return safeFile;
+	}
+
+	public void setSafeFile(final SafeFile safeFile)
+	{
+		this.safeFile = safeFile;
+		this.status = Status.Updated;
 	}
 
 	public boolean isSafeRoot()

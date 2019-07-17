@@ -124,7 +124,7 @@ public class ImageViewer extends JFrame implements KeyListener
 			if (img == null)
 			{
 				final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				safe.extract(block, baos);
+				safe.extract(block,true, baos);
 				img = ImageIO.read(new ByteArrayInputStream(baos.toByteArray()));
 				this.cache.put(block, img);
 			}

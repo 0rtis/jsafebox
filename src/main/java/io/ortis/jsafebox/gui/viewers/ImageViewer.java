@@ -117,7 +117,8 @@ public class ImageViewer extends JFrame implements KeyListener
 
 		setContentPane(main);
 
-		setIconImages(Settings.getSettings().getFrameIcons());
+		setIconImages(Settings.getSettings().getImageFrameIcons());
+
 		setSize(Toolkit.getDefaultToolkit().getScreenSize().width / 2, Toolkit.getDefaultToolkit().getScreenSize().height * 2 / 3);
 		setLocation(Toolkit.getDefaultToolkit().getScreenSize().width / 2 - getSize().width / 2,
 				Toolkit.getDefaultToolkit().getScreenSize().height / 2 - getSize().height / 2);
@@ -132,7 +133,7 @@ public class ImageViewer extends JFrame implements KeyListener
 			if(img == null)
 			{
 				final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				safe.extract(block, baos);
+				safe.extract(block,true, baos);
 				img = ImageIO.read(new ByteArrayInputStream(baos.toByteArray()));
 				this.cache.put(block, img);
 			}

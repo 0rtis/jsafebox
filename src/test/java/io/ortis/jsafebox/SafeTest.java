@@ -324,7 +324,7 @@ public class SafeTest
 			assertEquals(block.getProperties(), metadatas);
 
 			final ByteArrayOutputStream extracted = new ByteArrayOutputStream();
-			safe.extract(path, extracted);
+			safe.extract(path,false, extracted);
 			assertArrayEquals(original.toByteArray(), extracted.toByteArray());
 
 			// discard
@@ -347,7 +347,7 @@ public class SafeTest
 			assertEquals(block2.getProperties(), metadatas);
 
 			final ByteArrayOutputStream extracted2 = new ByteArrayOutputStream();
-			safe.extract(path, extracted2);
+			safe.extract(path,false, extracted2);
 			assertArrayEquals(original.toByteArray(), extracted2.toByteArray());
 
 			// after saved
@@ -366,7 +366,7 @@ public class SafeTest
 				assertEquals(savedBlock.getProperties(), savedSafe.readMetadata(savedBlock));
 
 				extracted.reset();
-				savedSafe.extract(savedBlock, extracted);
+				savedSafe.extract(savedBlock,false, extracted);
 				assertArrayEquals(original.toByteArray(), extracted.toByteArray());
 
 				// add existing

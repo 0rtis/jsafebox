@@ -75,7 +75,7 @@
         <Component class="javax.swing.JLabel" name="txtViewLabel">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/img/txt-32.png"/>
+              <Image iconType="3" name="/img/txt-file-32.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" value="View as text"/>
           </Properties>
@@ -83,7 +83,7 @@
         <Component class="javax.swing.JLabel" name="binaryViewLabel">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/img/binary-32.png"/>
+              <Image iconType="3" name="/img/binary-file-32.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" value="View as hexadecimal"/>
           </Properties>

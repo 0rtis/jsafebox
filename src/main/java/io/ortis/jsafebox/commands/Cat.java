@@ -82,7 +82,7 @@ public class Cat implements Callable<Void>
 				{
 					final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-					safe.extract(safeFile.getPath(), baos);
+					safe.extract(safeFile.getPath(),true, baos);
 					final StringBuilder sb = new StringBuilder("\n");
 					sb.append(new String(baos.toByteArray()));
 					log.info(safeFile + " -> " + sb.toString());

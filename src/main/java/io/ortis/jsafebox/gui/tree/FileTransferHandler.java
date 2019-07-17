@@ -79,20 +79,24 @@ public class FileTransferHandler extends TransferHandler
 				sources.add(f);
 			}
 
-			final SafeFileTreeNode node = (SafeFileTreeNode) tree.getLastSelectedPathComponent();
 
 			new SwingWorker<Void, Void>()
 			{
 				@Override
 				protected Void doInBackground() throws Exception
 				{
+
+					SafeFileTreeNode node = (SafeFileTreeNode) tree.getLastSelectedPathComponent();
 					final SafeTreeModel model = (SafeTreeModel) tree.getModel();
 
 					final Folder destination;
 					if(node.getSafeFile().isFolder())
 						destination = (Folder) node.getSafeFile();
 					else
+					{
 						destination = node.getSafeFile().getParent();
+						node = (SafeFileTreeNode) node.getParent();
+					}
 
 					final AddTask task = new AddTask(sources, destination, model.getSafe(), GUI.getLogger());
 

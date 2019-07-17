@@ -50,18 +50,17 @@ public class Settings
 	public static final String GUI_THEME_UI = "gui.theme.ui";
 	public static final String GUI_THEME_FONT = "gui.ui.font";
 
+	public static final String GUI_PREVIEW_MAXLENGTH = "gui.preview.maxlength";
+
+
+	public static final String MIMES_MAP = "safe.file.mimes";
+	public static final String TYPE_MAP = "safe.file.types";
+	public static final String SAFE_FILE_LIST_KEY = "safe.files";
+	public static final String SAFE_BUFFER_LENGTH_KEY = "safe.buffer.length";
 	private static final String GUI_MENU_TREELAZYLOADING_KEY = "gui.menu.treelazyloading";
 	private static final String GUI_MENU_AUTOSAVE_KEY = "gui.menu.autosave";
 	private static final String GUI_MENU_PREVIEW_KEY = "gui.menu.preview";
 	private static final String GUI_MENU_AUTOHASHCHECK_KEY = "gui.menu.autohashcheck";
-
-	public static final String MIMES_MAP = "safe.file.mimes";
-	public static final String TYPE_MAP = "safe.file.types";
-	public static final String TYPE_UNKNOWN_MAX_LENGTH = "safe.file.types.unknown.maxLength";
-
-	public static final String SAFE_FILE_LIST_KEY = "safe.files";
-	public static final String SAFE_BUFFER_LENGTH_KEY = "safe.buffer.length";
-
 	private static Settings instance;
 	private static File defaultDirectory = new File(".");
 
@@ -88,6 +87,8 @@ public class Settings
 	private final PropertiesConfiguration config;
 	private final PropertiesConfigurationLayout configLayout;
 	private final List<Image> frameIcons;
+	private final List<Image> textFrameIcons;
+	private final List<Image> imageFrameIcons;
 	private final List<Image> progressIcons;
 	private final Image successIcon;
 	private final OS osType;
@@ -132,6 +133,22 @@ public class Settings
 		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/safe-filled-64.png")));
 		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/safe-filled-100.png")));
 		this.frameIcons = Collections.unmodifiableList(icons);
+
+		final List<Image> textIcons = new ArrayList<>();
+		textIcons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/txt-file-16.png")));
+		textIcons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/txt-file-32.png")));
+		textIcons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/txt-file-64.png")));
+		textIcons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/txt-file-100.png")));
+		this.textFrameIcons = Collections.unmodifiableList(textIcons);
+
+
+		final List<Image> imgIcons = new ArrayList<>();
+		imgIcons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/image-file-16.png")));
+		imgIcons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/image-file-32.png")));
+		imgIcons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/image-file-64.png")));
+		imgIcons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/image-file-100.png")));
+		this.imageFrameIcons = Collections.unmodifiableList(imgIcons);
+
 
 		this.safeTheme = Optional.ofNullable(getBoolean(GUI_THEME_SAFE)).orElse(false);
 
@@ -348,7 +365,7 @@ public class Settings
 		if(value == null)
 			throw new IllegalArgumentException("Key '" + key + "' not found");
 
-		String [] buffer;
+		String[] buffer;
 		for(final String entry : value.split(";"))
 		{
 			buffer = entry.split("=");
@@ -362,10 +379,11 @@ public class Settings
 	}
 
 
-	public int maxUnknownFileTypeLengthDisplay()
+	public int getPreviewMaxLength()
 	{
-		return getInteger(TYPE_UNKNOWN_MAX_LENGTH);
+		return getInteger(GUI_PREVIEW_MAXLENGTH);
 	}
+
 
 	public FileType getFileType(String mime)
 	{
@@ -401,6 +419,16 @@ public class Settings
 	public List<Image> getFrameIcons()
 	{
 		return this.frameIcons;
+	}
+
+	public List<Image> getTextFrameIcons()
+	{
+		return textFrameIcons;
+	}
+
+	public List<Image> getImageFrameIcons()
+	{
+		return imageFrameIcons;
 	}
 
 	public List<Image> getProgressIcons()
@@ -559,19 +587,32 @@ public class Settings
 		component.setFont(component.getFont().deriveFont(Font.BOLD));
 	}
 
-	public void setTreeLazyLoading(final boolean fullTree)
-{
-	setProperty(GUI_MENU_TREELAZYLOADING_KEY, Boolean.toString(fullTree));
-}
-
 	public boolean isTreeLazyLoading()
 	{
 		final String value = getProperty(GUI_MENU_TREELAZYLOADING_KEY);
 
-		if (value == null)
+		if(value == null)
 		{
 			setTreeLazyLoading(false);
 			return false;
+		}
+
+		return Boolean.parseBoolean(value);
+	}
+
+	public void setTreeLazyLoading(final boolean fullTree)
+	{
+		setProperty(GUI_MENU_TREELAZYLOADING_KEY, Boolean.toString(fullTree));
+	}
+
+	public boolean isAutoSave()
+	{
+		final String value = getProperty(GUI_MENU_AUTOSAVE_KEY);
+
+		if(value == null)
+		{
+			setAutoSave(true);
+			return true;
 		}
 
 		return Boolean.parseBoolean(value);
@@ -582,13 +623,13 @@ public class Settings
 		setProperty(GUI_MENU_AUTOSAVE_KEY, Boolean.toString(autoSave));
 	}
 
-	public boolean isAutoSave()
+	public boolean isPreview()
 	{
-		final String value = getProperty(GUI_MENU_AUTOSAVE_KEY);
+		final String value = getProperty(GUI_MENU_PREVIEW_KEY);
 
-		if (value == null)
+		if(value == null)
 		{
-			setAutoSave(true);
+			setPreview(true);
 			return true;
 		}
 
@@ -600,13 +641,13 @@ public class Settings
 		setProperty(GUI_MENU_PREVIEW_KEY, Boolean.toString(preview));
 	}
 
-	public boolean isPreview()
+	public boolean isAutoHashCheck()
 	{
-		final String value = getProperty(GUI_MENU_PREVIEW_KEY);
+		final String value = getProperty(GUI_MENU_AUTOHASHCHECK_KEY);
 
-		if (value == null)
+		if(value == null)
 		{
-			setPreview(true);
+			setAutoHashCheck(true);
 			return true;
 		}
 
@@ -617,20 +658,6 @@ public class Settings
 	{
 		setProperty(GUI_MENU_AUTOHASHCHECK_KEY, Boolean.toString(autoHashCheck));
 	}
-
-	public boolean isAutoHashCheck()
-	{
-		final String value = getProperty(GUI_MENU_AUTOHASHCHECK_KEY);
-
-		if (value == null)
-		{
-			setAutoHashCheck(true);
-			return true;
-		}
-
-		return Boolean.parseBoolean(value);
-	}
-
 
 	public static void addKeyListener(final KeyListener keyListener, final Container root)
 	{

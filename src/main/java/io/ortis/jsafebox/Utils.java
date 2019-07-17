@@ -19,21 +19,13 @@ package io.ortis.jsafebox;
 
 import io.ortis.jsafebox.gui.Settings;
 
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.HeadlessException;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.List;
@@ -41,9 +33,9 @@ import java.util.regex.Pattern;
 
 /**
  * Utility class
- * 
+ *
  * @author Ortis <br>
- *         2018 Apr 26 8:06:47 PM <br>
+ * 2018 Apr 26 8:06:47 PM <br>
  */
 public class Utils
 {
@@ -52,11 +44,11 @@ public class Utils
 
 	private final static String SYSTEM_PATH_DELIMITER_REGEX = Pattern.quote(File.separator) + "|" + Pattern.quote("/") + "|" + Pattern.quote("\\");
 
-	public static byte [] passwordToBytes(final char [] chars)
+	public static byte[] passwordToBytes(final char[] chars)
 	{
 		final CharBuffer charBuffer = CharBuffer.wrap(chars);
 		final ByteBuffer byteBuffer = StandardCharsets.UTF_8.encode(charBuffer);
-		final byte [] bytes = Arrays.copyOfRange(byteBuffer.array(), byteBuffer.position(), byteBuffer.limit());
+		final byte[] bytes = Arrays.copyOfRange(byteBuffer.array(), byteBuffer.position(), byteBuffer.limit());
 		Arrays.fill(charBuffer.array(), '\u0000'); // clear sensitive data
 		Arrays.fill(byteBuffer.array(), (byte) 0); // clear sensitive data
 		return bytes;
@@ -64,29 +56,30 @@ public class Utils
 
 	public static List<java.io.File> parseSystemPath(String query, final List<java.io.File> destination) throws IOException
 	{
-		final String [] tokens = query.split(SYSTEM_PATH_DELIMITER_REGEX);
+		final String[] tokens = query.split(SYSTEM_PATH_DELIMITER_REGEX);
 
 		Path baseDirectory = null;
 
-		if (tokens[0].equals(".") || tokens[0].equals(".."))// Relative path
+		if(tokens[0].equals(".") || tokens[0].equals(".."))// Relative path
 		{
 			baseDirectory = new File(tokens[0]).toPath();
 
 			final StringBuilder sb = new StringBuilder();
-			for (int i = 1; i < tokens.length; i++)
-				if (sb.length() == 0)
+			for(int i = 1; i < tokens.length; i++)
+				if(sb.length() == 0)
 					sb.append(tokens[i]);
 				else
 					sb.append(File.separator + tokens[i]);
 
 			query = "**" + File.separator + sb.toString();
 
-		} else // Absolute path
+		}
+		else // Absolute path
 		{
 
 			final String comparableToken = Environment.comparableString(tokens[0]);
-			for (final File root : File.listRoots())
-				if (root.getAbsolutePath().toUpperCase().equals(comparableToken))
+			for(final File root : File.listRoots())
+				if(root.getAbsolutePath().toUpperCase().equals(comparableToken))
 				{
 					// perfect match
 					baseDirectory = root.toPath();
@@ -94,12 +87,12 @@ public class Utils
 
 				}
 
-			if (baseDirectory == null)
-				for (final File root : File.listRoots())
+			if(baseDirectory == null)
+				for(final File root : File.listRoots())
 				{
 					String rootPath = root.getAbsolutePath().toUpperCase();
 					rootPath = rootPath.substring(0, rootPath.length() - 1);
-					if (rootPath.equals(comparableToken))
+					if(rootPath.equals(comparableToken))
 					{
 						baseDirectory = root.toPath();
 						break;
@@ -108,23 +101,24 @@ public class Utils
 				}
 		}
 
-		if (baseDirectory == null)
+		if(baseDirectory == null)
 			throw new IOException("Could not locate base directory '" + tokens[0] + "'");
 
 		Path path = baseDirectory;
-		for (int i = 1; i < tokens.length; i++)
+		for(int i = 1; i < tokens.length; i++)
 		{
 			try
 			{
 				path = Paths.get(path.toString(), tokens[i]);
-			} catch (final Exception e)
+			} catch(final Exception e)
 			{
 				// Here, we have reach a special character and the start point for the search is
 				// in path
 			}
 		}
 
-		final String escapedQuery = query.replace("\\", "\\\\");// PathMatcher does not escape backslash properly. Need to do the escape manually for Windows OS path handling. This might be a bug of Java implementation.
+		final String escapedQuery = query.replace("\\",
+				"\\\\");// PathMatcher does not escape backslash properly. Need to do the escape manually for Windows OS path handling. This might be a bug of Java implementation.
 		// Need to check on Oracle bug report database.
 
 		final PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher("glob:" + escapedQuery);
@@ -139,7 +133,7 @@ public class Utils
 			@Override
 			public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException
 			{
-				if (pathMatcher.matches(dir))
+				if(pathMatcher.matches(dir))
 				{
 					destination.add(dir.toFile());
 					return FileVisitResult.SKIP_SUBTREE;
@@ -151,7 +145,7 @@ public class Utils
 			@Override
 			public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException
 			{
-				if (pathMatcher.matches(file))
+				if(pathMatcher.matches(file))
 					destination.add(file.toFile());
 
 				return FileVisitResult.CONTINUE;
@@ -167,30 +161,53 @@ public class Utils
 		return destination;
 
 	}
+	public static String humanReadableByteCount(final long bytes)
+	{
+		return humanReadableByteCount(bytes, true);
+	}
+
+	public static String humanReadableByteCount(final long bytes, final boolean si)
+	{
+		final int unit = si ? 1000 : 1024;
+
+		if(bytes < unit)
+			return bytes + " B";
+
+		final int exp = (int) (Math.log(bytes) / Math.log(unit));
+		final String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+
+		return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+	}
+
 
 	/**
 	 * Return the MIME type of a file
-	 * 
+	 *
 	 * @param file
 	 * @return
 	 */
 	public static String getMIMEType(final java.io.File file)
 	{
-		final String name = file.getName().toUpperCase();
-		final String [] buffer = name.split("\\.");
+		return getMIMEType(file.getName().toUpperCase());
+	}
+
+	public static String getMIMEType(final String fileName)
+	{
+		final String name = fileName;
+		final String[] buffer = name.split("\\.");
 		final String extenstion;
 
-		if (buffer.length == 0)
+		if(buffer.length == 0)
 			extenstion = "";
 		else
 			extenstion = buffer[buffer.length - 1];
 
 
 		final Settings settings = Settings.getSettings();
-		if(settings !=null)
+		if(settings != null)
 			return settings.getMime(extenstion);
 
-		switch (extenstion)
+		switch(extenstion)
 		{
 			case "TXT":
 				/**
@@ -267,13 +284,13 @@ public class Utils
 
 	/**
 	 * Format the exception message
-	 * 
+	 *
 	 * @param t
 	 * @return
 	 */
 	public static String formatException(final Throwable t)
 	{
-		if (t == null)
+		if(t == null)
 			return null;
 
 		final Throwable cause = t.getCause();
@@ -282,17 +299,17 @@ public class Utils
 
 	}
 
-	private static String formatException(final Class<?> exceptionClass, final String cause, final String msg, final StackTraceElement [] exceptionStack)
+	private static String formatException(final Class<?> exceptionClass, final String cause, final String msg, final StackTraceElement[] exceptionStack)
 	{
 		final StringBuilder builder = new StringBuilder();
 
-		if (msg != null)
+		if(msg != null)
 			builder.append(msg);
 
-		if (exceptionStack != null)
+		if(exceptionStack != null)
 		{
 			builder.append(System.lineSeparator());
-			for (int i = 0; i < exceptionStack.length; i++)
+			for(int i = 0; i < exceptionStack.length; i++)
 			{
 				final String stackElement = exceptionStack[i].toString();
 
@@ -300,7 +317,7 @@ public class Utils
 			}
 		}
 
-		if (cause != null)
+		if(cause != null)
 			builder.append("Caused by " + cause);
 
 		return builder.toString();
@@ -308,23 +325,20 @@ public class Utils
 
 	/**
 	 * Remove forbidden <code>char</code> from the path and replace them with <code>substitute</code>
-	 * 
-	 * @param path:
-	 *            the path to sanitize
-	 * @param delimiter:
-	 *            delimiter of the path
-	 * @param substitute:
-	 *            replacement char
+	 *
+	 * @param path:       the path to sanitize
+	 * @param delimiter:  delimiter of the path
+	 * @param substitute: replacement char
 	 * @return
 	 */
 	public static String sanitize(final String path, final Character delimiter, final Character substitute)
 	{
-		final String [] tokens = path.split(Pattern.quote(Character.toString(delimiter)));
+		final String[] tokens = path.split(Pattern.quote(Character.toString(delimiter)));
 
 		final StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < tokens.length; i++)
+		for(int i = 0; i < tokens.length; i++)
 		{
-			if (i < tokens.length - 1)
+			if(i < tokens.length - 1)
 				sb.append(sanitizeToken(tokens[i], substitute)).append(delimiter);
 			else
 				sb.append(sanitizeToken(tokens[i], substitute));
@@ -341,22 +355,23 @@ public class Utils
 
 		final Character replacement = substitute;
 
-		c: for (int i = 0; i < sb.length(); i++)
+		c:
+		for(int i = 0; i < sb.length(); i++)
 		{
 
-			if (sb.charAt(i) == java.io.File.separatorChar || sb.charAt(i) == Folder.DELIMITER)
+			if(sb.charAt(i) == java.io.File.separatorChar || sb.charAt(i) == Folder.DELIMITER)
 			{
-				if (replacement == null)
+				if(replacement == null)
 					sb.deleteCharAt(i--);
 				else
 					sb.setCharAt(i, replacement);
 				continue c;
 			}
 
-			for (final char c : Environment.getForbidenChars())
-				if (sb.charAt(i) == c)
+			for(final char c : Environment.getForbidenChars())
+				if(sb.charAt(i) == c)
 				{
-					if (replacement == null)
+					if(replacement == null)
 						sb.deleteCharAt(i--);
 					else
 						sb.setCharAt(i, replacement);
@@ -369,14 +384,14 @@ public class Utils
 
 	public static boolean isHeadless()
 	{
-		if (GraphicsEnvironment.isHeadless())
+		if(GraphicsEnvironment.isHeadless())
 			return true;
 
 		try
 		{
-			GraphicsDevice [] screenDevices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+			GraphicsDevice[] screenDevices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
 			return screenDevices == null || screenDevices.length == 0;
-		} catch (HeadlessException e)
+		} catch(HeadlessException e)
 		{
 			return true;
 		}

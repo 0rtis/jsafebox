@@ -20,16 +20,13 @@ import io.ortis.jsafebox.Block;
 import io.ortis.jsafebox.Folder;
 import io.ortis.jsafebox.Safe;
 import io.ortis.jsafebox.SafeFile;
-import io.ortis.jsafebox.gui.old.SafeExplorer;
-import io.ortis.jsafebox.gui.old.previews.ImagePreview;
-import io.ortis.jsafebox.gui.old.previews.TextPreview;
-import io.ortis.jsafebox.gui.tasks.ExceptionTask;
-import io.ortis.jsafebox.gui.tasks.LoadTreeTask;
+import io.ortis.jsafebox.gui.metadata.MetadataPanel;
+import io.ortis.jsafebox.gui.previewers.ImagePreview;
+import io.ortis.jsafebox.gui.previewers.TextPreview;
+import io.ortis.jsafebox.gui.tasks.*;
 import io.ortis.jsafebox.gui.tree.SafeFileNodePopupMenu;
 import io.ortis.jsafebox.gui.tree.SafeFileTreeNode;
 import io.ortis.jsafebox.gui.tree.SafeTreeCellEditor;
-import io.ortis.jsafebox.gui.viewers.ImageViewer;
-import io.ortis.jsafebox.gui.viewers.TextViewer;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -46,6 +43,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -57,32 +55,32 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 	private final Window parent;
 	private final AtomicBoolean modificationPending = new AtomicBoolean(false);
 	private Safe safe;
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenu ViewMenu;
-    private javax.swing.JMenuItem aboutMenuItem;
-    private javax.swing.JCheckBoxMenuItem autoHashCheckBoxMenuItem;
-    private javax.swing.JCheckBoxMenuItem autoSaveCheckBoxMenuItem;
-    private javax.swing.JPanel belowRightPanel;
-    private javax.swing.JPanel bottomPanel;
-    private javax.swing.JPanel explorerPanel;
-    private javax.swing.JMenu fileMenu;
-    private javax.swing.JPanel fileTreePanel;
-    private javax.swing.JMenuItem hashMenuItem;
-    private javax.swing.JMenu helpMenu;
-    private javax.swing.JMenuItem helpMenuItem;
-    private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JSplitPane jSplitPane1;
-    private javax.swing.JSplitPane jSplitPane2;
-    private javax.swing.JTree jTree1;
-    private javax.swing.JPanel rightPanel;
-    private javax.swing.JMenuItem saveMenuItem;
-    private javax.swing.JMenu securityMenu;
-    private javax.swing.JCheckBoxMenuItem showPreviewCheckBoxMenuItem;
-    private javax.swing.JPanel statusPanel;
-    private javax.swing.JPanel topRightPanel;
-    private javax.swing.JCheckBoxMenuItem treeLazyLoading;
-    // End of variables declaration//GEN-END:variables
+	// Variables declaration - do not modify//GEN-BEGIN:variables
+	private javax.swing.JMenu ViewMenu;
+	private javax.swing.JMenuItem aboutMenuItem;
+	private javax.swing.JCheckBoxMenuItem autoHashCheckBoxMenuItem;
+	private javax.swing.JCheckBoxMenuItem autoSaveCheckBoxMenuItem;
+	private javax.swing.JPanel belowRightPanel;
+	private javax.swing.JPanel bottomPanel;
+	private javax.swing.JPanel explorerPanel;
+	private javax.swing.JMenu fileMenu;
+	private javax.swing.JPanel fileTreePanel;
+	private javax.swing.JMenuItem hashMenuItem;
+	private javax.swing.JMenu helpMenu;
+	private javax.swing.JMenuItem helpMenuItem;
+	private javax.swing.JMenuBar jMenuBar1;
+	private javax.swing.JScrollPane jScrollPane1;
+	private javax.swing.JSplitPane jSplitPane1;
+	private javax.swing.JSplitPane jSplitPane2;
+	private javax.swing.JTree jTree1;
+	private javax.swing.JPanel rightPanel;
+	private javax.swing.JMenuItem saveMenuItem;
+	private javax.swing.JMenu securityMenu;
+	private javax.swing.JCheckBoxMenuItem showPreviewCheckBoxMenuItem;
+	private javax.swing.JPanel statusPanel;
+	private javax.swing.JPanel topRightPanel;
+	private javax.swing.JCheckBoxMenuItem treeLazyLoading;
+	// End of variables declaration//GEN-END:variables
 
 
 	/**
@@ -91,7 +89,6 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 	public SafeboxFrame(final Window parent, final Safe safe)
 	{
 		this.parent = parent;
-		this.safe = safe;
 
 		initComponents();
 
@@ -104,6 +101,7 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 		rightPanel.setBackground(settings.getUITheme().getBackgroundColor());
 		topRightPanel.setBackground(settings.getUITheme().getBackgroundColor());
 		belowRightPanel.setBackground(settings.getUITheme().getBackgroundColor());
+
 
 		bottomPanel.setBackground(settings.getUITheme().getBackgroundColor());
 		final LineBorder border = (LineBorder) bottomPanel.getBorder();
@@ -121,18 +119,18 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 		autoSaveCheckBoxMenuItem.addActionListener(this);
 
 		//View menu
-		keyStrokeAccelerator = KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK);
-		showPreviewCheckBoxMenuItem.setAccelerator(keyStrokeAccelerator);
 		showPreviewCheckBoxMenuItem.setSelected(settings.isPreview());
 		showPreviewCheckBoxMenuItem.addActionListener(this);
+
+		treeLazyLoading.setSelected(settings.isTreeLazyLoading());
+		treeLazyLoading.setToolTipText("Load folder content on a need basis");
+		treeLazyLoading.addActionListener(this);
 
 		//Security menu
 		keyStrokeAccelerator = KeyStroke.getKeyStroke(KeyEvent.VK_H, KeyEvent.CTRL_DOWN_MASK);
 		hashMenuItem.setAccelerator(keyStrokeAccelerator);
 		hashMenuItem.addActionListener(this);
 
-		keyStrokeAccelerator = KeyStroke.getKeyStroke(KeyEvent.VK_H, KeyEvent.SHIFT_DOWN_MASK);
-		autoHashCheckBoxMenuItem.setAccelerator(keyStrokeAccelerator);
 		autoHashCheckBoxMenuItem.setSelected(settings.isAutoHashCheck());
 		autoHashCheckBoxMenuItem.setToolTipText("Check hash when opening");
 		autoHashCheckBoxMenuItem.addActionListener(this);
@@ -160,8 +158,9 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 		jTree1.setCellEditor(safeTreeCellEditor);
 
 		addWindowListener(this);
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-		loadSafe();
+		setSafe(safe);
 
 		setIconImages(settings.getFrameIcons());
 		setSize(Toolkit.getDefaultToolkit().getScreenSize().width * 2 / 3, Toolkit.getDefaultToolkit().getScreenSize().height * 2 / 3);
@@ -176,253 +175,196 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 	 * regenerated by the Form Editor.
 	 */
 	@SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        explorerPanel = new javax.swing.JPanel();
-        jSplitPane1 = new javax.swing.JSplitPane();
-        fileTreePanel = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTree1 = new javax.swing.JTree();
-        rightPanel = new javax.swing.JPanel();
-        jSplitPane2 = new javax.swing.JSplitPane();
-        topRightPanel = new javax.swing.JPanel();
-        belowRightPanel = new javax.swing.JPanel();
-        bottomPanel = new javax.swing.JPanel();
-        statusPanel = new javax.swing.JPanel();
-        jMenuBar1 = new javax.swing.JMenuBar();
-        fileMenu = new javax.swing.JMenu();
-        saveMenuItem = new javax.swing.JMenuItem();
-        autoSaveCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        ViewMenu = new javax.swing.JMenu();
-        showPreviewCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        treeLazyLoading = new javax.swing.JCheckBoxMenuItem();
-        securityMenu = new javax.swing.JMenu();
-        hashMenuItem = new javax.swing.JMenuItem();
-        autoHashCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        helpMenu = new javax.swing.JMenu();
-        helpMenuItem = new javax.swing.JMenuItem();
-        aboutMenuItem = new javax.swing.JMenuItem();
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        explorerPanel.setBackground(new java.awt.Color(255, 255, 255));
-
-        jSplitPane1.setDividerLocation(150);
-        jSplitPane1.setOneTouchExpandable(true);
-
-        fileTreePanel.setBackground(new java.awt.Color(28, 29, 103));
-        fileTreePanel.setBorder(null);
-        fileTreePanel.setMinimumSize(new java.awt.Dimension(100, 0));
-        fileTreePanel.setPreferredSize(new java.awt.Dimension(100, 567));
-        fileTreePanel.setLayout(new java.awt.BorderLayout());
-
-        jScrollPane1.setOpaque(false);
-
-        jTree1.setOpaque(false);
-        jScrollPane1.setViewportView(jTree1);
-
-        fileTreePanel.add(jScrollPane1, java.awt.BorderLayout.CENTER);
-
-        jSplitPane1.setLeftComponent(fileTreePanel);
-
-        jSplitPane2.setDividerLocation(350);
-        jSplitPane2.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-        jSplitPane2.setOneTouchExpandable(true);
-
-        topRightPanel.setBackground(new java.awt.Color(177, 157, 24));
-        topRightPanel.setBorder(null);
-        topRightPanel.setLayout(new java.awt.BorderLayout());
-        jSplitPane2.setTopComponent(topRightPanel);
-
-        belowRightPanel.setBackground(new java.awt.Color(151, 246, 151));
-        belowRightPanel.setBorder(null);
-        belowRightPanel.setLayout(new java.awt.BorderLayout());
-        jSplitPane2.setRightComponent(belowRightPanel);
-
-        javax.swing.GroupLayout rightPanelLayout = new javax.swing.GroupLayout(rightPanel);
-        rightPanel.setLayout(rightPanelLayout);
-        rightPanelLayout.setHorizontalGroup(
-            rightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane2)
-        );
-        rightPanelLayout.setVerticalGroup(
-            rightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane2)
-        );
-
-        jSplitPane1.setRightComponent(rightPanel);
-
-        javax.swing.GroupLayout explorerPanelLayout = new javax.swing.GroupLayout(explorerPanel);
-        explorerPanel.setLayout(explorerPanelLayout);
-        explorerPanelLayout.setHorizontalGroup(
-            explorerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.TRAILING)
-        );
-        explorerPanelLayout.setVerticalGroup(
-            explorerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane1)
-        );
-
-        getContentPane().add(explorerPanel, java.awt.BorderLayout.CENTER);
-
-        bottomPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 5));
-        bottomPanel.setPreferredSize(new java.awt.Dimension(1081, 35));
-
-        statusPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
-
-        javax.swing.GroupLayout statusPanelLayout = new javax.swing.GroupLayout(statusPanel);
-        statusPanel.setLayout(statusPanelLayout);
-        statusPanelLayout.setHorizontalGroup(
-            statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1067, Short.MAX_VALUE)
-        );
-        statusPanelLayout.setVerticalGroup(
-            statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 21, Short.MAX_VALUE)
-        );
-
-        javax.swing.GroupLayout bottomPanelLayout = new javax.swing.GroupLayout(bottomPanel);
-        bottomPanel.setLayout(bottomPanelLayout);
-        bottomPanelLayout.setHorizontalGroup(
-            bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1071, Short.MAX_VALUE)
-            .addGroup(bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(statusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        bottomPanelLayout.setVerticalGroup(
-            bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 25, Short.MAX_VALUE)
-            .addGroup(bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(statusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        getContentPane().add(bottomPanel, java.awt.BorderLayout.SOUTH);
-
-        fileMenu.setText("File");
-
-        saveMenuItem.setText("Save");
-        fileMenu.add(saveMenuItem);
-
-        autoSaveCheckBoxMenuItem.setSelected(true);
-        autoSaveCheckBoxMenuItem.setText("Auto save");
-        fileMenu.add(autoSaveCheckBoxMenuItem);
-
-        jMenuBar1.add(fileMenu);
-
-        ViewMenu.setText("View");
-
-        showPreviewCheckBoxMenuItem.setSelected(true);
-        showPreviewCheckBoxMenuItem.setText("Show preview");
-        ViewMenu.add(showPreviewCheckBoxMenuItem);
-
-        treeLazyLoading.setSelected(true);
-        treeLazyLoading.setText("Lazy loading");
-        ViewMenu.add(treeLazyLoading);
-
-        jMenuBar1.add(ViewMenu);
-
-        securityMenu.setText("Security");
-
-        hashMenuItem.setText("Compute hash");
-        securityMenu.add(hashMenuItem);
-
-        autoHashCheckBoxMenuItem.setSelected(true);
-        autoHashCheckBoxMenuItem.setText("Check hash on opening");
-        securityMenu.add(autoHashCheckBoxMenuItem);
-
-        jMenuBar1.add(securityMenu);
-
-        helpMenu.setText("Help");
-
-        helpMenuItem.setText("Help frame");
-        helpMenu.add(helpMenuItem);
-
-        aboutMenuItem.setText("About");
-        helpMenu.add(aboutMenuItem);
-
-        jMenuBar1.add(helpMenu);
-
-        setJMenuBar(jMenuBar1);
-
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
-
-	public void loadSafe()
+	// <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+	private void initComponents()
 	{
-		this.modificationPending.set(false);
 
-		final LoadTreeTask task = new LoadTreeTask(this.safe, this.jTree1, this, Settings.getSettings().isTreeLazyLoading(), GUI.getLogger());
+		explorerPanel = new javax.swing.JPanel();
+		jSplitPane1 = new javax.swing.JSplitPane();
+		fileTreePanel = new javax.swing.JPanel();
+		jScrollPane1 = new javax.swing.JScrollPane();
+		jTree1 = new javax.swing.JTree();
+		rightPanel = new javax.swing.JPanel();
+		jSplitPane2 = new javax.swing.JSplitPane();
+		topRightPanel = new javax.swing.JPanel();
+		belowRightPanel = new javax.swing.JPanel();
+		bottomPanel = new javax.swing.JPanel();
+		statusPanel = new javax.swing.JPanel();
+		jMenuBar1 = new javax.swing.JMenuBar();
+		fileMenu = new javax.swing.JMenu();
+		saveMenuItem = new javax.swing.JMenuItem();
+		autoSaveCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+		ViewMenu = new javax.swing.JMenu();
+		showPreviewCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+		treeLazyLoading = new javax.swing.JCheckBoxMenuItem();
+		securityMenu = new javax.swing.JMenu();
+		hashMenuItem = new javax.swing.JMenuItem();
+		autoHashCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+		helpMenu = new javax.swing.JMenu();
+		helpMenuItem = new javax.swing.JMenuItem();
+		aboutMenuItem = new javax.swing.JMenuItem();
+
+		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+		explorerPanel.setBackground(new java.awt.Color(255, 255, 255));
+
+		jSplitPane1.setDividerLocation(150);
+		jSplitPane1.setOneTouchExpandable(true);
+
+		fileTreePanel.setBackground(new java.awt.Color(28, 29, 103));
+		fileTreePanel.setBorder(null);
+		fileTreePanel.setMinimumSize(new java.awt.Dimension(100, 0));
+		fileTreePanel.setPreferredSize(new java.awt.Dimension(100, 567));
+		fileTreePanel.setLayout(new java.awt.BorderLayout());
+
+		jScrollPane1.setOpaque(false);
+
+		jTree1.setOpaque(false);
+		jScrollPane1.setViewportView(jTree1);
+
+		fileTreePanel.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+		jSplitPane1.setLeftComponent(fileTreePanel);
+
+		jSplitPane2.setDividerLocation(350);
+		jSplitPane2.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+		jSplitPane2.setOneTouchExpandable(true);
+
+		topRightPanel.setBackground(new java.awt.Color(177, 157, 24));
+		topRightPanel.setBorder(null);
+		topRightPanel.setLayout(new java.awt.BorderLayout());
+		jSplitPane2.setTopComponent(topRightPanel);
+
+		belowRightPanel.setBackground(new java.awt.Color(151, 246, 151));
+		belowRightPanel.setBorder(null);
+		belowRightPanel.setLayout(new java.awt.BorderLayout());
+		jSplitPane2.setRightComponent(belowRightPanel);
+
+		javax.swing.GroupLayout rightPanelLayout = new javax.swing.GroupLayout(rightPanel);
+		rightPanel.setLayout(rightPanelLayout);
+		rightPanelLayout.setHorizontalGroup(rightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(jSplitPane2));
+		rightPanelLayout.setVerticalGroup(rightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(jSplitPane2));
+
+		jSplitPane1.setRightComponent(rightPanel);
+
+		javax.swing.GroupLayout explorerPanelLayout = new javax.swing.GroupLayout(explorerPanel);
+		explorerPanel.setLayout(explorerPanelLayout);
+		explorerPanelLayout.setHorizontalGroup(
+				explorerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.TRAILING));
+		explorerPanelLayout.setVerticalGroup(explorerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(jSplitPane1));
+
+		getContentPane().add(explorerPanel, java.awt.BorderLayout.CENTER);
+
+		bottomPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 5));
+		bottomPanel.setPreferredSize(new java.awt.Dimension(1081, 35));
+
+		statusPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+
+		javax.swing.GroupLayout statusPanelLayout = new javax.swing.GroupLayout(statusPanel);
+		statusPanel.setLayout(statusPanelLayout);
+		statusPanelLayout.setHorizontalGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 1067, Short.MAX_VALUE));
+		statusPanelLayout.setVerticalGroup(statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 21, Short.MAX_VALUE));
+
+		javax.swing.GroupLayout bottomPanelLayout = new javax.swing.GroupLayout(bottomPanel);
+		bottomPanel.setLayout(bottomPanelLayout);
+		bottomPanelLayout.setHorizontalGroup(bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 1071, Short.MAX_VALUE).addGroup(
+				bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(statusPanel, javax.swing.GroupLayout.DEFAULT_SIZE,
+						javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+		bottomPanelLayout.setVerticalGroup(bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 25, Short.MAX_VALUE).addGroup(
+				bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(statusPanel, javax.swing.GroupLayout.DEFAULT_SIZE,
+						javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+
+		getContentPane().add(bottomPanel, java.awt.BorderLayout.SOUTH);
+
+		fileMenu.setText("File");
+
+		saveMenuItem.setText("Save");
+		fileMenu.add(saveMenuItem);
+
+		autoSaveCheckBoxMenuItem.setSelected(true);
+		autoSaveCheckBoxMenuItem.setText("Auto save");
+		fileMenu.add(autoSaveCheckBoxMenuItem);
+
+		jMenuBar1.add(fileMenu);
+
+		ViewMenu.setText("View");
+
+		showPreviewCheckBoxMenuItem.setSelected(true);
+		showPreviewCheckBoxMenuItem.setText("Show preview");
+		ViewMenu.add(showPreviewCheckBoxMenuItem);
+
+		treeLazyLoading.setSelected(true);
+		treeLazyLoading.setText("Lazy loading");
+		ViewMenu.add(treeLazyLoading);
+
+		jMenuBar1.add(ViewMenu);
+
+		securityMenu.setText("Security");
+
+		hashMenuItem.setText("Compute hash");
+		securityMenu.add(hashMenuItem);
+
+		autoHashCheckBoxMenuItem.setSelected(true);
+		autoHashCheckBoxMenuItem.setText("Check hash on opening");
+		securityMenu.add(autoHashCheckBoxMenuItem);
+
+		jMenuBar1.add(securityMenu);
+
+		helpMenu.setText("Help");
+
+		helpMenuItem.setText("Help frame");
+		helpMenu.add(helpMenuItem);
+
+		aboutMenuItem.setText("About");
+		helpMenu.add(aboutMenuItem);
+
+		jMenuBar1.add(helpMenu);
+
+		setJMenuBar(jMenuBar1);
+
+		pack();
+	}// </editor-fold>//GEN-END:initComponents
+
+
+	private void computeHash(final boolean quiet)
+	{
 		final ProgressFrame progressFrame = new ProgressFrame(this);
-		progressFrame.execute(task);
-
-		if(task.getException() == null)
-			jTree1.expandRow(0);
-		else
-			jTree1.collapseRow(0);
-
-		jTree1.updateUI();
-		jTree1.repaint();
+		final HashTask hashTask = new HashTask(this.safe, GUI.getLogger());
+		progressFrame.execute(hashTask);
+		if(hashTask.getException() == null)
+		{
+			final String hash = HashTask.bytexToHex(this.safe.getHash());
+			if(hashTask.getHash().equals(hash))
+			{
+				if(!quiet)
+					new ResultFrame(this, new AdapterTask("Integrity hash successfully verified", hash, GUI.getLogger()));
+			}
+			else
+				new ResultFrame(this, new ExceptionTask(new Exception(
+						"CAREFULLY READ THIS MESSAGE !!!!!!!!!\n\nIntegrity hash verification failed\n\n Expected " + hash + "\n but " + "found " + hashTask.getHash() + ".\n\nThe content of the safe might have been altered.\n"),
+						GUI.getLogger()));
+		}
 	}
 
 	private void openNode(final SafeFileTreeNode node)
 	{
-		SafeFile file = (SafeFile) node.getUserObject();
-		if(file.isBlock())
+		final ProgressFrame progressFrame = new ProgressFrame(this);
+		final OpenNodeTask task = new OpenNodeTask(node, this, GUI.getLogger());
+		progressFrame.execute(task);
+
+		if(task.getException() == null)
 		{
-			final Block block = (Block) file;
-
-			final String mime = block.getProperties().get(Block.MIME_LABEL);
-
-			final Settings settings = Settings.getSettings();
-			final FileType fileType = settings.getFileType(mime);
-
-			switch(fileType)
-			{
-				case Image:
-					try
-					{
-						final ImageViewer viewer = new ImageViewer(safe, block, getTitle() + " - ");
-						viewer.addWindowListener(SafeboxFrame.this);
-						viewer.setVisible(true);
-
-					} catch(final Exception exception)
-					{
-						new ResultFrame(this, new ExceptionTask(exception, GUI.getLogger()));
-					}
-
-					break;
-
-				default:
-					if(block.getDataLength() > settings.maxUnknownFileTypeLengthDisplay())
-						break;
-
-				case Text:
-					try
-					{
-						final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-						safe.extract(block, baos);
-						final String text = new String(baos.toByteArray());// Use local Charset
-						final TextViewer viewer = new TextViewer(text);
-						viewer.setTitle(getTitle() + " - " + block.getPath());
-						viewer.addWindowListener(this);
-						viewer.setVisible(true);
-
-					} catch(final Exception exception)
-					{
-						new ResultFrame(this, new ExceptionTask(exception, GUI.getLogger()));
-					}
-
-					break;
-			}
+			if(task.getWindow() != null)
+				task.getWindow().toFront();
 		}
-
 	}
 
 	private void loadNode(final SafeFileTreeNode node)
 	{
 		// clear preview
 		topRightPanel.removeAll();
+		belowRightPanel.removeAll();
+
 		SafeFile file = (SafeFile) node.getUserObject();
 		if(file.isFolder())
 		{
@@ -437,23 +379,22 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 			// preview
 			final Block block = (Block) file;
 
-			final List<String> displayed = new ArrayList<>();
-/*
-			propertyModel.addRow(new Object[]{Block.NAME_LABEL, block.getProperties().get(Block.NAME_LABEL)});
-			propertyModel.addRow(new Object[]{Block.PATH_LABEL, block.getProperties().get(Block.PATH_LABEL)});
-			propertyModel.addRow(new Object[]{"size", block.getLength() > 1000 ? MEMORY_FORMAT.format(
-					block.getLength() / 1000) + " Kb" : block.getLength() + " bytes"});
+			final MetadataPanel metadataPanel = new MetadataPanel();
+			metadataPanel.setBlock(block);
+			belowRightPanel.add(metadataPanel, BorderLayout.CENTER);
 
-			for(int i = 0; i < propertyModel.getRowCount(); i++)
-				displayed.add(propertyModel.getValueAt(i, 0).toString());
-
-			for(final Map.Entry<String, String> metadata : block.getProperties().entrySet())
-				if(!displayed.contains(metadata.getKey()))
-					propertyModel.addRow(new Object[]{metadata.getKey(), metadata.getValue()});
-*/
 
 			final String mime = block.getProperties().get(Block.MIME_LABEL);
-			final FileType type = settings.getFileType(mime);
+			final FileType type;
+
+			final boolean large = block.getDataLength() > settings.getPreviewMaxLength();
+
+			if(large)
+				type = FileType.Unknown;
+			else
+				type = settings.getFileType(mime);
+
+
 			if(Settings.getSettings().isPreview())
 				switch(type)
 				{
@@ -461,11 +402,9 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 						try
 						{
 							final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-							safe.extract(block, baos);
+							safe.extract(block, true, baos);
 							final ImagePreview imagePreview = new ImagePreview(ImageIO.read(new ByteArrayInputStream(baos.toByteArray())));
-							topRightPanel.setBackground(Color.pink);
-							//topRightPanel.add(imagePreview, BorderLayout.CENTER);
-							topRightPanel.add(imagePreview);
+							topRightPanel.add(imagePreview, BorderLayout.CENTER);
 						} catch(final Exception e)
 						{
 							topRightPanel.removeAll();
@@ -477,7 +416,7 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 						try
 						{
 							final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-							safe.extract(block, baos);
+							safe.extract(block, true, baos);
 							final String text = new String(baos.toByteArray());// use local charset
 							final TextPreview textPreview = new TextPreview(text);
 							topRightPanel.add(textPreview, BorderLayout.CENTER);
@@ -491,7 +430,7 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 					case Audio:
 						try
 						{
-							final ImagePreview imagePreview = new ImagePreview(ImageIO.read(SafeExplorer.class.getResourceAsStream("/img/audio-file-100.png")));
+							final ImagePreview imagePreview = new ImagePreview(ImageIO.read(SafeboxFrame.class.getResourceAsStream("/img/audio-file-100.png")));
 							topRightPanel.add(imagePreview, BorderLayout.CENTER);
 						} catch(final Exception e)
 						{
@@ -503,7 +442,8 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 					case Video:
 						try
 						{
-							final ImagePreview imagePreview = new ImagePreview(ImageIO.read(SafeExplorer.class.getResourceAsStream("/img/video-file-100.png")));
+
+							final ImagePreview imagePreview = new ImagePreview(ImageIO.read(SafeboxFrame.class.getResourceAsStream("/img/video-file-100.png")));
 							topRightPanel.add(imagePreview, BorderLayout.CENTER);
 						} catch(final Exception e)
 						{
@@ -515,7 +455,9 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 					default:
 						try
 						{
-							final ImagePreview imagePreview = new ImagePreview(ImageIO.read(SafeExplorer.class.getResourceAsStream("/img/binary-file-100.png")));
+							final ImagePreview imagePreview = new ImagePreview(ImageIO.read(
+									large ? SafeboxFrame.class.getResourceAsStream("/img/warning-100.png") : SafeboxFrame.class.getResourceAsStream(
+											"/img/binary-file-100.png")));
 							topRightPanel.add(imagePreview, BorderLayout.CENTER);
 						} catch(final Exception e)
 						{
@@ -525,6 +467,12 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 						break;
 				}
 		}
+
+		topRightPanel.repaint();
+		topRightPanel.validate();
+
+		belowRightPanel.repaint();
+		belowRightPanel.validate();
 	}
 
 	public void notifyModificationPending()
@@ -534,30 +482,44 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 		jTree1.expandRow(0);
 	}
 
-
 	@Override
 	public void actionPerformed(final ActionEvent e)
 	{
 		if(e.getSource() == saveMenuItem)
 		{
-
-
+			final ProgressFrame progressFrame = new ProgressFrame(this);
+			final SaveTask saveTask = new SaveTask(this.safe, GUI.getLogger());
+			progressFrame.execute(saveTask);
+			if(saveTask.getException() == null)
+			{
+				setSafe(saveTask.getNewSafe());
+			}
 		}
 		else if(e.getSource() == autoSaveCheckBoxMenuItem)
 		{
+			final boolean value = this.autoSaveCheckBoxMenuItem.isSelected();
+			Settings.getSettings().setAutoSave(value);
 
-		}
-		else if(e.getSource() == autoSaveCheckBoxMenuItem)
-		{
-
+			if(value && this.modificationPending.get())
+			{
+				actionPerformed(new ActionEvent(saveMenuItem, 0, null));
+			}
 		}
 		else if(e.getSource() == showPreviewCheckBoxMenuItem)
 		{
-
+			Settings.getSettings().setPreview(this.showPreviewCheckBoxMenuItem.isSelected());
+		}
+		else if(e.getSource() == treeLazyLoading)
+		{
+			Settings.getSettings().setTreeLazyLoading(this.treeLazyLoading.isSelected());
 		}
 		else if(e.getSource() == hashMenuItem)
 		{
-
+			computeHash(false);
+		}
+		else if(e.getSource() == autoHashCheckBoxMenuItem)
+		{
+			Settings.getSettings().setPreview(this.autoHashCheckBoxMenuItem.isSelected());
 		}
 		else if(e.getSource() == helpMenuItem)
 		{
@@ -612,13 +574,7 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 	}
 
 	@Override
-	public void mouseClicked(final MouseEvent mouseEvent)
-	{
-
-	}
-
-	@Override
-	public void mousePressed(final MouseEvent e)
+	public void mouseClicked(final MouseEvent e)
 	{
 		final int selRow = jTree1.getRowForLocation(e.getX(), e.getY());
 		final TreePath selPath = jTree1.getPathForLocation(e.getX(), e.getY());
@@ -626,24 +582,31 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 		{
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
 
-			if(node.getParent() != null)
+			final SafeFileTreeNode sfNode = (SafeFileTreeNode) node;
+
+			if(e.getClickCount() == 2)
 			{
-				final SafeFileTreeNode sfNode = (SafeFileTreeNode) node;
-
-				//				loadNode(sfNode);
-
-				if(e.getClickCount() == 2)
+				if(!e.isConsumed())
 				{
 					openNode(sfNode);
-				}
-				else if(SwingUtilities.isRightMouseButton(e))
-				{
-					jTree1.setSelectionRow(selRow);
-					final SafeFileNodePopupMenu menu = new SafeFileNodePopupMenu(jTree1, sfNode);
-					menu.show(e.getComponent(), e.getX(), e.getY());
+					e.consume();
 				}
 			}
+			else if(SwingUtilities.isRightMouseButton(e))
+			{
+				jTree1.setSelectionRow(selRow);
+				final SafeFileNodePopupMenu menu = new SafeFileNodePopupMenu(jTree1, sfNode);
+				menu.show(e.getComponent(), e.getX(), e.getY());
+				e.consume();
+			}
+
 		}
+	}
+
+	@Override
+	public void mousePressed(final MouseEvent e)
+	{
+
 	}
 
 	@Override
@@ -668,7 +631,7 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 	public void valueChanged(final TreeSelectionEvent treeSelectionEvent)
 	{
 		final DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) this.jTree1.getLastSelectedPathComponent();
-		if(selectedNode != null && selectedNode instanceof SafeFileTreeNode)
+		if(selectedNode instanceof SafeFileTreeNode)
 			loadNode((SafeFileTreeNode) selectedNode);
 	}
 
@@ -685,7 +648,6 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 		{
 			if(this.safe != null)
 			{
-
 				if(modificationPending.get())
 				{
 					final WarningOptionFrame warningOptionFrame = new WarningOptionFrame(this, "Discard changes ?", null, "You have pending changes.\n\n Exit anyway ?");
@@ -737,6 +699,11 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 		return this.modificationPending.get();
 	}
 
+	public JTree getjTree()
+	{
+		return jTree1;
+	}
+
 	public Safe getSafe()
 	{
 		return safe;
@@ -745,7 +712,22 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 	public void setSafe(final Safe safe)
 	{
 		this.safe = safe;
-		loadSafe();
+		this.modificationPending.set(false);
+
+		final LoadTreeTask task = new LoadTreeTask(this.safe, this.jTree1, this, Settings.getSettings().isTreeLazyLoading(), GUI.getLogger());
+		final ProgressFrame progressFrame = new ProgressFrame(this);
+		progressFrame.execute(task);
+
+		if(task.getException() == null)
+			jTree1.expandRow(0);
+		else
+			jTree1.collapseRow(0);
+
+		jTree1.updateUI();
+		jTree1.repaint();
+
+		if(Settings.getSettings().isAutoHashCheck())
+			computeHash(true);
 	}
 
 	/**

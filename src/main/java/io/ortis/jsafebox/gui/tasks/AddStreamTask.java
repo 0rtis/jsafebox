@@ -17,27 +17,36 @@
 
 package io.ortis.jsafebox.gui.tasks;
 
+import io.ortis.jsafebox.Folder;
 import io.ortis.jsafebox.Safe;
+import io.ortis.jsafebox.SafeFile;
+import io.ortis.jsafebox.commands.Add;
 import io.ortis.jsafebox.task.Task;
 import io.ortis.jsafebox.task.TaskListener;
 import io.ortis.jsafebox.task.TaskProbeAdapter;
 
-import javax.xml.bind.DatatypeConverter;
+import java.io.InputStream;
 import java.util.logging.Logger;
 
 /**
  * @author Ortis
  */
-public class HashTask extends AbstractGUITask implements TaskListener
+public class AddStreamTask extends AbstractGUITask implements TaskListener
 {
-
+	private final InputStream sourceInputStream;
+	private final String sourceName;
+	private final Folder folder;
 	private final Safe safe;
 
-	private String hash;
+	private SafeFile added = null;
 
-	public HashTask(final Safe safe, final Logger log)
+	public AddStreamTask(final InputStream sourceInputStream, final String sourceName, final Folder folder, final Safe safe, final Logger log)
 	{
-		super("Computing integrity hash", "Success", "Integrity hash has been successfully computed !", log);
+		super("Copying", "Success", "Data has been successfully copied !", log);
+
+		this.sourceInputStream = sourceInputStream;
+		this.sourceName = sourceName;
+		this.folder = folder;
 		this.safe = safe;
 	}
 
@@ -52,20 +61,25 @@ public class HashTask extends AbstractGUITask implements TaskListener
 	{
 		try
 		{
-			log.info("Computing integrity hash");
+			log.info("Initializing transfer");
 			final TaskProbeAdapter adapter = new TaskProbeAdapter();
 			adapter.addListener(this);
 
-			System.gc();
-			final byte[] hash = safe.computeHash(adapter);
-			System.gc();
-
-			this.hash =bytexToHex(hash) ;
-
+			log.info("Copying " + sourceName);
+			this.added = Add.add(sourceInputStream, this.sourceName, null, safe, folder, adapter);
+		} catch(final Exception e)
+		{
+			safe.discardChanges();
+			throw e;
 		} finally
 		{
 
 		}
+	}
+
+	public SafeFile getAdded()
+	{
+		return added;
 	}
 
 	@Override
@@ -102,16 +116,5 @@ public class HashTask extends AbstractGUITask implements TaskListener
 	public void onCancelled(final Task task)
 	{
 
-	}
-
-	public String getHash()
-	{
-		return hash;
-	}
-
-
-	public static String bytexToHex(final byte [] bytes)
-	{
-		return DatatypeConverter.printHexBinary(bytes);
 	}
 }
