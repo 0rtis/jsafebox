@@ -277,9 +277,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 					}
 
 				}
-
 		}
-
 	}
 
 	private void configUI()

@@ -58,7 +58,7 @@ public class SaveTask extends AbstractGUITask implements TaskListener
 		try
 		{
 
-			log.info("Writing setttings file");
+			log.info("Writing settings file");
 			GUI.save();
 			log.info("Writing safe file");
 			final TaskProbeAdapter adapter = new TaskProbeAdapter();

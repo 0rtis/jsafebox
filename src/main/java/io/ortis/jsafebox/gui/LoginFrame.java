@@ -20,6 +20,7 @@ package io.ortis.jsafebox.gui;
 import io.ortis.jsafebox.gui.tasks.OpenSafeboxTask;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -66,10 +67,12 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
 		this.jPasswordField1.setText("");
 		this.jPasswordField1.addActionListener(this);
 
+		this.browseLabel.addMouseListener(this);
+		this.newLabel.addMouseListener(this);
+
 		settings.applyFirstButtonStyle(this.openLabel);
 		openLabel.setFont(settings.getFontTheme().getLoginOpenFont());
 		this.openLabel.addMouseListener(this);
-
 
 
 		setIconImages(settings.getFrameIcons());
@@ -147,6 +150,13 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
 		pack();
 	}// </editor-fold>//GEN-END:initComponents
 
+
+	public void setSafePath(final String path)
+	{
+		final JTextField field = (JTextField) walletPathComboBox.getEditor().getEditorComponent();
+		field.setText(path);
+	}
+
 	@Override
 	public void mouseClicked(final MouseEvent mouseEvent)
 	{
@@ -159,7 +169,7 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
 			final JTextField field = (JTextField) walletPathComboBox.getEditor().getEditorComponent();
 			final String path = field.getText();
 
-			final OpenSafeboxTask task = new OpenSafeboxTask(path,this.jPasswordField1.getPassword(),  GUI.getLogger());
+			final OpenSafeboxTask task = new OpenSafeboxTask(path, this.jPasswordField1.getPassword(), GUI.getLogger());
 
 			final ProgressFrame progressFrame = new ProgressFrame(this);
 			progressFrame.execute(task);
@@ -175,6 +185,27 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
 
 				dispose();
 			}
+		}
+		else if(source == browseLabel)
+		{
+			final JFileChooser fileChooser = new JFileChooser();
+			fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
+
+			fileChooser.setFileFilter(new FileNameExtensionFilter("JSafebox file", "jsb"));
+			fileChooser.setCurrentDirectory(Settings.getDefaultDirectory());
+
+			if(fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+			{
+				final String filename = fileChooser.getSelectedFile().toString();
+				Settings.setDefaultDirectory(filename);
+
+				setSafePath(filename);
+			}
+		}
+		else if(source == newLabel)
+		{
+			final NewSafeFrame newSafeFrame = new NewSafeFrame(this);
+			newSafeFrame.setVisible(true);
 		}
 	}
 
@@ -229,7 +260,6 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
 			final MouseEvent me = new MouseEvent(openLabel, 0, 0, 0, 0, 0, 0, 0, 0, false, 0);
 			mouseClicked(me);// simulate click
 		}
-
 	}
 
 	/**

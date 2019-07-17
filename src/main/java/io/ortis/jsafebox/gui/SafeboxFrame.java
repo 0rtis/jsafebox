@@ -30,7 +30,6 @@ import io.ortis.jsafebox.gui.tree.SafeTreeCellEditor;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -41,9 +40,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -55,33 +51,33 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 	private final Window parent;
 	private final AtomicBoolean modificationPending = new AtomicBoolean(false);
 	private Safe safe;
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenu ViewMenu;
-    private javax.swing.JMenuItem aboutMenuItem;
-    private javax.swing.JCheckBoxMenuItem autoHashCheckBoxMenuItem;
-    private javax.swing.JCheckBoxMenuItem autoSaveCheckBoxMenuItem;
-    private javax.swing.JPanel belowRightPanel;
-    private javax.swing.JPanel bottomPanel;
-    private javax.swing.JPanel explorerPanel;
-    private javax.swing.JMenu fileMenu;
-    private javax.swing.JPanel fileTreePanel;
-    private javax.swing.JMenuItem hashMenuItem;
-    private javax.swing.JMenu helpMenu;
-    private javax.swing.JMenuItem helpMenuItem;
-    private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JSplitPane jSplitPane1;
-    private javax.swing.JSplitPane jSplitPane2;
-    private javax.swing.JTree jTree1;
-    private javax.swing.JPanel rightPanel;
-    private javax.swing.JMenuItem saveMenuItem;
-    private javax.swing.JMenu securityMenu;
-    private javax.swing.JCheckBoxMenuItem showPreviewCheckBoxMenuItem;
-    private javax.swing.JLabel statusLabel;
-    private javax.swing.JPanel statusPanel;
-    private javax.swing.JPanel topRightPanel;
-    private javax.swing.JCheckBoxMenuItem treeLazyLoading;
-    // End of variables declaration//GEN-END:variables
+	// Variables declaration - do not modify//GEN-BEGIN:variables
+	private javax.swing.JMenu ViewMenu;
+	private javax.swing.JMenuItem aboutMenuItem;
+	private javax.swing.JCheckBoxMenuItem autoHashCheckBoxMenuItem;
+	private javax.swing.JCheckBoxMenuItem autoSaveCheckBoxMenuItem;
+	private javax.swing.JPanel belowRightPanel;
+	private javax.swing.JPanel bottomPanel;
+	private javax.swing.JPanel explorerPanel;
+	private javax.swing.JMenu fileMenu;
+	private javax.swing.JPanel fileTreePanel;
+	private javax.swing.JMenuItem hashMenuItem;
+	private javax.swing.JMenu helpMenu;
+	private javax.swing.JMenuItem helpMenuItem;
+	private javax.swing.JMenuBar jMenuBar1;
+	private javax.swing.JScrollPane jScrollPane1;
+	private javax.swing.JSplitPane jSplitPane1;
+	private javax.swing.JSplitPane jSplitPane2;
+	private javax.swing.JTree jTree1;
+	private javax.swing.JPanel rightPanel;
+	private javax.swing.JMenuItem saveMenuItem;
+	private javax.swing.JMenu securityMenu;
+	private javax.swing.JCheckBoxMenuItem showPreviewCheckBoxMenuItem;
+	private javax.swing.JLabel statusLabel;
+	private javax.swing.JPanel statusPanel;
+	private javax.swing.JPanel topRightPanel;
+	private javax.swing.JCheckBoxMenuItem treeLazyLoading;
+	// End of variables declaration//GEN-END:variables
 
 
 	/**
@@ -105,9 +101,9 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 
 
 		bottomPanel.setBackground(settings.getUITheme().getBackgroundColor());
-		final LineBorder border = (LineBorder) bottomPanel.getBorder();
+		/*final LineBorder border = (LineBorder) bottomPanel.getBorder();
 		bottomPanel.setBorder(new LineBorder(jSplitPane1.getBackground(), border.getThickness(), false));
-
+*/
 		//File menu
 		KeyStroke keyStrokeAccelerator = KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK);
 		saveMenuItem.setAccelerator(keyStrokeAccelerator);
@@ -155,8 +151,12 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 		this.jTree1.getRootPane().setOpaque(false);
 		this.jTree1.getRootPane().setBackground(fileTreePanel.getBackground());
 
+
 		final SafeTreeCellEditor safeTreeCellEditor = new SafeTreeCellEditor(jTree1, (DefaultTreeCellRenderer) jTree1.getCellRenderer());
 		jTree1.setCellEditor(safeTreeCellEditor);
+
+		this.statusPanel.setBackground(settings.getUITheme().getBackgroundColor());
+		settings.applyNumericalFieldLabelStyle(this.statusLabel);
 
 		addWindowListener(this);
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -167,6 +167,7 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 		setSize(Toolkit.getDefaultToolkit().getScreenSize().width * 2 / 3, Toolkit.getDefaultToolkit().getScreenSize().height * 2 / 3);
 		setLocationRelativeTo(this);
 
+		new StatusUpdater(this.statusLabel).start();
 	}
 
 
@@ -176,171 +177,155 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 	 * regenerated by the Form Editor.
 	 */
 	@SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+	// <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+	private void initComponents()
+	{
 
-        explorerPanel = new javax.swing.JPanel();
-        jSplitPane1 = new javax.swing.JSplitPane();
-        fileTreePanel = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTree1 = new javax.swing.JTree();
-        rightPanel = new javax.swing.JPanel();
-        jSplitPane2 = new javax.swing.JSplitPane();
-        topRightPanel = new javax.swing.JPanel();
-        belowRightPanel = new javax.swing.JPanel();
-        bottomPanel = new javax.swing.JPanel();
-        statusPanel = new javax.swing.JPanel();
-        statusLabel = new javax.swing.JLabel();
-        jMenuBar1 = new javax.swing.JMenuBar();
-        fileMenu = new javax.swing.JMenu();
-        saveMenuItem = new javax.swing.JMenuItem();
-        autoSaveCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        ViewMenu = new javax.swing.JMenu();
-        showPreviewCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        treeLazyLoading = new javax.swing.JCheckBoxMenuItem();
-        securityMenu = new javax.swing.JMenu();
-        hashMenuItem = new javax.swing.JMenuItem();
-        autoHashCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
-        helpMenu = new javax.swing.JMenu();
-        helpMenuItem = new javax.swing.JMenuItem();
-        aboutMenuItem = new javax.swing.JMenuItem();
+		explorerPanel = new javax.swing.JPanel();
+		jSplitPane1 = new javax.swing.JSplitPane();
+		fileTreePanel = new javax.swing.JPanel();
+		jScrollPane1 = new javax.swing.JScrollPane();
+		jTree1 = new javax.swing.JTree();
+		rightPanel = new javax.swing.JPanel();
+		jSplitPane2 = new javax.swing.JSplitPane();
+		topRightPanel = new javax.swing.JPanel();
+		belowRightPanel = new javax.swing.JPanel();
+		bottomPanel = new javax.swing.JPanel();
+		statusPanel = new javax.swing.JPanel();
+		statusLabel = new javax.swing.JLabel();
+		jMenuBar1 = new javax.swing.JMenuBar();
+		fileMenu = new javax.swing.JMenu();
+		saveMenuItem = new javax.swing.JMenuItem();
+		autoSaveCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+		ViewMenu = new javax.swing.JMenu();
+		showPreviewCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+		treeLazyLoading = new javax.swing.JCheckBoxMenuItem();
+		securityMenu = new javax.swing.JMenu();
+		hashMenuItem = new javax.swing.JMenuItem();
+		autoHashCheckBoxMenuItem = new javax.swing.JCheckBoxMenuItem();
+		helpMenu = new javax.swing.JMenu();
+		helpMenuItem = new javax.swing.JMenuItem();
+		aboutMenuItem = new javax.swing.JMenuItem();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        explorerPanel.setBackground(new java.awt.Color(255, 255, 255));
+		explorerPanel.setBackground(new java.awt.Color(255, 255, 255));
 
-        jSplitPane1.setDividerLocation(150);
-        jSplitPane1.setOneTouchExpandable(true);
+		jSplitPane1.setDividerLocation(150);
+		jSplitPane1.setOneTouchExpandable(true);
 
-        fileTreePanel.setBackground(new java.awt.Color(28, 29, 103));
-        fileTreePanel.setBorder(null);
-        fileTreePanel.setMinimumSize(new java.awt.Dimension(100, 0));
-        fileTreePanel.setPreferredSize(new java.awt.Dimension(100, 567));
-        fileTreePanel.setLayout(new java.awt.BorderLayout());
+		fileTreePanel.setBackground(new java.awt.Color(28, 29, 103));
+		fileTreePanel.setBorder(null);
+		fileTreePanel.setMinimumSize(new java.awt.Dimension(100, 0));
+		fileTreePanel.setPreferredSize(new java.awt.Dimension(100, 567));
+		fileTreePanel.setLayout(new java.awt.BorderLayout());
 
-        jScrollPane1.setOpaque(false);
+		jScrollPane1.setOpaque(false);
 
-        jTree1.setOpaque(false);
-        jScrollPane1.setViewportView(jTree1);
+		jTree1.setOpaque(false);
+		jScrollPane1.setViewportView(jTree1);
 
-        fileTreePanel.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+		fileTreePanel.add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
-        jSplitPane1.setLeftComponent(fileTreePanel);
+		jSplitPane1.setLeftComponent(fileTreePanel);
 
-        jSplitPane2.setDividerLocation(350);
-        jSplitPane2.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-        jSplitPane2.setOneTouchExpandable(true);
+		jSplitPane2.setDividerLocation(350);
+		jSplitPane2.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+		jSplitPane2.setOneTouchExpandable(true);
 
-        topRightPanel.setBackground(new java.awt.Color(177, 157, 24));
-        topRightPanel.setBorder(null);
-        topRightPanel.setLayout(new java.awt.BorderLayout());
-        jSplitPane2.setTopComponent(topRightPanel);
+		topRightPanel.setBackground(new java.awt.Color(177, 157, 24));
+		topRightPanel.setBorder(null);
+		topRightPanel.setLayout(new java.awt.BorderLayout());
+		jSplitPane2.setTopComponent(topRightPanel);
 
-        belowRightPanel.setBackground(new java.awt.Color(151, 246, 151));
-        belowRightPanel.setBorder(null);
-        belowRightPanel.setLayout(new java.awt.BorderLayout());
-        jSplitPane2.setRightComponent(belowRightPanel);
+		belowRightPanel.setBackground(new java.awt.Color(151, 246, 151));
+		belowRightPanel.setBorder(null);
+		belowRightPanel.setLayout(new java.awt.BorderLayout());
+		jSplitPane2.setRightComponent(belowRightPanel);
 
-        javax.swing.GroupLayout rightPanelLayout = new javax.swing.GroupLayout(rightPanel);
-        rightPanel.setLayout(rightPanelLayout);
-        rightPanelLayout.setHorizontalGroup(
-            rightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane2)
-        );
-        rightPanelLayout.setVerticalGroup(
-            rightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane2)
-        );
+		javax.swing.GroupLayout rightPanelLayout = new javax.swing.GroupLayout(rightPanel);
+		rightPanel.setLayout(rightPanelLayout);
+		rightPanelLayout.setHorizontalGroup(rightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(jSplitPane2));
+		rightPanelLayout.setVerticalGroup(rightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(jSplitPane2));
 
-        jSplitPane1.setRightComponent(rightPanel);
+		jSplitPane1.setRightComponent(rightPanel);
 
-        javax.swing.GroupLayout explorerPanelLayout = new javax.swing.GroupLayout(explorerPanel);
-        explorerPanel.setLayout(explorerPanelLayout);
-        explorerPanelLayout.setHorizontalGroup(
-            explorerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.TRAILING)
-        );
-        explorerPanelLayout.setVerticalGroup(
-            explorerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane1)
-        );
+		javax.swing.GroupLayout explorerPanelLayout = new javax.swing.GroupLayout(explorerPanel);
+		explorerPanel.setLayout(explorerPanelLayout);
+		explorerPanelLayout.setHorizontalGroup(
+				explorerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.TRAILING));
+		explorerPanelLayout.setVerticalGroup(explorerPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(jSplitPane1));
 
-        getContentPane().add(explorerPanel, java.awt.BorderLayout.CENTER);
+		getContentPane().add(explorerPanel, java.awt.BorderLayout.CENTER);
 
-        bottomPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
-        bottomPanel.setPreferredSize(new java.awt.Dimension(1081, 35));
+		bottomPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 3, 3, 3));
+		bottomPanel.setPreferredSize(new java.awt.Dimension(1081, 35));
 
-        statusPanel.setBorder(null);
-        statusPanel.setLayout(new java.awt.BorderLayout());
+		statusPanel.setBorder(null);
+		statusPanel.setLayout(new java.awt.BorderLayout());
 
-        javax.swing.GroupLayout bottomPanelLayout = new javax.swing.GroupLayout(bottomPanel);
-        bottomPanel.setLayout(bottomPanelLayout);
-        bottomPanelLayout.setHorizontalGroup(
-            bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(bottomPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(statusLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 1051, Short.MAX_VALUE)
-                .addContainerGap())
-            .addGroup(bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(statusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        bottomPanelLayout.setVerticalGroup(
-            bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(statusLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 29, Short.MAX_VALUE)
-            .addGroup(bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(statusPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+		javax.swing.GroupLayout bottomPanelLayout = new javax.swing.GroupLayout(bottomPanel);
+		bottomPanel.setLayout(bottomPanelLayout);
+		bottomPanelLayout.setHorizontalGroup(bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
+				bottomPanelLayout.createSequentialGroup().addContainerGap().addComponent(statusLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 1051,
+						Short.MAX_VALUE).addContainerGap()).addGroup(
+				bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(statusPanel, javax.swing.GroupLayout.DEFAULT_SIZE,
+						javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+		bottomPanelLayout.setVerticalGroup(bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(statusLabel,
+				javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 29, Short.MAX_VALUE).addGroup(
+				bottomPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(statusPanel, javax.swing.GroupLayout.DEFAULT_SIZE,
+						javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 
-        getContentPane().add(bottomPanel, java.awt.BorderLayout.SOUTH);
+		getContentPane().add(bottomPanel, java.awt.BorderLayout.SOUTH);
 
-        fileMenu.setText("File");
+		fileMenu.setText("File");
 
-        saveMenuItem.setText("Save");
-        fileMenu.add(saveMenuItem);
+		saveMenuItem.setText("Save");
+		fileMenu.add(saveMenuItem);
 
-        autoSaveCheckBoxMenuItem.setSelected(true);
-        autoSaveCheckBoxMenuItem.setText("Auto save");
-        fileMenu.add(autoSaveCheckBoxMenuItem);
+		autoSaveCheckBoxMenuItem.setSelected(true);
+		autoSaveCheckBoxMenuItem.setText("Auto save");
+		fileMenu.add(autoSaveCheckBoxMenuItem);
 
-        jMenuBar1.add(fileMenu);
+		jMenuBar1.add(fileMenu);
 
-        ViewMenu.setText("View");
+		ViewMenu.setText("View");
 
-        showPreviewCheckBoxMenuItem.setSelected(true);
-        showPreviewCheckBoxMenuItem.setText("Show preview");
-        ViewMenu.add(showPreviewCheckBoxMenuItem);
+		showPreviewCheckBoxMenuItem.setSelected(true);
+		showPreviewCheckBoxMenuItem.setText("Show preview");
+		ViewMenu.add(showPreviewCheckBoxMenuItem);
 
-        treeLazyLoading.setSelected(true);
-        treeLazyLoading.setText("Lazy loading");
-        ViewMenu.add(treeLazyLoading);
+		treeLazyLoading.setSelected(true);
+		treeLazyLoading.setText("Lazy loading");
+		ViewMenu.add(treeLazyLoading);
 
-        jMenuBar1.add(ViewMenu);
+		jMenuBar1.add(ViewMenu);
 
-        securityMenu.setText("Security");
+		securityMenu.setText("Security");
 
-        hashMenuItem.setText("Compute hash");
-        securityMenu.add(hashMenuItem);
+		hashMenuItem.setText("Compute hash");
+		securityMenu.add(hashMenuItem);
 
-        autoHashCheckBoxMenuItem.setSelected(true);
-        autoHashCheckBoxMenuItem.setText("Check hash on opening");
-        securityMenu.add(autoHashCheckBoxMenuItem);
+		autoHashCheckBoxMenuItem.setSelected(true);
+		autoHashCheckBoxMenuItem.setText("Check hash on opening");
+		securityMenu.add(autoHashCheckBoxMenuItem);
 
-        jMenuBar1.add(securityMenu);
+		jMenuBar1.add(securityMenu);
 
-        helpMenu.setText("Help");
+		helpMenu.setText("Help");
 
-        helpMenuItem.setText("Help frame");
-        helpMenu.add(helpMenuItem);
+		helpMenuItem.setText("Help frame");
+		helpMenu.add(helpMenuItem);
 
-        aboutMenuItem.setText("About");
-        helpMenu.add(aboutMenuItem);
+		aboutMenuItem.setText("About");
+		helpMenu.add(aboutMenuItem);
 
-        jMenuBar1.add(helpMenu);
+		jMenuBar1.add(helpMenu);
 
-        setJMenuBar(jMenuBar1);
+		setJMenuBar(jMenuBar1);
 
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
+		pack();
+	}// </editor-fold>//GEN-END:initComponents
 
 
 	private void computeHash(final boolean quiet)
@@ -399,7 +384,6 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 			final MetadataPanel metadataPanel = new MetadataPanel();
 			metadataPanel.setBlock(block);
 			belowRightPanel.add(metadataPanel, BorderLayout.CENTER);
-
 
 			final String mime = block.getProperties().get(Block.MIME_LABEL);
 			final FileType type;
@@ -541,10 +525,25 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 		else if(e.getSource() == helpMenuItem)
 		{
 
+			try
+			{
+				final HelpFrame helpFrame = new HelpFrame(this);
+				helpFrame.setVisible(true);
+			} catch(final Exception ex)
+			{
+				new ResultFrame(this, new ExceptionTask(ex, GUI.getLogger()));
+			}
 		}
 		else if(e.getSource() == aboutMenuItem)
 		{
-
+			try
+			{
+				final AboutFrame aboutFrame = new AboutFrame(this);
+				aboutFrame.setVisible(true);
+			} catch(final Exception ex)
+			{
+				new ResultFrame(this, new ExceptionTask(ex, GUI.getLogger()));
+			}
 		}
 	}
 

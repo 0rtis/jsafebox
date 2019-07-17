@@ -90,6 +90,7 @@ public class Settings
 	private final List<Image> textFrameIcons;
 	private final List<Image> imageFrameIcons;
 	private final List<Image> progressIcons;
+	private final List<Image> helpIcons;
 	private final Image successIcon;
 	private final OS osType;
 	private final String htmlHelp;
@@ -148,6 +149,13 @@ public class Settings
 		imgIcons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/image-file-64.png")));
 		imgIcons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/image-file-100.png")));
 		this.imageFrameIcons = Collections.unmodifiableList(imgIcons);
+
+		final List<Image> helpIcons = new ArrayList<>();
+		helpIcons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/help-16.png")));
+		helpIcons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/help-32.png")));
+		helpIcons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/help-64.png")));
+		helpIcons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/help-100.png")));
+		this.helpIcons = Collections.unmodifiableList(helpIcons);
 
 
 		this.safeTheme = Optional.ofNullable(getBoolean(GUI_THEME_SAFE)).orElse(false);
@@ -434,6 +442,11 @@ public class Settings
 	public List<Image> getProgressIcons()
 	{
 		return progressIcons;
+	}
+
+	public List<Image> getHelpIcons()
+	{
+		return helpIcons;
 	}
 
 	public Image getSuccessIcon()
