@@ -56,8 +56,10 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
 
 		final JTextField field = (JTextField) safePathComboBox.getEditor().getEditorComponent();
 		field.setText("Select a safe or create a new one");
+
+		safePathComboBox.setRenderer(new ComboBoxRenderer());
 		safePathComboBox.removeAllItems();
-		for(final String path : settings.getSafeFilePaths())
+				for(final String path : settings.getSafeFilePaths())
 			safePathComboBox.addItem(path);
 		safePathComboBox.setFont(settings.getFontTheme().getFieldFont());
 
@@ -107,12 +109,6 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
         safePathComboBox.setEditable(true);
         safePathComboBox.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         safePathComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        safePathComboBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                safePathComboBoxActionPerformed(evt);
-            }
-        });
-
         browseLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/browse-folder-32.png"))); // NOI18N
 
         newLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/new-32.png"))); // NOI18N
@@ -188,12 +184,10 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
 
 			if(task.getException() == null)
 			{
-
 				GUI.getSettings().addSafeFilePath(path);
 
 				final SafeboxFrame safeboxFrame = new SafeboxFrame(this, task.getSafe());
 				SwingUtilities.invokeLater(() -> safeboxFrame.setVisible(true));
-
 
 				dispose();
 			}
@@ -218,6 +212,10 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
 		{
 			final NewSafeFrame newSafeFrame = new NewSafeFrame(this);
 			newSafeFrame.setVisible(true);
+			if(newSafeFrame.getCreated() !=null)
+			{
+				setSafePath(newSafeFrame.getCreated().getAbsolutePath());
+			}
 		}
 	}
 
