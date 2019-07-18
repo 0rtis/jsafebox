@@ -191,7 +191,7 @@ public class NewSafeFrame extends javax.swing.JDialog implements MouseListener, 
 		{
 			final JFileChooser fileChooser = new JFileChooser();
 			fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
-			fileChooser.setSelectedFile(new File("safe-"+FILENAME_DATETIME_FORMAT.format(LocalDateTime.now())+".jsb"));
+			fileChooser.setSelectedFile(new File("safe-" + FILENAME_DATETIME_FORMAT.format(LocalDateTime.now()) + ".jsb"));
 			fileChooser.setFileFilter(new FileNameExtensionFilter("JSafebox file", "jsb"));
 			fileChooser.setCurrentDirectory(Settings.getDefaultDirectory());
 

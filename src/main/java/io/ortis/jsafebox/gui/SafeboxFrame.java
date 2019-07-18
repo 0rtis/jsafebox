@@ -339,7 +339,14 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 			if(hashTask.getHash().equals(hash))
 			{
 				if(!quiet)
-					new ResultFrame(this, new AdapterTask("Integrity hash successfully verified", hash, GUI.getLogger()));
+					new ResultFrame(this, new AdapterTask("Integrity hash successfully verified", hash, GUI.getLogger())
+					{
+						@Override
+						public long getResultTimer()
+						{
+							return Long.MAX_VALUE;
+						}
+					});
 			}
 			else
 				new ResultFrame(this, new ExceptionTask(new Exception(
@@ -386,18 +393,20 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 			belowRightPanel.add(metadataPanel, BorderLayout.CENTER);
 
 			final String mime = block.getProperties().get(Block.MIME_LABEL);
-			final FileType type;
+			final FileType type = settings.getFileType(mime);
+
+			final FileType displayType;
 
 			final boolean large = block.getDataLength() > settings.getPreviewMaxLength();
 
 			if(large)
-				type = FileType.Unknown;
+				displayType = FileType.Unknown;
 			else
-				type = settings.getFileType(mime);
+				displayType = type;
 
 
 			if(Settings.getSettings().isPreview())
-				switch(type)
+				switch(displayType)
 				{
 					case Image:
 						try
@@ -456,9 +465,8 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 					default:
 						try
 						{
-							final ImagePreview imagePreview = new ImagePreview(ImageIO.read(
-									large ? SafeboxFrame.class.getResourceAsStream("/img/warning-100.png") : SafeboxFrame.class.getResourceAsStream(
-											"/img/binary-file-100.png")));
+							final ImagePreview imagePreview = new ImagePreview(ImageIO.read(large && displayType != type ? SafeboxFrame.class.getResourceAsStream(
+									"/img/warning-100.png") : SafeboxFrame.class.getResourceAsStream("/img/binary-file-100.png")));
 							topRightPanel.add(imagePreview, BorderLayout.CENTER);
 						} catch(final Exception e)
 						{

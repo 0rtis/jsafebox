@@ -17,6 +17,16 @@
 
 package io.ortis.jsafebox.commands;
 
+import io.ortis.jsafebox.Environment;
+import io.ortis.jsafebox.Safe;
+import io.ortis.jsafebox.Utils;
+import io.ortis.jsafebox.Version;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import java.io.File;
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -25,38 +35,26 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-
-import io.ortis.jsafebox.Environment;
-import io.ortis.jsafebox.Safe;
-import io.ortis.jsafebox.Utils;
-
-import io.ortis.jsafebox.Version;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
-
 /**
  * Create a new {@link Safe}
- * 
+ *
  * @author Ortis <br>
- *         2018 Apr 26 8:16:17 PM <br>
+ * 2018 Apr 26 8:16:17 PM <br>
  */
 @Command(description = "Init a new safe", name = "init", mixinStandardHelpOptions = true, version = Version.VERSION, showDefaultValues = true)
 public class Init implements Callable<Void>
 {
 
-	@Option(names = { "-H", "--header" }, arity = "2", description = "Clear text header key and value")
-	private String [] headers;
+	@Option(names = {"-H", "--header"}, arity = "2", description = "Clear text header key and value")
+	private String[] headers;
 
-	@Option(names = { "-p", "-pp", "--property" }, arity = "2", description = "Encrypted text header key and value")
-	private String [] properties;
+	@Option(names = {"-p", "-pp", "--property"}, arity = "2", description = "Encrypted text header key and value")
+	private String[] properties;
 
-	@Option(names = { "-pw", "-pwd", "--password" }, required = true, description = "Password")
+	@Option(names = {"-pw", "-pwd", "--password"}, required = true, description = "Password")
 	private String password;
 
-	@Option(names = { "-b", "--buffer" }, description = "Read buffer size")
+	@Option(names = {"-b", "--buffer"}, description = "Read buffer size")
 	private int bufferSize = 1024;
 
 	@Parameters(index = "0", description = "File path of safe file")
@@ -71,12 +69,12 @@ public class Init implements Callable<Void>
 		{
 			final File file = new File(this.filePath);
 
-			if (file.exists())
+			if(file.exists())
 				throw new IOException("File " + file + " already exist");
 
 			final Map<String, String> header = new LinkedHashMap<>();
-			if (this.headers != null)
-				for (int i = 0; i < headers.length; i += 2)
+			if(this.headers != null)
+				for(int i = 0; i < headers.length; i += 2)
 				{
 					final String key = this.headers[i];
 					final String value = this.headers[i + 1];
@@ -85,8 +83,8 @@ public class Init implements Callable<Void>
 				}
 
 			final Map<String, String> properties = new LinkedHashMap<>();
-			if (this.properties != null)
-				for (int i = 0; i < this.properties.length; i += 2)
+			if(this.properties != null)
+				for(int i = 0; i < this.properties.length; i += 2)
 				{
 					final String key = this.properties[i];
 					final String value = this.properties[i + 1];
@@ -98,7 +96,7 @@ public class Init implements Callable<Void>
 			init(file, password.toCharArray(), header, properties, this.bufferSize);
 			log.info("Done");
 
-		} catch (final Exception e)
+		} catch(final Exception e)
 		{
 			log.severe(Utils.formatException(e));
 		}
@@ -106,14 +104,15 @@ public class Init implements Callable<Void>
 		return null;
 	}
 
-	public static void init(final File file, final char [] password, final Map<String, String> header, final Map<String, String> properties, final int bufferSize) throws Exception
+	public static void init(final File file, final char[] password, final Map<String, String> header, final Map<String, String> properties,
+			final int bufferSize) throws Exception
 	{
 		final Map<String, String> innerProperties = new LinkedHashMap<>();
-		if (properties != null)
+		if(properties != null)
 			innerProperties.putAll(properties);
 
 		final Map<String, String> innerHeader = new LinkedHashMap<>();
-		if (header != null)
+		if(header != null)
 			innerHeader.putAll(header);
 
 		innerHeader.put(Safe.PROTOCOL_SPEC_LABEL, Safe.PROTOCOL_SPEC);
@@ -122,15 +121,26 @@ public class Init implements Callable<Void>
 		innerHeader.put(Safe.ENCRYPTION_IV_LENGTH_LABEL, Integer.toString(16));
 
 		final SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-		final byte [] salt = new byte[16];
+		final byte[] salt = new byte[16];
 		random.nextBytes(salt);
 
 		innerHeader.put(Safe.PBKDF2_SALT_LABEL, Safe.GSON.toJson(salt));
-		innerHeader.put(Safe.PBKDF2_ITERATION_LABEL, Integer.toString(Safe.PBKDF2_ITERATION));
 
-		PBEKeySpec spec = new PBEKeySpec(password, salt, Safe.PBKDF2_ITERATION, 128);
+		if(!innerHeader.containsKey(Safe.PBKDF2_ITERATION_LABEL))
+			innerHeader.put(Safe.PBKDF2_ITERATION_LABEL, Integer.toString(Safe.PBKDF2_DEFAULT_ITERATIONS));
+
+		final int pbkdf2Iterations;
+		try
+		{
+			pbkdf2Iterations = Integer.parseInt(innerHeader.get(Safe.PBKDF2_ITERATION_LABEL).trim());
+		} catch(final Exception e)
+		{
+			throw new Exception("Could not parse value of '" + Safe.PBKDF2_ITERATION_LABEL + "' " + innerHeader.get(Safe.PBKDF2_ITERATION_LABEL));
+		}
+
+		PBEKeySpec spec = new PBEKeySpec(password, salt, pbkdf2Iterations, 128);
 		SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-		final byte [] key = skf.generateSecret(spec).getEncoded();
+		final byte[] key = skf.generateSecret(spec).getEncoded();
 
 		Safe.create(file, key, innerHeader, innerProperties, bufferSize).close();
 	}

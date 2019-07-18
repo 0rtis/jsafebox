@@ -59,9 +59,9 @@ public class Safe implements Closeable
 	public static final String KEY_ALGO_LABEL = "algo";
 	public static final String PROTOCOL_SPEC_LABEL = "protocol description";
 	public static final String PBKDF2_SALT_LABEL = "pbkdf2 salt";
-	public static final int PBKDF2_ITERATION = 100000;
 	public static final String PBKDF2_ITERATION_LABEL = "pbkdf2 iteration";
-	public static final String PROTOCOL_SPEC = "JSafebox is using a very simple protocol so encrypted files can be easily read by another program, as long as you have the password. The encryption key is derived from the password using PBKDF2 hashing with 100000 iteration. A JSafebox file contains a SHA256 integrity hash followed by blocks: [ integrity hash | block 0 | block 1 | ... | block N ]. Each block is stored as followed: [ IV | metadata length | metadata | data length | data ] where 'IV' is the Initialization_vector of the encryption (16 bytes), 'metadata' is a JSON string and 'length' are 64 bits (8 bytes) integer. The first block 'block 0' is the 'header' and is the only block not encrypted and therefore, the only block without IV. The 'header' only have metadata ('data length' is 0) and contains text entries specified by the user and various additional entries including a protocol explanation, the type of encoding and the parameters of the encryption. The 'header's metadata is stored as JSON string and can be seen by opening the safe file with a basic text editor. The second block 'block 1' is the 'properties'. It is similar to the 'header' except that it is encrypted and have an IV. The 'properties' contains text entries specified by the user and stored in JSON. The following blocks (from 2 to N) are the encrypted files. (Full manual at https://github.com/0rtis/jsafebox)";
+	public static final int PBKDF2_DEFAULT_ITERATIONS = 100000;
+	public static final String PROTOCOL_SPEC = "JSafebox is using a simple protocol so encrypted files can be easily read by another program, as long as the password is known. The encryption key is derived from the password using PBKDF2 hashing. A JSafebox file contains a SHA256 integrity hash followed by blocks: [ integrity hash | block 0 | block 1 | ... | block N ]. Each block is stored as followed: [ IV | metadata length | metadata | data length | data ] where 'IV' is the Initialization_vector of the encryption (16 bytes), 'metadata' is a JSON string and 'length' are 64 bits (8 bytes) integer. The first block 'block 0' is the 'header' and is the only block not encrypted and therefore, the only block without IV. The 'header' only have metadata ('data length' is 0) and contains text entries specified by the user and various additional entries including a protocol explanation, the type of encoding and the parameters of the encryption. The 'header's metadata is stored as JSON string and can be seen by opening the safe file with a basic text editor. The second block 'block 1' is the 'properties'. It is similar to the 'header' except that it is encrypted and have an IV. The 'properties' contains text entries specified by the user and stored in JSON. The following blocks (from 2 to N) are the encrypted files. (Full manual at https://github.com/0rtis/jsafebox)";
 	private static final Type MAP_STRING_STRING_TYPE = new TypeToken<Map<String, String>>()
 	{
 	}.getType();
@@ -932,9 +932,22 @@ public class Safe implements Closeable
 		if(log != null)
 			log.fine("Key algorithm " + header.get(Safe.KEY_ALGO_LABEL));
 
-		final byte[] salt = (byte[]) Safe.GSON.fromJson(header.get(Safe.PBKDF2_SALT_LABEL), Safe.BYTE_ARRAY_TYPE);
 
-		PBEKeySpec spec = new PBEKeySpec(password, salt, Safe.PBKDF2_ITERATION, 128);
+		if(!header.containsKey(Safe.PBKDF2_ITERATION_LABEL))
+			throw new Exception("Could not read property '" + Safe.PBKDF2_ITERATION_LABEL + "' from header");
+
+		final int pbkdf2Iterations;
+		try
+		{
+			pbkdf2Iterations = Integer.parseInt(header.get(Safe.PBKDF2_ITERATION_LABEL).trim());
+		} catch(final Exception e)
+		{
+			throw new Exception("Could not parse value of '" + Safe.PBKDF2_ITERATION_LABEL + "' " + header.get(Safe.PBKDF2_ITERATION_LABEL));
+		}
+
+		final byte[] salt = Safe.GSON.fromJson(header.get(Safe.PBKDF2_SALT_LABEL), Safe.BYTE_ARRAY_TYPE);
+
+		PBEKeySpec spec = new PBEKeySpec(password, salt, pbkdf2Iterations, 128);
 		SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 		final byte[] key = skf.generateSecret(spec).getEncoded();
 

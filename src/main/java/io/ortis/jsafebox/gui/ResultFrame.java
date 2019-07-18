@@ -35,7 +35,7 @@ import java.util.logging.LogRecord;
  */
 public class ResultFrame extends JDialog implements WindowListener, KeyListener
 {
-	private final static long SUCCESS_DISPOSE_DELAY = 1500;
+
 	private final Window parent;
 	private final GUITask task;
 	// Variables declaration - do not modify//GEN-BEGIN:variables
@@ -91,7 +91,7 @@ public class ResultFrame extends JDialog implements WindowListener, KeyListener
 
 					try
 					{
-						Thread.sleep(SUCCESS_DISPOSE_DELAY);
+						Thread.sleep(task.getResultTimer());
 					} catch(final InterruptedException e)
 					{
 

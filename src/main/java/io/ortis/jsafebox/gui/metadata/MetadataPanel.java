@@ -49,6 +49,9 @@ public class MetadataPanel extends javax.swing.JPanel
 
 		this.mainPanel.setBackground(settings.getUITheme().getBackgroundColor());
 
+		this.txtViewLabel.setVisible(false);
+		this.binaryViewLabel.setVisible(false);
+
 		this.jScrollPane1.setOpaque(false);
 		this.jScrollPane1.setViewportBorder(null);
 		this.jScrollPane1.setBackground(this.mainPanel.getBackground());

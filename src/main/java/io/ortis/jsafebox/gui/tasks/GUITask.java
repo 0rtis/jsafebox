@@ -23,9 +23,7 @@ import java.util.function.Consumer;
 import java.util.logging.LogRecord;
 
 /**
- * 
  * @author Ortis
- *
  */
 public interface GUITask
 {
@@ -37,6 +35,11 @@ public interface GUITask
 	{
 		return false;
 
+	}
+
+	default long getResultTimer()
+	{
+		return 1500;
 	}
 
 	String getSuccessHeader();

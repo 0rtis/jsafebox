@@ -17,10 +17,13 @@
 
 package io.ortis.jsafebox.gui.tasks;
 
+import io.ortis.jsafebox.Safe;
 import io.ortis.jsafebox.commands.Init;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -56,7 +59,7 @@ public class CreateTask extends AbstractGUITask
 		try
 		{
 			log.info("Parsing pbkdf2");
-			final long pbkdf2 = Long.parseLong(this.pbkdf2.trim());
+			final int pbkdf2 = Integer.parseInt(this.pbkdf2.trim());
 			if(pbkdf2 <= 0)
 				throw new IllegalArgumentException("PBKDF2 must be greater than zero");
 
@@ -70,8 +73,11 @@ public class CreateTask extends AbstractGUITask
 
 
 			log.info("Writing safe file");
-			Init.init(destination, pwd1, null, null, 1024 * 8);
 
+			final Map<String, String> header = new HashMap<>();
+			header.put(Safe.PBKDF2_ITERATION_LABEL, Integer.toString(pbkdf2));
+
+			Init.init(destination, pwd1, header, null, 1024 * 8);
 
 		} finally
 		{

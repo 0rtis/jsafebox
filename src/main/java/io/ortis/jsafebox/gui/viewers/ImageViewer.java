@@ -144,6 +144,7 @@ public class ImageViewer extends JFrame implements KeyListener
 			canvasPanel.add(canvas, BorderLayout.CENTER);
 			canvasPanel.revalidate();
 			canvas.repaint();
+
 		} catch(final Exception e)
 		{
 			new ResultFrame(this, new ExceptionTask(e, GUI.getLogger()));

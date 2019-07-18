@@ -17,12 +17,10 @@
 
 package io.ortis.jsafebox;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.*;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -33,15 +31,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class SafeTest
 {
@@ -51,23 +41,6 @@ public class SafeTest
 	private static Random random;
 	private String filePath;
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception
-	{
-		log = TestUtils.getLog();
-		random = TestUtils.getRandom();
-		folder = TestUtils.mkdir();
-	}
-
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception
-	{
-		TestUtils.delete(folder);
-	}
-
 	/**
 	 * @throws java.lang.Exception
 	 */
@@ -75,18 +48,18 @@ public class SafeTest
 	public void setUp() throws Exception
 	{
 
-		for (int i = 0; i < 100; i++)
+		for(int i = 0; i < 100; i++)
 		{
 			filePath = TestUtils.randomString(random, 10) + ".jsafe";
 
 			final File file = new File(folder, this.filePath);
-			if (!file.exists())
+			if(!file.exists())
 				break;
 
 		}
 
 		final File file = new File(this.filePath);
-		if (file.exists())
+		if(file.exists())
 			throw new Exception("Could not find non existing file");
 	}
 
@@ -97,7 +70,7 @@ public class SafeTest
 	public void tearDown() throws Exception
 	{
 		final File file = new File(this.filePath);
-		if (file.exists())
+		if(file.exists())
 		{
 			log.fine("Deleting file " + file);
 			file.delete();
@@ -112,12 +85,14 @@ public class SafeTest
 		final File safeFile = new File(folder, this.filePath);
 
 		final SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-		final byte [] salt = new byte[16];
+		final byte[] salt = new byte[16];
 		random.nextBytes(salt);
 
-		PBEKeySpec spec = new PBEKeySpec(TestUtils.randomString(random, 12).toCharArray(), salt, Safe.PBKDF2_ITERATION, 128);
+		final int pbkdf2Iterations = random.nextInt(1000000);
+
+		PBEKeySpec spec = new PBEKeySpec(TestUtils.randomString(random, 12).toCharArray(), salt, pbkdf2Iterations, 128);
 		SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-		final byte [] key = skf.generateSecret(spec).getEncoded();
+		final byte[] key = skf.generateSecret(spec).getEncoded();
 
 		final Map<String, String> header = new HashMap<>();
 
@@ -147,10 +122,10 @@ public class SafeTest
 			Assert.assertNotNull(safe.getPublicHeader().get(Safe.KEY_ALGO_LABEL));
 			Assert.assertNotNull(safe.getPublicHeader().get(Safe.PROTOCOL_SPEC_LABEL));
 
-			for (final Map.Entry<String, String> entry : header.entrySet())
+			for(final Map.Entry<String, String> entry : header.entrySet())
 				assertEquals(entry.getValue(), safe.getPublicHeader().get(entry.getKey()));
 
-			for (final Map.Entry<String, String> entry : properties.entrySet())
+			for(final Map.Entry<String, String> entry : properties.entrySet())
 				assertEquals(entry.getValue(), safe.getPrivateProperties().get(entry.getKey()));
 
 			assertEquals(0, safe.getBlocks().size());
@@ -170,19 +145,21 @@ public class SafeTest
 		final Map<String, String> header = new HashMap<>();
 
 		final SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-		final byte [] salt = new byte[16];
+		final byte[] salt = new byte[16];
 		random.nextBytes(salt);
 
-		PBEKeySpec spec = new PBEKeySpec(TestUtils.randomString(random, 12).toCharArray(), salt, Safe.PBKDF2_ITERATION, 128);
+		final int pbkdf2Iterations = random.nextInt(1000000);
+
+		PBEKeySpec spec = new PBEKeySpec(TestUtils.randomString(random, 12).toCharArray(), salt, pbkdf2Iterations, 128);
 		SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-		final byte [] key = skf.generateSecret(spec).getEncoded();
+		final byte[] key = skf.generateSecret(spec).getEncoded();
 
 		try
 		{
 			final Safe safe = Safe.create(safeFile, key, header, null, 1024);
 			safe.close();
 			fail("Uncomplete safe's header should not be allowed");
-		} catch (final Exception e)
+		} catch(final Exception e)
 		{
 
 		}
@@ -193,18 +170,18 @@ public class SafeTest
 			final Safe safe = Safe.create(safeFile, key, header, null, 1024);
 			safe.close();
 			fail("Uncomplete safe's header should not be allowed");
-		} catch (final Exception e)
+		} catch(final Exception e)
 		{
 
 		}
 
-		header.put(Safe.PBKDF2_ITERATION_LABEL, Safe.GSON.toJson(Safe.PBKDF2_ITERATION));
+		header.put(Safe.PBKDF2_ITERATION_LABEL, Safe.GSON.toJson(pbkdf2Iterations));
 		try
 		{
 			final Safe safe = Safe.create(safeFile, key, header, null, 1024);
 			safe.close();
 			fail("Uncomplete safe's header should not be allowed");
-		} catch (final Exception e)
+		} catch(final Exception e)
 		{
 
 		}
@@ -215,7 +192,7 @@ public class SafeTest
 			final Safe safe = Safe.create(safeFile, key, header, null, 1024);
 			safe.close();
 			fail("Uncomplete safe's header should not be allowed");
-		} catch (final Exception e)
+		} catch(final Exception e)
 		{
 
 		}
@@ -226,15 +203,15 @@ public class SafeTest
 			final Safe safe = Safe.create(safeFile, key, header, null, 1024);
 			safe.close();
 			fail("Uncomplete safe's header should not be allowed");
-		} catch (final Exception e)
+		} catch(final Exception e)
 		{
 
 		}
-		
+
 		header.put(Safe.ENCRYPTION_IV_LENGTH_LABEL, Integer.toString(salt.length));
-		
-		
-		try (Safe safe = Safe.create(safeFile, key, header, null, 1024))
+
+
+		try(Safe safe = Safe.create(safeFile, key, header, null, 1024))
 		{
 
 			assertEquals(0, safe.getPrivateProperties().size());
@@ -243,7 +220,7 @@ public class SafeTest
 			{
 				Safe.create(safeFile, key, header, null, 1024);
 				fail("Should not allow create on existing file");
-			} catch (final Exception e)
+			} catch(final Exception e)
 			{
 
 			}
@@ -257,7 +234,7 @@ public class SafeTest
 			final InputStream is = SafeTest.class.getResourceAsStream("/img/Gentleman.sh-600x600.png");
 
 			int b;
-			while ((b = is.read()) > -1)
+			while((b = is.read()) > -1)
 				original.write(b);
 
 			// add missing path and name
@@ -265,7 +242,7 @@ public class SafeTest
 			{
 				safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()), null);
 				fail("Uncomplete metadata's block should not be allowed");
-			} catch (final Exception e)
+			} catch(final Exception e)
 			{
 
 			}
@@ -277,7 +254,7 @@ public class SafeTest
 			{
 				safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()), null);
 				fail("Uncomplete metadata's block should not be allowed");
-			} catch (final Exception e)
+			} catch(final Exception e)
 			{
 
 			}
@@ -290,7 +267,7 @@ public class SafeTest
 			{
 				safe.add(metadatas, new ByteArrayInputStream(original.toByteArray()), null);
 				fail("Adding existing block should not be allowed");
-			} catch (final Exception e)
+			} catch(final Exception e)
 			{
 
 			}
@@ -302,7 +279,7 @@ public class SafeTest
 				metadatas2.put(Block.PATH_LABEL, Folder.ROOT_NAME + Folder.DELIMITER + "404" + Folder.DELIMITER + name);
 				safe.add(metadatas2, new ByteArrayInputStream(original.toByteArray()), null);
 				fail("Adding block without desintation should not be allowed");
-			} catch (final Exception e)
+			} catch(final Exception e)
 			{
 
 			}
@@ -324,7 +301,7 @@ public class SafeTest
 			assertEquals(block.getProperties(), metadatas);
 
 			final ByteArrayOutputStream extracted = new ByteArrayOutputStream();
-			safe.extract(path,false, extracted);
+			safe.extract(path, false, extracted);
 			assertArrayEquals(original.toByteArray(), extracted.toByteArray());
 
 			// discard
@@ -347,11 +324,11 @@ public class SafeTest
 			assertEquals(block2.getProperties(), metadatas);
 
 			final ByteArrayOutputStream extracted2 = new ByteArrayOutputStream();
-			safe.extract(path,false, extracted2);
+			safe.extract(path, false, extracted2);
 			assertArrayEquals(original.toByteArray(), extracted2.toByteArray());
 
 			// after saved
-			try (Safe savedSafe = safe.save())
+			try(Safe savedSafe = safe.save())
 			{
 				final Block savedBlock = savedSafe.getBlock(path);
 				Assert.assertNotNull(savedBlock);
@@ -366,7 +343,7 @@ public class SafeTest
 				assertEquals(savedBlock.getProperties(), savedSafe.readMetadata(savedBlock));
 
 				extracted.reset();
-				savedSafe.extract(savedBlock,false, extracted);
+				savedSafe.extract(savedBlock, false, extracted);
 				assertArrayEquals(original.toByteArray(), extracted.toByteArray());
 
 				// add existing
@@ -374,7 +351,7 @@ public class SafeTest
 				{
 					savedSafe.add(metadatas, new ByteArrayInputStream(original.toByteArray()), null);
 					fail("Duplicate block should not be allowed");
-				} catch (final Exception e)
+				} catch(final Exception e)
 				{
 
 				}
@@ -386,7 +363,7 @@ public class SafeTest
 				metadatas.put(Block.PATH_LABEL, path2);
 				metadatas.put(Block.NAME_LABEL, name2);
 				savedSafe.add(metadatas, new ByteArrayInputStream(original.toByteArray()), null);
-				try (final Safe lastSafe = savedSafe.save())
+				try(final Safe lastSafe = savedSafe.save())
 				{
 					assertEquals(0, lastSafe.getTempBlocks().size());
 					assertEquals(0, lastSafe.getDeletedBlocks().size());
@@ -402,6 +379,23 @@ public class SafeTest
 
 		}
 
+	}
+
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception
+	{
+		log = TestUtils.getLog();
+		random = TestUtils.getRandom();
+		folder = TestUtils.mkdir();
+	}
+
+	/**
+	 * @throws java.lang.Exception
+	 */
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception
+	{
+		TestUtils.delete(folder);
 	}
 
 }

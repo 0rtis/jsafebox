@@ -91,7 +91,10 @@ public class UtilsTest
 		final byte [] salt = new byte[16];
 		random.nextBytes(salt);
 
-		PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, Safe.PBKDF2_ITERATION, 128);
+
+		final int pbkdf2Iterations= random.nextInt(1000000);
+
+		PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, pbkdf2Iterations, 128);
 		SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 		final byte [] key = skf.generateSecret(spec).getEncoded();
 
@@ -101,7 +104,7 @@ public class UtilsTest
 
 		header.put(Safe.ENCRYPTION_IV_LENGTH_LABEL, Integer.toString(16));
 		header.put(Safe.PBKDF2_SALT_LABEL, Safe.GSON.toJson(salt));
-		header.put(Safe.PBKDF2_ITERATION_LABEL, Integer.toString(Safe.PBKDF2_ITERATION));
+		header.put(Safe.PBKDF2_ITERATION_LABEL, Integer.toString(pbkdf2Iterations));
 
 		header.put(Safe.PROTOCOL_SPEC_LABEL, Safe.PROTOCOL_SPEC);
 		header.put(TestUtils.randomString(random, 5), TestUtils.randomString(random, 20));
