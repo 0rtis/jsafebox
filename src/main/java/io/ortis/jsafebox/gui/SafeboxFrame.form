@@ -20,6 +20,11 @@
                 <Property name="text" type="java.lang.String" value="Auto save"/>
               </Properties>
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="discardChangesMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Discard changes"/>
+              </Properties>
+            </MenuItem>
           </SubComponents>
         </Menu>
         <Menu class="javax.swing.JMenu" name="ViewMenu">
