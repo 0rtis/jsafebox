@@ -35,6 +35,9 @@ public class SafeFileTreeCellRenderer extends DefaultTreeCellRenderer
 	 */
 	private static final long serialVersionUID = 1L;
 
+
+	private final static ImageIcon ROOT_ICON = new ImageIcon(
+			Toolkit.getDefaultToolkit().getImage(SafeFileTreeCellRenderer.class.getResource("/img/frame-icons/safe" + "-filled-16.png")));
 	private final static ImageIcon SYSTEM_FOLDER_ICON = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(
 			new File(System.getProperty("user.home")).getParentFile());
 
@@ -75,7 +78,7 @@ public class SafeFileTreeCellRenderer extends DefaultTreeCellRenderer
 			else
 				label.setText("Safe");
 
-			label.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().getImage(SafeFileTreeCellRenderer.class.getResource("/img/frame-icons/safe-filled-32.png"))));
+			label.setIcon(ROOT_ICON);
 		}
 		else
 		{

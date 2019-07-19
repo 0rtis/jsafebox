@@ -543,7 +543,8 @@ public class Settings
 
 	public void applyTextAreaStyle(final JTextArea textArea)
 	{
-		textArea.setForeground(getUITheme().getTextFieldColor());
+		textArea.setForeground(Color.BLACK);
+		textArea.setBackground(Color.WHITE);
 		textArea.setFont(getFontTheme().getFieldFont());
 	}
 
