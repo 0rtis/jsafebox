@@ -61,7 +61,7 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
                 
                 logoLabel.setText("<html>Jsafebox</html>");
                 logoLabel.setForeground(settings.getUITheme().getButtonFirstColor());
-                logoLabel.setFont(settings.getFontTheme().getLoginOpenFont());
+                logoLabel.setFont(new Font(settings.getFontTheme().getLoginOpenFont().getName(), Font.BOLD, 38));
                 
 		safePathComboBox.setRenderer(new ComboBoxRenderer());
 		safePathComboBox.removeAllItems();
@@ -116,11 +116,6 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
         safePathComboBox.setEditable(true);
         safePathComboBox.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         safePathComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        safePathComboBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                safePathComboBoxActionPerformed(evt);
-            }
-        });
 
         browseLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/browse-folder-32.png"))); // NOI18N
 
