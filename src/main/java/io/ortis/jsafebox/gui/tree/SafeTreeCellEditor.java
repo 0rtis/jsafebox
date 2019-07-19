@@ -33,29 +33,5 @@ public class SafeTreeCellEditor extends DefaultTreeCellEditor
 	{
 
 		return false;
-		/*
-		if (!super.isCellEditable(event))
-			return false;
-		
-		if (event != null && event.getSource() instanceof JTree && event instanceof MouseEvent)
-		{
-			MouseEvent mouseEvent = (MouseEvent) event;
-			JTree tree = (JTree) event.getSource();
-			TreePath path = tree.getPathForLocation(mouseEvent.getX(), mouseEvent.getY());
-			final int selRow = tree.getRowForLocation(mouseEvent.getX(), mouseEvent.getY());
-			if (selRow != -1)
-			{
-				final SafeFileTreeNode node = (SafeFileTreeNode) path.getLastPathComponent();
-				if(node.isSafeRoot())
-					return false;
-				return path.getPathCount() > 1; // root and direct children are not editable
-			} else
-				return false;
-		
-		}
-		
-		return false;
-		*/
 	}
-
 }

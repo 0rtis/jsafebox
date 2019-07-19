@@ -38,25 +38,27 @@ public class SafeFileTreeCellRenderer extends DefaultTreeCellRenderer
 	private final static ImageIcon SYSTEM_FOLDER_ICON = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(
 			new File(System.getProperty("user.home")).getParentFile());
 
-	private final static ImageIcon UNKNOWN_ICON =
-			new ImageIcon(Toolkit.getDefaultToolkit().getImage(SafeFileTreeCellRenderer.class.getResource("/img/binary-file-16.png")));
+	private final static ImageIcon UNKNOWN_ICON = new ImageIcon(
+			Toolkit.getDefaultToolkit().getImage(SafeFileTreeCellRenderer.class.getResource("/img/binary-file-16.png")));
 	private final static ImageIcon TEXT_ICON = new ImageIcon(Toolkit.getDefaultToolkit().getImage(SafeFileTreeCellRenderer.class.getResource("/img/txt-file-16.png")));
 	private final static ImageIcon IMAGE_ICON = new ImageIcon(Toolkit.getDefaultToolkit().getImage(SafeFileTreeCellRenderer.class.getResource("/img/image-file-16.png")));
 	private final static ImageIcon AUDIO_ICON = new ImageIcon(Toolkit.getDefaultToolkit().getImage(SafeFileTreeCellRenderer.class.getResource("/img/audio-file-16.png")));
 	private final static ImageIcon VIDEO_ICON = new ImageIcon(Toolkit.getDefaultToolkit().getImage(SafeFileTreeCellRenderer.class.getResource("/img/video-file-16.png")));
 
 
+	private final Color selectedBackground;
+	private final Color nonSelectedBackground;
+
 	public SafeFileTreeCellRenderer()
 	{
-
+		this.nonSelectedBackground = Settings.getSettings().getUITheme().getLeftPanelBackgroundColor();
+		this.selectedBackground = new Color(backgroundSelectionColor.getRed(), backgroundSelectionColor.getGreen(), backgroundSelectionColor.getBlue());
 	}
 
 	@Override
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus)
 	{
 		final JLabel label = this;//(JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-		label.setOpaque(true);
-		label.setBackground(Color.GREEN);
 
 		if(!(value instanceof SafeFileTreeNode))
 			return label;
@@ -135,36 +137,34 @@ public class SafeFileTreeCellRenderer extends DefaultTreeCellRenderer
 
 				}
 
-
 				label.setToolTipText(safeFile.getPath());
 			}
 		}
 
-		label.setOpaque(false);
+		label.setOpaque(true);
 
 		if(selected)
 		{
-			label.setBackground(backgroundSelectionColor);
-
 			if(foregroundColor == null)
 				foregroundColor = textSelectionColor;
 		}
 		else
 		{
-			label.setBackground(backgroundNonSelectionColor);
-
 			if(foregroundColor == null)
 				foregroundColor = textNonSelectionColor;
 		}
 
 		label.setForeground(foregroundColor);
 
+		if(selected)
+			//label.setBackground(Settings.getSettings().getUITheme().getButtonFirstColorMouseOver());
+			label.setBackground(selectedBackground);
+		else
+			label.setBackground(nonSelectedBackground);
+
+		//	label.setBackground();
+
 		return label;
 	}
 
-	@Override
-	public Color getBackground()
-	{
-		return Settings.getSettings().getUITheme().getLeftPanelBackgroundColor();
-	}
 }

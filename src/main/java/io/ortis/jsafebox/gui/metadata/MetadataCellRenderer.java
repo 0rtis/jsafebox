@@ -17,6 +17,8 @@
 
 package io.ortis.jsafebox.gui.metadata;
 
+import io.ortis.jsafebox.gui.Settings;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -43,6 +45,12 @@ public class MetadataCellRenderer extends DefaultTableCellRenderer
 	{
 		final JComponent c = (JComponent) super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
 
+		if(row == -1)
+			c.setFont(Settings.getSettings().getFontTheme().getMetaDataFieldFont());
+		else
+			c.setFont(Settings.getSettings().getFontTheme().getFieldFont());
+			
+
 		if(row >= 0)
 		{
 
@@ -55,6 +63,9 @@ public class MetadataCellRenderer extends DefaultTableCellRenderer
 				c.setToolTipText(null);
 
 		}
+
+
+
 
 		c.setBorder(new EmptyBorder(0, 0, 0, 0));
 		c.setForeground(this.foregroundColor);
