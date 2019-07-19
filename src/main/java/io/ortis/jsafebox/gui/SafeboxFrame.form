@@ -24,6 +24,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Discard changes"/>
               </Properties>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="fileMenu.addSeparator();"/>
+              </AuxValues>
             </MenuItem>
           </SubComponents>
         </Menu>
