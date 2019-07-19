@@ -171,7 +171,12 @@ public class SafeFileNodePopupMenu extends JPopupMenu implements ActionListener
 						final String sanitized = Utils.sanitizeToken(name, Environment.getSubstitute());
 						try
 						{
-							this.folder.mkdir(sanitized);
+							final Folder child = this.folder.mkdir(sanitized);
+
+							final SafeFileTreeNode newNode = new SafeFileTreeNode(child);
+							node.add(newNode);
+							newNode.setStatus(SafeFileTreeNode.Status.Added);
+
 							this.safeboxFrame.notifyModificationPending();
 
 						} catch(final Exception e)

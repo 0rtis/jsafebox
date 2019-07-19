@@ -48,10 +48,10 @@ public class MetadataCellRenderer extends DefaultTableCellRenderer
 		if(row == -1)
 			c.setFont(Settings.getSettings().getFontTheme().getMetaDataFieldFont());
 		else
+		{
 			c.setFont(Settings.getSettings().getFontTheme().getFieldFont());
 
-		if(row >= 0)
-		{
+
 			if(value != null)
 			{
 				final String tooltip = value.toString();
@@ -60,14 +60,10 @@ public class MetadataCellRenderer extends DefaultTableCellRenderer
 			else
 				c.setToolTipText(null);
 
+			c.setBorder(new EmptyBorder(0, 0, 0, 0));
+			c.setForeground(this.foregroundColor);
+			c.setBackground(this.backgroundColor);
 		}
-
-
-
-
-		c.setBorder(new EmptyBorder(0, 0, 0, 0));
-		c.setForeground(this.foregroundColor);
-		c.setBackground(this.backgroundColor);
 
 		return c;
 	}

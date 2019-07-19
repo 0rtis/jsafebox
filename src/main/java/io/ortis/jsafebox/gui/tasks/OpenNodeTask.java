@@ -78,6 +78,7 @@ public class OpenNodeTask extends AbstractGUITask
 						final ImageViewer viewer = new ImageViewer(this.safeboxFrame.getSafe(), block, this.safeboxFrame.getTitle() + " - ");
 						viewer.addWindowListener(this.safeboxFrame);
 						viewer.setVisible(true);
+						viewer.toFront();
 
 						this.window = viewer;
 					}
@@ -91,6 +92,7 @@ public class OpenNodeTask extends AbstractGUITask
 						viewer.setTitle(this.safeboxFrame.getTitle() + " - " + block.getPath());
 						viewer.addWindowListener(this.safeboxFrame);
 						viewer.setVisible(true);
+						viewer.toFront();
 
 						this.window = viewer;
 					}

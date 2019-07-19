@@ -520,16 +520,16 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 	{
 		this.modificationPending.set(true);
 
-
 		final DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) jTree1.getLastSelectedPathComponent();
 		final List<TreePath> expands = getExpandedPaths(((SafeTreeModel) jTree1.getModel()).getRootNode(), new ArrayList<>());
-
 
 		((DefaultTreeModel) jTree1.getModel()).reload();
 
 		if(jTree1.getModel() instanceof SafeTreeModel)
 			for(final TreePath path : expands)
 				jTree1.expandPath(path);
+
+		jTree1.expandRow(0);
 
 		loadNode(selectedNode instanceof SafeFileTreeNode ? (SafeFileTreeNode) selectedNode : null);
 	}
@@ -797,6 +797,9 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 
 		reloadTree();
 
+
+
+
 		if(Settings.getSettings().isAutoHashCheck())
 			computeHash(true);
 	}
@@ -820,6 +823,8 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 			jTree1.expandRow(0);
 		else
 			jTree1.collapseRow(0);
+
+		loadNode(null);
 	}
 
 	private <D extends Collection<TreePath>> D getExpandedPaths(final SafeFileTreeNode node, final D destination)

@@ -53,7 +53,7 @@ public class MetadataPanel extends javax.swing.JPanel
 		this.binaryViewLabel.setVisible(false);
 
 		this.jScrollPane1.setOpaque(false);
-		this.jScrollPane1.setBorder(null);
+		this.jScrollPane1.setBorder(new EmptyBorder(1, 1, 1, 1));
 		this.jScrollPane1.setViewportBorder(null);
 		this.jScrollPane1.setBackground(this.mainPanel.getBackground());
 
@@ -68,6 +68,8 @@ public class MetadataPanel extends javax.swing.JPanel
 		this.metadataTable.setDefaultRenderer(Integer.class, cellRenderer);
 		this.metadataTable.setDefaultRenderer(Double.class, cellRenderer);
 		this.metadataTable.setDefaultRenderer(Object.class, cellRenderer);
+
+		this.metadataTable.getTableHeader().setDefaultRenderer(cellRenderer);
 
 		this.metadataTable.setBorder(null);
 		this.metadataTable.setAutoCreateRowSorter(true);

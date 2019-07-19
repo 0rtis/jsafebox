@@ -105,10 +105,6 @@
     	<version>4.12</version>
     	<scope>test</scope>
 	</dependency>
-      <dependency>
-          <groupId>unknown.binary</groupId>
-          <artifactId>AbsoluteLayout</artifactId>
-          <version>SNAPSHOT</version>
-      </dependency>
+
   </dependencies>
 </project>
