@@ -49,11 +49,9 @@ public class MetadataCellRenderer extends DefaultTableCellRenderer
 			c.setFont(Settings.getSettings().getFontTheme().getMetaDataFieldFont());
 		else
 			c.setFont(Settings.getSettings().getFontTheme().getFieldFont());
-			
 
 		if(row >= 0)
 		{
-
 			if(value != null)
 			{
 				final String tooltip = value.toString();
