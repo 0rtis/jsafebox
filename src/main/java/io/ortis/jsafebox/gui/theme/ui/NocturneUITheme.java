@@ -47,6 +47,7 @@ public class NocturneUITheme implements UITheme
 
 	private final static Color ADD_COLOR = new Color(78, 154, 6);
 	private final static Color DELETE_COLOR = Color.RED;//new Color(208, 15, 15);
+	private final static Color UPDATE_COLOR = Color.BLUE;
 
 	private final OS os;
 
@@ -160,4 +161,9 @@ public class NocturneUITheme implements UITheme
 		return ADD_COLOR;
 	}
 
+	@Override
+	public Color pendingUpdateColor()
+	{
+		return UPDATE_COLOR;
+	}
 }

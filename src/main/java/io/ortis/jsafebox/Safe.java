@@ -482,7 +482,6 @@ public class Safe implements Closeable
 
 			try(RandomAccessFile destination = new RandomAccessFile(newFile, "rw"))
 			{
-
 				final byte[] buffer = new byte[this.bufferSize];
 				final byte[] bufferDecrypted = new byte[this.bufferSize];
 

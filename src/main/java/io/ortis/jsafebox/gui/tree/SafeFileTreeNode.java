@@ -34,12 +34,13 @@ public class SafeFileTreeNode extends DefaultMutableTreeNode
 	private boolean dropTarget;
 	private Status status = Status.Unchanged;
 
+
 	public SafeFileTreeNode(final SafeFile safeFile)
 	{
 		this.safeFile = safeFile;
 		this.dropTarget = false;
 
-		if(safeFile.isFolder())
+		if(this.safeFile.isFolder())
 		{
 			if(safeFile.getParent() == null)
 				this.root = true;
@@ -88,4 +89,24 @@ public class SafeFileTreeNode extends DefaultMutableTreeNode
 		this.dropTarget = dropTarget;
 	}
 
+	@Override
+	public int hashCode()
+	{
+		return this.safeFile.hashCode();
+	}
+
+	@Override
+	public boolean equals(final Object o)
+	{
+		if(o == this)
+			return true;
+
+		if(o instanceof  SafeFileTreeNode)
+		{
+			final SafeFileTreeNode other = (SafeFileTreeNode)o;
+
+			return this.safeFile.equals(other.safeFile);
+		}
+		return false;
+	}
 }

@@ -25,6 +25,7 @@ import io.ortis.jsafebox.gui.Settings;
 import io.ortis.jsafebox.gui.tasks.AddTask;
 import io.ortis.jsafebox.gui.tasks.ExceptionTask;
 import io.ortis.jsafebox.gui.tasks.SaveTask;
+import sun.misc.GC;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;

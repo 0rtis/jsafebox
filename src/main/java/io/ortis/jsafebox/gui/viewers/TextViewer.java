@@ -28,6 +28,7 @@ import io.ortis.jsafebox.gui.tree.SafeFileTreeNode;
 import io.ortis.jsafebox.gui.tree.SafeTreeModel;
 
 import javax.swing.*;
+import javax.swing.tree.TreeNode;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -136,7 +137,14 @@ public class TextViewer extends JFrame implements ActionListener
 		if(event.getSource() == saveMenuItem)
 		{
 			final Safe safe = this.safeboxFrame.getSafe();
-			final DeleteTask deleteTask = new DeleteTask(this.node.getSafeFile(), safe, GUI.getLogger());
+			final DeleteTask deleteTask = new DeleteTask(this.node.getSafeFile(), safe, GUI.getLogger()){
+				@Override
+				public boolean skipResultOnSuccess()
+				{
+					return true;
+				}
+			};
+
 			final ProgressFrame progressFrame = new ProgressFrame(this.safeboxFrame);
 			progressFrame.execute(deleteTask);
 
@@ -153,11 +161,8 @@ public class TextViewer extends JFrame implements ActionListener
 
 					if(task.getException() == null)
 					{
-
+						this.node.setStatus(SafeFileTreeNode.Status.Updated);
 						this.safeboxFrame.notifyModificationPending();
-
-						node.setSafeFile(task.getAdded());
-						node.setStatus(SafeFileTreeNode.Status.Updated);
 
 						if(Settings.getSettings().isAutoSave())
 						{
@@ -167,6 +172,7 @@ public class TextViewer extends JFrame implements ActionListener
 							if(saveTask.getException() == null)
 								this.safeboxFrame.setSafe(saveTask.getNewSafe());
 						}
+
 
 						editableMenuItem.doClick();
 					}

@@ -125,7 +125,7 @@ public class SafeFileTreeCellRenderer extends DefaultTreeCellRenderer
 
 					case Updated:
 						label.setText("* " + safeFile.getName());
-						foregroundColor = Color.BLUE;
+						foregroundColor = Settings.getSettings().getUITheme().pendingUpdateColor();
 						break;
 
 					case Unchanged:

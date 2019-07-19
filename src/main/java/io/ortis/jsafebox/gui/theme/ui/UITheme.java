@@ -58,4 +58,6 @@ public interface UITheme
 	Color pendingDeleteColor();
 
 	Color pendingAddColor();
+
+	Color pendingUpdateColor();
 }

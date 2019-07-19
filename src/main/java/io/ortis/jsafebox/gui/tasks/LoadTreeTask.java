@@ -29,7 +29,11 @@ import io.ortis.jsafebox.gui.tree.SafeTreeModel;
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -40,15 +44,18 @@ public class LoadTreeTask extends AbstractGUITask
 	private final Safe safe;
 	private final JTree tree;
 	private final SafeboxFrame safeboxFrame;
+	private final List<TreePath> expands;
 	private final boolean lazyLoading;
 
-	public LoadTreeTask(final Safe safe, final JTree tree, final SafeboxFrame safeboxFrame, final boolean lazyLoading, final Logger log)
+	public LoadTreeTask(final Safe safe, final JTree tree, final SafeboxFrame safeboxFrame, final List<TreePath> expands, final boolean lazyLoading,
+			final Logger log)
 	{
 		super("Loading safebox tree", "Success", "Safebox tree successfully loaded !", log);
 
 		this.safe = safe;
 		this.tree = tree;
 		this.safeboxFrame = safeboxFrame;
+		this.expands = expands;
 		this.lazyLoading = lazyLoading;
 	}
 
@@ -77,18 +84,21 @@ public class LoadTreeTask extends AbstractGUITask
 				final SafeTreeModel model = new SafeTreeModel(this.safeboxFrame);
 				SafeFileTreeNode node = new SafeFileTreeNode(safe.getRootFolder());
 
-				model.getRootMode().add(node);
+				model.getRootNode().add(node);
 				if(this.lazyLoading)
 					for(final SafeFile safeFile : safe.getRootFolder().listFiles())
 						node.add(new SafeFileTreeNode(safeFile));
 				else
+				{
 					for(final SafeFile safeFile : safe.getRootFolder().listFiles())
 						recursiveAdd(node, safeFile);
 
-				this.tree.setModel(model);
-				model.reload();
 
-				tree.expandRow(0);
+				}
+
+
+				this.tree.setModel(model);
+
 				tree.repaint();
 
 				tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -102,13 +112,14 @@ public class LoadTreeTask extends AbstractGUITask
 
 				tree.addMouseListener(this.safeboxFrame);
 				tree.addKeyListener(this.safeboxFrame);
-
 				tree.setEditable(true);
 
 				this.safeboxFrame.setTitle(SafeboxFrame.TITLE + " - " + safe.getFile().getAbsolutePath());
+
+				for(final TreePath path : this.expands)
+						tree.expandPath(path);
+
 			}
-
-
 		} finally
 		{
 

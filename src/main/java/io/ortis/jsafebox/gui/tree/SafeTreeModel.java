@@ -44,7 +44,7 @@ public class SafeTreeModel extends DefaultTreeModel
 			this.root = null;
 	}
 
-	public SafeFileTreeNode getRootMode()
+	public SafeFileTreeNode getRootNode()
 	{
 		return this.root;
 	}
