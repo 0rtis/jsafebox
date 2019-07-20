@@ -129,10 +129,11 @@ public class Settings
 
 
 		final List<Image> icons = new ArrayList<>();
-		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/safe-filled-16.png")));
-		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/safe-filled-32.png")));
-		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/safe-filled-64.png")));
-		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/safe-filled-100.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/jsafebox-logo-16.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/jsafebox-logo-32.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/jsafebox-logo-64.png")));
+		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/jsafebox-logo-128.png")));
+
 		this.frameIcons = Collections.unmodifiableList(icons);
 
 		final List<Image> textIcons = new ArrayList<>();
