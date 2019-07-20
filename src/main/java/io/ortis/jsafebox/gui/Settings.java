@@ -52,7 +52,6 @@ public class Settings
 
 	public static final String GUI_PREVIEW_MAXLENGTH = "gui.preview.maxlength";
 
-
 	public static final String MIMES_MAP = "safe.file.mimes";
 	public static final String TYPE_MAP = "safe.file.types";
 	public static final String SAFE_FILE_LIST_KEY = "safe.files";
@@ -86,6 +85,8 @@ public class Settings
 	private final Path settingFilePath;
 	private final PropertiesConfiguration config;
 	private final PropertiesConfigurationLayout configLayout;
+
+	private final Image logoTitle;
 	private final List<Image> frameIcons;
 	private final List<Image> textFrameIcons;
 	private final List<Image> imageFrameIcons;
@@ -128,12 +129,15 @@ public class Settings
 			this.osType = OS.Unknown;
 
 
+		this.logoTitle = Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/jsafebox-title.png"));
+
 		final List<Image> icons = new ArrayList<>();
 		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/jsafebox-logo-16.png")));
 		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/jsafebox-logo-32.png")));
 		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/jsafebox-logo-64.png")));
 		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/jsafebox-logo-128.png")));
-
+		icons.clear();
+		icons.add(logoTitle);
 		this.frameIcons = Collections.unmodifiableList(icons);
 
 		final List<Image> textIcons = new ArrayList<>();
@@ -423,6 +427,16 @@ public class Settings
 					return extensions.getKey();
 
 		return "application/octet-stream";
+	}
+
+	public Image getLogoTitle()
+	{
+		return logoTitle;
+	}
+
+	public InputStream getLogoTitleAsStream()
+	{
+		return Settings.class.getResourceAsStream("/img/frame-icons/jsafebox-title.png");
 	}
 
 	public List<Image> getFrameIcons()
