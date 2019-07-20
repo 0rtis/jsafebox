@@ -116,6 +116,11 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
         safePathComboBox.setEditable(true);
         safePathComboBox.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         safePathComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        safePathComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                safePathComboBoxActionPerformed(evt);
+            }
+        });
 
         browseLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/browse-folder-32.png"))); // NOI18N
 
@@ -132,14 +137,16 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
         jPasswordField1.setText("jPasswordField1");
 
         logoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/frame-icons/safe-filled-100.png"))); // NOI18N
-        logoLabel.setText("JSafebox");
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(mainPanelLayout.createSequentialGroup()
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(logoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addGap(102, 102, 102)
                         .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -149,10 +156,7 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(browseLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(newLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addGap(49, 49, 49)
-                        .addComponent(logoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(newLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         mainPanelLayout.setVerticalGroup(
@@ -171,6 +175,8 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
                 .addComponent(openLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(25, 25, 25))
         );
+
+        logoLabel.getAccessibleContext().setAccessibleName("");
 
         getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
 
