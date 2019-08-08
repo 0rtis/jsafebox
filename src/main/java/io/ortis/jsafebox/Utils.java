@@ -41,7 +41,7 @@ public class Utils
 {
 
 	public final static String SEPARATOR_REGEX = "[/|" + Pattern.quote(java.io.File.separator) + "]";
-
+	private final static char[] hexArray = "0123456789abcdef".toCharArray();
 	private final static String SYSTEM_PATH_DELIMITER_REGEX = Pattern.quote(File.separator) + "|" + Pattern.quote("/") + "|" + Pattern.quote("\\");
 
 	public static byte[] passwordToBytes(final char[] chars)
@@ -161,6 +161,26 @@ public class Utils
 		return destination;
 
 	}
+
+
+	public static String bytesToHex(final byte[] bytes)
+	{
+		return bytesToHex(bytes, 0, bytes.length);
+	}
+
+	public static String bytesToHex(final byte[] bytes, final int offset, final int length)
+	{
+		char[] hexChars = new char[length << 1];
+		for(int j = 0; j < length; j++)
+		{
+			int v = bytes[j + offset] & 0xFF;
+			hexChars[j * 2] = hexArray[v >>> 4];
+			hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+		}
+		return new String(hexChars);
+	}
+
+
 	public static String humanReadableByteCount(final long bytes)
 	{
 		return humanReadableByteCount(bytes, true);

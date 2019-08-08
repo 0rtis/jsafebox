@@ -35,17 +35,17 @@ import java.awt.image.BufferedImage;
 public class LoginFrame extends javax.swing.JFrame implements MouseListener, ActionListener
 {
 	private static final int WIDTH = 640;
-	private static final int HEIGHT = 400;
+	private static final int HEIGHT = 450;
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel browseLabel;
-    private javax.swing.JPasswordField jPasswordField1;
-    private javax.swing.JLabel logoLabel;
-    private javax.swing.JPanel mainPanel;
-    private javax.swing.JLabel newLabel;
-    private javax.swing.JLabel openLabel;
-    private javax.swing.JComboBox<String> safePathComboBox;
-    // End of variables declaration//GEN-END:variables
+	// Variables declaration - do not modify//GEN-BEGIN:variables
+	private javax.swing.JLabel browseLabel;
+	private javax.swing.JPasswordField jPasswordField1;
+	private javax.swing.JLabel logoLabel;
+	private javax.swing.JPanel mainPanel;
+	private javax.swing.JLabel newLabel;
+	private javax.swing.JLabel openLabel;
+	private javax.swing.JComboBox<String> safePathComboBox;
+	// End of variables declaration//GEN-END:variables
 
 
 	/**
@@ -54,10 +54,9 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
 	public LoginFrame()
 	{
 		initComponents();
-
 		final Settings settings = Settings.getSettings();
 
-		mainPanel.setBackground(settings.getUITheme().getBackgroundColor());
+		mainPanel.setBackground(settings.getUITheme().getLoginBackgroundColor());
 
 		final JTextField field = (JTextField) safePathComboBox.getEditor().getEditorComponent();
 		field.setText("Select a safe or create a new one");
@@ -89,10 +88,10 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
 
 		setIconImages(settings.getFrameIcons());
 		setSize(WIDTH, HEIGHT);
-		setResizable(true);
+		setResizable(false);
+		setTitle("JSafebox");
 		setLocation(Toolkit.getDefaultToolkit().getScreenSize().width / 2 - getSize().width / 2,
 				Toolkit.getDefaultToolkit().getScreenSize().height / 2 - getSize().height / 2);
-
 
 		try
 		{
@@ -107,8 +106,6 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
 			e.printStackTrace();
 		}
 
-
-
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
@@ -119,82 +116,69 @@ public class LoginFrame extends javax.swing.JFrame implements MouseListener, Act
 	 */
 	@SuppressWarnings("unchecked")
 
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+	// <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+	private void initComponents()
+	{
 
-        mainPanel = new javax.swing.JPanel();
-        safePathComboBox = new javax.swing.JComboBox<>();
-        browseLabel = new javax.swing.JLabel();
-        newLabel = new javax.swing.JLabel();
-        openLabel = new javax.swing.JLabel();
-        jPasswordField1 = new javax.swing.JPasswordField();
-        logoLabel = new javax.swing.JLabel();
+		mainPanel = new javax.swing.JPanel();
+		safePathComboBox = new javax.swing.JComboBox<>();
+		browseLabel = new javax.swing.JLabel();
+		newLabel = new javax.swing.JLabel();
+		openLabel = new javax.swing.JLabel();
+		jPasswordField1 = new javax.swing.JPasswordField();
+		logoLabel = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        safePathComboBox.setEditable(true);
-        safePathComboBox.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        safePathComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        safePathComboBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                safePathComboBoxActionPerformed(evt);
-            }
-        });
+		safePathComboBox.setEditable(true);
+		safePathComboBox.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+		safePathComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{"Item 1", "Item 2", "Item 3", "Item 4"}));
 
-        browseLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/browse-folder-32.png"))); // NOI18N
+		browseLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/browse-folder-32.png"))); // NOI18N
 
-        newLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/new-32.png"))); // NOI18N
+		newLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/new-32.png"))); // NOI18N
 
-        openLabel.setBackground(new java.awt.Color(255, 102, 0));
-        openLabel.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
-        openLabel.setForeground(new java.awt.Color(255, 255, 255));
-        openLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        openLabel.setText("Open");
-        openLabel.setOpaque(true);
+		openLabel.setBackground(new java.awt.Color(255, 102, 0));
+		openLabel.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
+		openLabel.setForeground(new java.awt.Color(255, 255, 255));
+		openLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+		openLabel.setText("Open");
+		openLabel.setOpaque(true);
 
-        jPasswordField1.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        jPasswordField1.setText("jPasswordField1");
+		jPasswordField1.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+		jPasswordField1.setText("jPasswordField1");
 
-        logoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/frame-icons/safe-filled-100.png"))); // NOI18N
+		logoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/frame-icons/safe-filled-100.png"))); // NOI18N
 
-        javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
-        mainPanel.setLayout(mainPanelLayout);
-        mainPanelLayout.setHorizontalGroup(
-            mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
-                .addGap(102, 102, 102)
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(logoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(safePathComboBox, 0, 328, Short.MAX_VALUE)
-                    .addComponent(jPasswordField1)
-                    .addComponent(openLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(browseLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(newLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-        mainPanelLayout.setVerticalGroup(
-            mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(logoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(safePathComboBox, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(browseLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(newLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(openLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(25, 25, 25))
-        );
+		javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
+		mainPanel.setLayout(mainPanelLayout);
+		mainPanelLayout.setHorizontalGroup(
+				mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
+						mainPanelLayout.createSequentialGroup().addGap(102, 102, 102).addGroup(mainPanelLayout.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.TRAILING).addComponent(logoLabel, javax.swing.GroupLayout.DEFAULT_SIZE,
+								javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addComponent(safePathComboBox, 0, 328, Short.MAX_VALUE).addComponent(
+								jPasswordField1).addComponent(openLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE,
+								Short.MAX_VALUE)).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(browseLabel,
+								javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE).addPreferredGap(
+								javax.swing.LayoutStyle.ComponentPlacement.UNRELATED).addComponent(newLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 32,
+								javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap()));
+		mainPanelLayout.setVerticalGroup(
+				mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
+						mainPanelLayout.createSequentialGroup().addContainerGap().addComponent(logoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 137,
+								Short.MAX_VALUE).addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED).addGroup(mainPanelLayout.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING).addComponent(safePathComboBox, javax.swing.GroupLayout.Alignment.TRAILING,
+								javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE).addComponent(browseLabel,
+								javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 32,
+								javax.swing.GroupLayout.PREFERRED_SIZE).addComponent(newLabel, javax.swing.GroupLayout.Alignment.TRAILING,
+								javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)).addPreferredGap(
+								javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE,
+								javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE).addGap(18, 18, 18).addComponent(openLabel,
+								javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE).addGap(25, 25, 25)));
 
-        getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
+		getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
 
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
+		pack();
+	}// </editor-fold>//GEN-END:initComponents
 
 	public void setSafePath(final String path)
 	{

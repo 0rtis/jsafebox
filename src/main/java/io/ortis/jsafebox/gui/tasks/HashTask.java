@@ -18,11 +18,11 @@
 package io.ortis.jsafebox.gui.tasks;
 
 import io.ortis.jsafebox.Safe;
+import io.ortis.jsafebox.Utils;
 import io.ortis.jsafebox.task.Task;
 import io.ortis.jsafebox.task.TaskListener;
 import io.ortis.jsafebox.task.TaskProbeAdapter;
 
-import javax.xml.bind.DatatypeConverter;
 import java.util.logging.Logger;
 
 /**
@@ -60,7 +60,7 @@ public class HashTask extends AbstractGUITask implements TaskListener
 			final byte[] hash = safe.computeHash(adapter);
 			System.gc();
 
-			this.hash =bytexToHex(hash) ;
+			this.hash = Utils.bytesToHex(hash) ;
 
 		} finally
 		{
@@ -107,11 +107,5 @@ public class HashTask extends AbstractGUITask implements TaskListener
 	public String getHash()
 	{
 		return hash;
-	}
-
-
-	public static String bytexToHex(final byte [] bytes)
-	{
-		return DatatypeConverter.printHexBinary(bytes);
 	}
 }

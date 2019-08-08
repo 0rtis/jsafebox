@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
-import javax.xml.bind.DatatypeConverter;
 
 import io.ortis.jsafebox.*;
 
@@ -60,16 +59,14 @@ public class Hash implements Callable<Void>
 			final byte [] hash = safe.computeHash(null);
 			System.gc();
 
-			final String readableHash = DatatypeConverter.printHexBinary(hash);
+			final String readableHash = Utils.bytesToHex(hash);
 			if (Arrays.equals(hash, safe.getHash()))
-			
-				
-				
+
 				log.info("Integrity hash " + readableHash + " sucessfully verified");
 			else 
 			{
 				
-				final String expectedHash = DatatypeConverter.printHexBinary(safe.getHash());
+				final String expectedHash = Utils.bytesToHex(safe.getHash());
 				log.warning("Integrity hash is "+readableHash+" but "+expectedHash+" was expected");
 				log.warning("The content of the file might have been altered. It is strongly advised to revert to a backup file");
 			}

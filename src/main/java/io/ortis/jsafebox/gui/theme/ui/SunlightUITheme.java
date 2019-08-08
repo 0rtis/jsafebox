@@ -30,7 +30,9 @@ public class SunlightUITheme implements UITheme
 
 	private final static Color SUNLIGHT_THEME_TEXT_HEADER_COLOR = new Color(115, 122, 133);
 	private final static Color SUNLIGHT_THEME_BACKGROUND_COLOR = new Color(32, 32, 32);
+
 	private final static Color SUNLIGHT_THEME_LEFT_PANEL_COLOR = new Color(255, 255, 255);
+	private final static Color SUNLIGHT_THEME_LOGIN_PANEL_COLOR = SUNLIGHT_THEME_BACKGROUND_COLOR;
 	private final static Color SUNLIGHT_THEME_SELECTION_COLOR = new Color(255, 85, 0);
 
 	private final static Color SUNLIGHT_THEME_BUTTON_FIRST_COLOR = SUNLIGHT_THEME_SELECTION_COLOR;
@@ -136,6 +138,12 @@ public class SunlightUITheme implements UITheme
 		return SUNLIGHT_THEME_BACKGROUND_COLOR;
 	}
 
+
+	@Override
+	public Color getLoginBackgroundColor()
+	{
+		return SUNLIGHT_THEME_LOGIN_PANEL_COLOR;
+	}
 
 	@Override
 	public Color getLeftPanelBackgroundColor()

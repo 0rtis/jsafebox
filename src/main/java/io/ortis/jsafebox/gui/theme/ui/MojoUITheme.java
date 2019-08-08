@@ -29,7 +29,9 @@ public class MojoUITheme implements UITheme
 	private final static Color MOJO_TEXT_HEADER_COLOR = new Color(115, 122, 133);
 
 	private final static Color MOJO_BACKGROUND_COLOR = new Color(45, 58, 79);
+
 	private final static Color MOJO_LEFT_PANEL_COLOR = new Color(22, 28, 38);
+	private final static Color MOJO_THEME_LOGIN_PANEL_COLOR = MOJO_LEFT_PANEL_COLOR;
 
 	private final static Color MOJO_SELECTION_COLOR = new Color(102, 255, 255);
 
@@ -101,6 +103,11 @@ public class MojoUITheme implements UITheme
 		return MOJO_BACKGROUND_COLOR;
 	}
 
+	@Override
+	public Color getLoginBackgroundColor()
+	{
+		return MOJO_THEME_LOGIN_PANEL_COLOR;
+	}
 
 	@Override
 	public Color getLeftPanelBackgroundColor()

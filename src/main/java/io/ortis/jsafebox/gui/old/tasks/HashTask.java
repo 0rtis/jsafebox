@@ -18,9 +18,9 @@
 package io.ortis.jsafebox.gui.old.tasks;
 
 import javax.swing.SwingWorker;
-import javax.xml.bind.DatatypeConverter;
 
 import io.ortis.jsafebox.Safe;
+import io.ortis.jsafebox.Utils;
 import io.ortis.jsafebox.task.MultipartTask;
 import io.ortis.jsafebox.task.TaskProbeAdapter;
 
@@ -54,7 +54,7 @@ public class HashTask extends MultipartTask implements GuiTask
 				try
 				{
 					final byte [] hash = safe.computeHash(adapter);
-					return DatatypeConverter.printHexBinary(hash);
+					return Utils.bytesToHex(hash);
 
 				} catch (final Exception e)
 				{

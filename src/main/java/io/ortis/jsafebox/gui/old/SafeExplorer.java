@@ -17,10 +17,7 @@
 
 package io.ortis.jsafebox.gui.old;
 
-import io.ortis.jsafebox.Block;
-import io.ortis.jsafebox.Folder;
-import io.ortis.jsafebox.Safe;
-import io.ortis.jsafebox.SafeFile;
+import io.ortis.jsafebox.*;
 import io.ortis.jsafebox.gui.old.previews.ErrorPreview;
 import io.ortis.jsafebox.gui.old.previews.ImagePreview;
 import io.ortis.jsafebox.gui.old.previews.TextPreview;
@@ -39,7 +36,6 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.*;
-import javax.xml.bind.DatatypeConverter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.ByteArrayInputStream;
@@ -635,7 +631,7 @@ public class SafeExplorer implements WindowListener, ActionListener
 				final HashTask hashTask = new HashTask(this.safe);
 				hashCheckDialog.monitor(hashTask, "Computing hash...");
 
-				final String expectedHash = DatatypeConverter.printHexBinary(this.safe.getHash());
+				final String expectedHash = Utils.bytesToHex(this.safe.getHash());
 				if(hashTask.getHash() != null)
 					if(!hashTask.getHash().equals(expectedHash))
 					{

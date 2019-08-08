@@ -16,10 +16,7 @@
  */
 package io.ortis.jsafebox.gui;
 
-import io.ortis.jsafebox.Block;
-import io.ortis.jsafebox.Folder;
-import io.ortis.jsafebox.Safe;
-import io.ortis.jsafebox.SafeFile;
+import io.ortis.jsafebox.*;
 import io.ortis.jsafebox.gui.metadata.MetadataPanel;
 import io.ortis.jsafebox.gui.previewers.ImagePreview;
 import io.ortis.jsafebox.gui.previewers.TextPreview;
@@ -363,7 +360,7 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 		progressFrame.execute(hashTask);
 		if(hashTask.getException() == null)
 		{
-			final String hash = HashTask.bytexToHex(this.safe.getHash());
+			final String hash = Utils.bytesToHex(this.safe.getHash());
 			if(hashTask.getHash().equals(hash))
 			{
 				if(!quiet)

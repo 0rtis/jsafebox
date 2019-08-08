@@ -52,8 +52,8 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileSystemView;
-import javax.xml.bind.DatatypeConverter;
 
+import io.ortis.jsafebox.Utils;
 import io.ortis.jsafebox.gui.old.tasks.HashTask;
 import io.ortis.jsafebox.gui.old.tasks.InitTask;
 import io.ortis.jsafebox.gui.old.tasks.OpenTask;
@@ -442,7 +442,7 @@ public class LoginFrame implements ActionListener
 							final HashTask hashTask = new HashTask(openTask.getSafeExplorer().getSafe());
 							hashCheckDialog.monitor(hashTask, "Computing hash...");
 
-							final String expectedHash = DatatypeConverter.printHexBinary(openTask.getSafeExplorer().getSafe().getHash());
+							final String expectedHash = Utils.bytesToHex(openTask.getSafeExplorer().getSafe().getHash());
 							if (hashTask.getHash() != null)
 								if (!hashTask.getHash().equals(expectedHash))
 								{

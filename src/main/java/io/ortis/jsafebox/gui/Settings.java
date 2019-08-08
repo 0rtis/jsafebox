@@ -136,8 +136,6 @@ public class Settings
 		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/jsafebox-logo-32.png")));
 		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/jsafebox-logo-64.png")));
 		icons.add(Toolkit.getDefaultToolkit().getImage(Settings.class.getResource("/img/frame-icons/jsafebox-logo-128.png")));
-		icons.clear();
-		icons.add(logoTitle);
 		this.frameIcons = Collections.unmodifiableList(icons);
 
 		final List<Image> textIcons = new ArrayList<>();

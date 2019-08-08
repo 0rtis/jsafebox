@@ -30,7 +30,10 @@ public class NocturneUITheme implements UITheme
 
 	private final static Color NOCTURNE_THEME_TEXT_HEADER_COLOR = new Color(115, 122, 133);
 	private final static Color NOCTURNE_THEME_BACKGROUND_COLOR = new Color(32, 32, 32);
+
 	private final static Color NOCTURNE_LEFT_PANEL_COLOR = new Color(0, 0, 0);
+	private final static Color NOCTURNE_THEME_LOGIN_PANEL_COLOR = NOCTURNE_LEFT_PANEL_COLOR;
+
 	private final static Color NOCTURNE_THEME_SELECTION_COLOR = new Color(0, 89, 255);
 
 	private final static Color NOCTURNE_THEME_BUTTON_FIRST_COLOR = NOCTURNE_THEME_SELECTION_COLOR;
@@ -135,6 +138,12 @@ public class NocturneUITheme implements UITheme
 		return NOCTURNE_THEME_BACKGROUND_COLOR;
 	}
 
+
+	@Override
+	public Color getLoginBackgroundColor()
+	{
+		return NOCTURNE_THEME_LOGIN_PANEL_COLOR;
+	}
 
 	@Override
 	public Color getLeftPanelBackgroundColor()

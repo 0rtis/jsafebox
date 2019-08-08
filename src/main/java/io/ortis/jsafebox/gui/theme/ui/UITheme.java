@@ -39,6 +39,8 @@ public interface UITheme
 
 	Color getBackgroundColor();
 
+	Color getLoginBackgroundColor();
+
 	Color getLeftPanelBackgroundColor();
 
 	Color getClickableColor();
