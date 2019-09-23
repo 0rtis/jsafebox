@@ -83,8 +83,8 @@ You can download the latest version of JSafebox [here](https://github.com/0rtis/
 
 
 ### Install
-JSafebox is a portable application. No installation is required. A simple double click will work in most platform. If not, open a Command Line 
-Interpreter and start the application with `java -jar jsafebox.jar`. 
+JSafebox is a portable application. No installation is required. A simple double click will work on most platform. If not, open a Command Line 
+Interpreter (CMD on Windows, Terminal on Linux and MacOS) and start the application with `java -jar jsafebox.jar`. 
 
 
 ### Donation
