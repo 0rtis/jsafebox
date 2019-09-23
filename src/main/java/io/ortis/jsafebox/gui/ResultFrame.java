@@ -116,7 +116,6 @@ public class ResultFrame extends JDialog implements WindowListener, KeyListener
 		{
 			headerLabel.setText("Error");
 			loadingIconLabel.setIcon(new ImageIcon(getClass().getResource("/img/error-50.png")));
-			// loadingIconLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/mochimomascot/mochimomascot10.png")));
 			resultLabel.setText("<html>" + exception.getMessage() + "</html>");
 			final String exceptionStackTrace = Utils.formatException(exception);
 			final StringBuilder sb = new StringBuilder();
@@ -208,8 +207,7 @@ public class ResultFrame extends JDialog implements WindowListener, KeyListener
 		jTextArea1.setColumns(20);
 		jTextArea1.setFont(new Font("Segoe UI", 0, 14)); // NOI18N
 		jTextArea1.setRows(5);
-		jTextArea1.setText(
-				"java.lang.Exception: Invalid mnemonic - Mnemonic phrase must be a at least 32 characters long\nio.ortis.mochimo.mojo.gui.swing.download_task.CreateWalletTask.task(CreateWalletTask.java:120)\nio.ortis.mochimo.mojo.gui.swing.download_task.AbstractGUITask.run(AbstractGUITask.java:49)\njava.lang.Thread.run(Thread.java:745)\n\n-----------------------------------------------------\n\nChecking wallet path\nC:\\Users\\ortis\\workspaces\\mochimo\\mojo-app\\wallet-Sun 31 Mar 2019 222830.mcm\nChecking password\nParsing PBKDF2\n\njava.lang.Exception: Invalid mnemonic - Mnemonic phrase must be a at least 32 characters long\nio.ortis.mochimo.mojo.gui.swing.download_task.CreateWalletTask.task(CreateWalletTask.java:120)\nio.ortis.mochimo.mojo.gui.swing.download_task.AbstractGUITask.run(AbstractGUITask.java:49)\njava.lang.Thread.run(Thread.java:745)\n\n-----------------------------------------------------\n\nChecking wallet path\nC:\\Users\\ortis\\workspaces\\mochimo\\mojo-app\\wallet-Sun 31 Mar 2019 222830.mcm\nChecking password\nParsing PBKDF2");
+		jTextArea1.setText("");
 		jScrollPane1.setViewportView(jTextArea1);
 
 		GroupLayout logPanelLayout = new GroupLayout(logPanel);
