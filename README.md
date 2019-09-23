@@ -43,7 +43,7 @@ Those file need to be easily accessible, securely stored and encrypted. But ligh
 
 
 ### JSafebox Protocol
-JSafebox is using a very simple protocol so encrypted files can be easily read by another program, as long as you have the password. The encryption key is derived from the password using [PBKDF2](https://en.wikipedia.org/wiki/PBKDF2) hashing with 100000 iteration.
+JSafebox is using a very simple protocol so encrypted files can be easily read by another program, as long as you have the password. The encryption key is derived from the password using [PBKDF2](https://en.wikipedia.org/wiki/PBKDF2) hashing.
 
 A JSafebox file contains a [SHA256](https://en.wikipedia.org/wiki/SHA-2) integrity hash followed by blocks:
 	
