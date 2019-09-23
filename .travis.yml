@@ -12,7 +12,7 @@ jdk:
 os:
  - linux
 
-# dist: trusty
+dist: trusty
 
 script: "mvn cobertura:cobertura"
 
