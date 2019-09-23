@@ -7,7 +7,9 @@ jdk:
   
 os:
  - linux
- 
+
+dist: trusty
+
 script: "mvn cobertura:cobertura"
 
 after_success:
