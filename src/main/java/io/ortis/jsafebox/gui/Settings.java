@@ -166,8 +166,8 @@ public class Settings
 		final Theme propTheme = Theme.of(getProperty(GUI_THEME_UI));
 		if(propTheme == null)
 		{
-			setProperty(GUI_THEME_UI, Theme.Mojo.name());
-			this.theme = Theme.Mojo;
+			setProperty(GUI_THEME_UI, Theme.Sunlight.name());
+			this.theme = Theme.Sunlight;
 		}
 		else
 			this.theme = propTheme;
