@@ -66,9 +66,10 @@
 				<excludes>
 					<exclude>io/ortis/jsafebox/gui/**/*</exclude>
 					<exclude>io/ortis/jsafebox/cli/**/*</exclude>
+					<exclude>io/ortis/jsafebox/hash/**/*</exclude>
 					<exclude>io/ortis/jsafebox/task/**/*</exclude>
 					<exclude>io/ortis/jsafebox/log/**/*</exclude>
-					<exclude>io/ortis/jsafebox/Utils.java</exclude>
+					<exclude>io/ortis/jsafebox/Utils.*</exclude>
 				</excludes>
 			</configuration>
 			<executions>
