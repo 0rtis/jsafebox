@@ -25,7 +25,6 @@ import io.ortis.jsafebox.gui.Settings;
 import io.ortis.jsafebox.gui.tasks.AddTask;
 import io.ortis.jsafebox.gui.tasks.ExceptionTask;
 import io.ortis.jsafebox.gui.tasks.SaveTask;
-import sun.misc.GC;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -67,6 +66,7 @@ public class FileTransferHandler extends TransferHandler
 		{
 			return false;
 		}
+
 		final JTree tree = (JTree) comp;
 
 		try
@@ -106,13 +106,17 @@ public class FileTransferHandler extends TransferHandler
 
 					if(task.getException() == null)
 					{
+
 						for(final SafeFile child : destination.listFiles())
 						{
 							if(task.getAddeds().contains(child))
 							{
 								final SafeFileTreeNode newNode = new SafeFileTreeNode(child);
 								node.add(newNode);
-								newNode.setStatus(SafeFileTreeNode.Status.Added);
+								if(child.isFolder())
+									recursiveStatus(newNode, SafeFileTreeNode.Status.Added);
+								else
+									newNode.setStatus(SafeFileTreeNode.Status.Added);
 							}
 						}
 
@@ -262,6 +266,19 @@ public class FileTransferHandler extends TransferHandler
 	@Override
 	protected void exportDone(JComponent c, Transferable d, int a)
 	{
+
+	}
+
+	public static void recursiveStatus(final SafeFileTreeNode root, final SafeFileTreeNode.Status status)
+	{
+		root.setStatus(status);
+		for(int i = 0; i < root.getChildCount(); i++)
+		{
+			final SafeFileTreeNode child = (SafeFileTreeNode) root.getChildAt(i);
+			child.setStatus(status);
+			if(child.getChildCount() > 0)
+				recursiveStatus(child, status);
+		}
 
 	}
 

@@ -72,7 +72,6 @@ public class LoadTreeTask extends AbstractGUITask
 		{
 			this.tree.removeTreeSelectionListener(this.safeboxFrame);
 
-
 			if(this.safe == null)
 			{
 				this.tree.setModel(new DefaultTreeModel(null));
@@ -92,8 +91,6 @@ public class LoadTreeTask extends AbstractGUITask
 				{
 					for(final SafeFile safeFile : safe.getRootFolder().listFiles())
 						recursiveAdd(node, safeFile);
-
-
 				}
 
 

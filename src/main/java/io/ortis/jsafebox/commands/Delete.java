@@ -139,7 +139,7 @@ public class Delete implements Callable<Void>
 				}
 			}
 
-			log.info("Writting safebox file...");
+			log.info("Writing safebox file...");
 			safe.save().close();
 			log.info("Done");
 

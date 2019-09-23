@@ -405,9 +405,16 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 			SafeFile file = (SafeFile) node.getUserObject();
 			if(file.isFolder())
 			{
-				if(node.isLeaf() && node.getSafeFile().isFolder())
+				if(node.isLeaf()/* Not loaded */ && node.getSafeFile().isFolder())
+				{
+					final SafeFileTreeNode.Status status = ((SafeFileTreeNode) node).getStatus();
 					for(final SafeFile safeFile : ((Folder) node.getSafeFile()).listFiles())
-						node.add(new SafeFileTreeNode(safeFile));
+					{
+						final SafeFileTreeNode child = new SafeFileTreeNode(safeFile);
+						child.setStatus(status);
+						node.add(child);
+					}
+				}
 			}
 			else
 			{
@@ -518,7 +525,10 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 		this.modificationPending.set(true);
 
 		final DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) jTree1.getLastSelectedPathComponent();
+
 		final List<TreePath> expands = getExpandedPaths(((SafeTreeModel) jTree1.getModel()).getRootNode(), new ArrayList<>());
+
+		loadModifications(((SafeTreeModel) jTree1.getModel()).getRootNode());
 
 		((DefaultTreeModel) jTree1.getModel()).reload();
 
@@ -528,7 +538,40 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 
 		jTree1.expandRow(0);
 
+
 		loadNode(selectedNode instanceof SafeFileTreeNode ? (SafeFileTreeNode) selectedNode : null);
+	}
+
+
+	private void loadModifications(final SafeFileTreeNode root)
+	{
+		switch(root.getStatus())
+		{
+			case Added:
+			case Updated:
+			case Deleted:
+
+				if(Settings.getSettings().isTreeLazyLoading())
+					root.removeAllChildren();
+				else if(root.getSafeFile().isFolder())
+					loadNode(root);
+
+
+				break;
+
+			case Unchanged:
+			default:
+				break;
+		}
+
+
+		for(int i = 0; i < root.getChildCount(); i++)
+		{
+			final SafeFileTreeNode child = (SafeFileTreeNode) root.getChildAt(i);
+			loadModifications(child);
+		}
+
+
 	}
 
 	@Override
@@ -795,8 +838,6 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 		reloadTree();
 
 
-
-
 		if(Settings.getSettings().isAutoHashCheck())
 			computeHash(true);
 	}
@@ -836,6 +877,7 @@ public class SafeboxFrame extends javax.swing.JFrame implements MouseListener, K
 
 		return destination;
 	}
+
 
 	/**
 	 * @param args the command line arguments

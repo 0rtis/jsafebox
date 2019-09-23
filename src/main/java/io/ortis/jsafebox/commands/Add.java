@@ -108,7 +108,7 @@ public class Add implements Callable<Void>
 				add(source, props, safe, folder, null, null);
 			}
 
-			log.info("Witting safebox file...");
+			log.info("Writing safebox file...");
 			safe.save().close();
 			log.info("Done");
 
@@ -147,7 +147,7 @@ public class Add implements Callable<Void>
 		{
 			if(source.isDirectory())
 			{
-
+				/*
 				final String name = Utils.sanitizeToken(source.getName(), Environment.getSubstitute());
 				final SafeFile sf = folder.getChild(name);
 				final Folder currentFolder;
@@ -155,11 +155,16 @@ public class Add implements Callable<Void>
 				{
 					folder.mkdir(name);
 					currentFolder = (Folder) folder.getChild(name);
+
+					//create all subfolder recursively
 				}
 				else if(sf.isFolder())
 					currentFolder = (Folder) sf;
 				else
 					throw new Exception("Folder " + folder.getPath() + Folder.DELIMITER + name + " cannot be created. A block with the same path already exists");
+*/
+
+				final Folder currentFolder = recursiveMkdir(source, folder, destination);
 
 				for(final File file : source.listFiles())
 					add(file, properties, safe, currentFolder, destination, adapter);
@@ -201,10 +206,39 @@ public class Add implements Callable<Void>
 			throw e;
 		} catch(final Exception e)
 		{
+			e.printStackTrace();
 			if(adapter.getException() == null)
 				adapter.fireException(e);
 			throw e;
 		}
 
 	}
+
+	private static <A extends Collection<SafeFile>> Folder recursiveMkdir(final File systemFolder, final Folder destination, final A createds) throws Exception
+	{
+		final String name = Utils.sanitizeToken(systemFolder.getName(), Environment.getSubstitute());
+
+		final SafeFile sf = destination.getChild(name);
+		final Folder safeFolder;
+
+		if(sf == null)
+		{
+			safeFolder = destination.mkdir(name);
+			if(createds != null)
+				createds.add(safeFolder);
+		}
+		else if(sf.isFolder())
+			safeFolder = (Folder) sf;
+		else
+			throw new Exception("Folder " + systemFolder.getPath() + Folder.DELIMITER + name + " cannot be created. A block with the same path already exists");
+
+		//create all subfolder recursively
+		for(final File file : systemFolder.listFiles())
+			if(file.isDirectory())
+				recursiveMkdir(file, safeFolder, createds);
+
+		return safeFolder;
+	}
+
+
 }

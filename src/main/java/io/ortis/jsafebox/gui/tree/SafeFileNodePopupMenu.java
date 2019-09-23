@@ -110,8 +110,8 @@ public class SafeFileNodePopupMenu extends JPopupMenu implements ActionListener
 
 					if(deleteTask.getException() == null)
 					{
-						this.node.setStatus(SafeFileTreeNode.Status.Deleted);
-						this.safeboxFrame.notifyModificationPending();
+						FileTransferHandler.recursiveStatus(this.node, SafeFileTreeNode.Status.Deleted);
+												this.safeboxFrame.notifyModificationPending();
 
 						if(Settings.getSettings().isAutoSave())
 						{
@@ -151,8 +151,8 @@ public class SafeFileNodePopupMenu extends JPopupMenu implements ActionListener
 						final ExtractTask extractTask = new ExtractTask(this.safeFile, destination, safe, GUI.getLogger());
 						final ProgressFrame progressFrame = new ProgressFrame(this.safeboxFrame);
 						progressFrame.execute(extractTask);
-
-					}
+					}else
+						throw new IllegalArgumentException("Destination not found");
 
 				} catch(Exception e)
 				{
