@@ -3,13 +3,16 @@ language: java
 jdk:
   - oraclejdk8
 # - oraclejdk9   removed since codecov required "mvn cobertura:cobertura" is not supported
-  - openjdk12
+  - openjdk8
   - openjdk9
+  - openjdk11
+  - openjdk12
+
   
 os:
  - linux
 
-dist: trusty
+# dist: trusty
 
 script: "mvn cobertura:cobertura"
 
