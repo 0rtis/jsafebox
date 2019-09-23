@@ -20,7 +20,7 @@ package io.ortis.jsafebox.gui.tasks;
 import io.ortis.jsafebox.Folder;
 import io.ortis.jsafebox.Safe;
 import io.ortis.jsafebox.SafeFile;
-import io.ortis.jsafebox.commands.Add;
+import io.ortis.jsafebox.cli.Add;
 import io.ortis.jsafebox.task.Task;
 import io.ortis.jsafebox.task.TaskListener;
 import io.ortis.jsafebox.task.TaskProbeAdapter;

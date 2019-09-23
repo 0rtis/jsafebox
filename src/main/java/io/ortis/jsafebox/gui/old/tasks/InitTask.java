@@ -21,7 +21,7 @@ import java.io.File;
 
 import javax.swing.SwingWorker;
 
-import io.ortis.jsafebox.commands.Init;
+import io.ortis.jsafebox.cli.Init;
 import io.ortis.jsafebox.gui.old.LoginFrame;
 import io.ortis.jsafebox.task.MultipartTask;
 

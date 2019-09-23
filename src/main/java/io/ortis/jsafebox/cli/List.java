@@ -15,9 +15,8 @@
  *
  */
 
-package io.ortis.jsafebox.commands;
+package io.ortis.jsafebox.cli;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.concurrent.Callable;

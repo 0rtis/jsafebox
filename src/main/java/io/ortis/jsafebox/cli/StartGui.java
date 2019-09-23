@@ -15,7 +15,7 @@
  *
  */
 
-package io.ortis.jsafebox.commands;
+package io.ortis.jsafebox.cli;
 
 import io.ortis.jsafebox.Version;
 import io.ortis.jsafebox.gui.GUI;

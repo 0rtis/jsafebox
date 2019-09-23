@@ -18,7 +18,7 @@
 package io.ortis.jsafebox.gui.tasks;
 
 import io.ortis.jsafebox.Safe;
-import io.ortis.jsafebox.commands.Init;
+import io.ortis.jsafebox.cli.Init;
 
 import java.io.File;
 import java.util.Arrays;

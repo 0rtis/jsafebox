@@ -19,13 +19,11 @@ package io.ortis.jsafebox.gui.tasks;
 
 import io.ortis.jsafebox.Safe;
 import io.ortis.jsafebox.SafeFile;
-import io.ortis.jsafebox.commands.Delete;
-import io.ortis.jsafebox.commands.Extract;
+import io.ortis.jsafebox.cli.Extract;
 import io.ortis.jsafebox.task.Task;
 import io.ortis.jsafebox.task.TaskListener;
 import io.ortis.jsafebox.task.TaskProbeAdapter;
 
-import java.awt.*;
 import java.io.File;
 import java.util.logging.Logger;
 

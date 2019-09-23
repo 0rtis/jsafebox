@@ -15,7 +15,7 @@
  *
  */
 
-package io.ortis.jsafebox.commands;
+package io.ortis.jsafebox.cli;
 
 import java.util.Arrays;
 import java.util.concurrent.Callable;

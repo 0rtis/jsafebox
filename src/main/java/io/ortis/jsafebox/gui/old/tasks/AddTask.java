@@ -23,7 +23,7 @@ import javax.swing.SwingWorker;
 
 import io.ortis.jsafebox.Folder;
 import io.ortis.jsafebox.Safe;
-import io.ortis.jsafebox.commands.Add;
+import io.ortis.jsafebox.cli.Add;
 import io.ortis.jsafebox.gui.old.SafeExplorer;
 import io.ortis.jsafebox.task.MultipartTask;
 import io.ortis.jsafebox.task.TaskProbeAdapter;

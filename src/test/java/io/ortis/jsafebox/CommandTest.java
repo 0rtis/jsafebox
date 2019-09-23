@@ -17,7 +17,7 @@
 
 package io.ortis.jsafebox;
 
-import io.ortis.jsafebox.commands.Bootstrap;
+import io.ortis.jsafebox.cli.Bootstrap;
 import org.junit.*;
 import picocli.CommandLine;
 
@@ -246,12 +246,6 @@ public class CommandTest
 		// extract deleted file
 		args = new String[]{"extract", "--password", "mypassword", safeFile.getAbsolutePath(), safeFolderPath + Folder.DELIMITER + systemFile.getName(), extractTargetSystemFolder.getAbsolutePath()};
 		Bootstrap.main(args);
-
-		/**
-		 * StartGui
-		 */
-		if(!GraphicsEnvironment.isHeadless())
-			Bootstrap.main(new String[]{});
 
 	}
 

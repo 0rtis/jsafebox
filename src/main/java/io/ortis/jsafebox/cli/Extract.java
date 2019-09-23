@@ -15,7 +15,7 @@
  *
  */
 
-package io.ortis.jsafebox.commands;
+package io.ortis.jsafebox.cli;
 
 import java.io.File;
 import java.io.FileOutputStream;

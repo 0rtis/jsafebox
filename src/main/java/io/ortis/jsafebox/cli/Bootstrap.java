@@ -15,7 +15,7 @@
  *
  */
 
-package io.ortis.jsafebox.commands;
+package io.ortis.jsafebox.cli;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,7 +25,6 @@ import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 import io.ortis.jsafebox.Environment;
-import io.ortis.jsafebox.Safe;
 
 import io.ortis.jsafebox.Version;
 import picocli.CommandLine;
